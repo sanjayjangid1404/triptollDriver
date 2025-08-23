@@ -98,6 +98,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                   height: 30,
                 ),
                 LineTextField(
+                  readyOnly: authController.isKyc(),
                   title: "Bank Name",
                   hintText: "Ex: SBI",
                   controller: txtBankName,
@@ -106,6 +107,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                   height: 8,
                 ),
                 LineTextField(
+                  readyOnly: authController.isKyc(),
                   title: "Account Holder name",
                   hintText: "Ex: A Patel",
                   controller: txtAccountHolderName,
@@ -114,6 +116,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                   height: 8,
                 ),
                 LineTextField(
+                  readyOnly: authController.isKyc(),
                   title: "Account Number",
                   hintText: "Ex: 12345678945245",
                   controller: txtAccountNumber,
@@ -123,6 +126,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                   height: 8,
                 ),
                 LineTextField(
+                  readyOnly: authController.isKyc(),
                   title: "IFSC Code",
                   hintText: "YT123C",
                   controller: txtSwiftCode,
@@ -132,6 +136,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                 ),
 
                 LineTextField(
+                  readyOnly: authController.isKyc(),
                   title: "UPI",
                   hintText: "",
                   controller: txtUPICode,

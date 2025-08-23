@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
 import 'package:taxi_driver/common/custom_snackbar.dart';
@@ -35,6 +36,13 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
   TextEditingController panCt = TextEditingController();
   final KYCDocument _kycDocs = KYCDocument();
   final ImagePicker _picker = ImagePicker();
+  String? panImage;
+  String? adharfront;
+  String? adharback;
+  String? lienceback;
+  String? liencefornt;
+  String? insurancefront;
+
 
   @override
   void initState() {
@@ -47,6 +55,12 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
       licenseCt.text = authController.driverInResponse!.licenseNo ??"";
       insuranceCt.text = authController.driverInResponse!.insurance ??"";
       panCt.text = authController.driverInResponse!.panNo ??"";
+      panImage = AppContants.imageURL+"uploaded_files/id_proof_img/"+( authController.driverInResponse!.panCardImg ??"");
+      adharfront = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.adharFrontImg ??"");
+      adharback = AppContants.imageURL+"uploaded_files/id_proof_back_img/"+(authController.driverInResponse!.adharBackImg ??"");
+      lienceback = AppContants.imageURL+"uploaded_files/id_proof_back_img/"+(authController.driverInResponse!.licenseBackImg ??"");
+      liencefornt = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.licenseFrontImg ??"");
+      insurancefront = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.insuranceImg ??"");
 
       setState(() {
 
@@ -55,32 +69,57 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
    // apiList();
   }
 
+
+
   Future<void> _pickDocumentImage(String docType) async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        setState(() {
-          switch (docType) {
-            case 'aadhar_front':
-              _kycDocs.aadharFront = File(image.path);
-              break;
-            case 'aadhar_back':
-              _kycDocs.aadharBack = File(image.path);
-              break;
-            case 'psu':
-              _kycDocs.psuImage = File(image.path);
-              break;
-            case 'license_front':
-              _kycDocs.licenseFront = File(image.path);
-              break;
-            case 'license_back':
-              _kycDocs.licenseBack = File(image.path);
-              break;
-            case 'insurance':
-              _kycDocs.insuranceImage = File(image.path);
-              break;
-          }
-        });
+      print("Value=>${Get.find<AuthController>().isKyc()}");
+      if (!Get.find<AuthController>().isKyc()) {
+        // Bottom Sheet Open
+        showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (BuildContext ctx) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Wrap(
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ListTile(
+                    leading: const Icon(Icons.camera_alt, color: Colors.blue),
+                    title: const Text("Take Photo from Camera"),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+                      _savePickedImage(image, docType);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo, color: Colors.green),
+                    title: const Text("Choose from Gallery"),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+                      _savePickedImage(image, docType);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,7 +128,36 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
     }
   }
 
-  Widget _buildImageBox(File? file, String label, VoidCallback onTap) {
+  /// helper function
+  void _savePickedImage(XFile? image, String docType) {
+    if (image != null) {
+      setState(() {
+        switch (docType) {
+          case 'aadhar_front':
+            _kycDocs.aadharFront = File(image.path);
+            break;
+          case 'aadhar_back':
+            _kycDocs.aadharBack = File(image.path);
+            break;
+          case 'psu':
+            _kycDocs.psuImage = File(image.path);
+            break;
+          case 'license_front':
+            _kycDocs.licenseFront = File(image.path);
+            break;
+          case 'license_back':
+            _kycDocs.licenseBack = File(image.path);
+            break;
+          case 'insurance':
+            _kycDocs.insuranceImage = File(image.path);
+            break;
+        }
+      });
+    }
+  }
+
+
+  Widget _buildImageBox2(File? file, String label, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -118,10 +186,12 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
 
   Widget _buildDocumentField({
     required String label,
+    required String imageURL,
     required String docType,
     required File? file,
 
   }) {
+    print("imageURL=>${imageURL}");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -132,6 +202,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
           children: [
             _buildImageBox(
               file,
+              imageURL,
               docType.contains('front') ? 'Front Side' :
               docType.contains('back') ? 'Back Side' : 'Document',
                   () => _pickDocumentImage(docType),
@@ -140,6 +211,32 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
         ),
         SizedBox(height: 16),
       ],
+    );
+  }
+
+  Widget _buildImageBox(File? file, String? imageUrl, String label,  onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 120,
+        height: 100,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: file != null
+            ? Image.file(file, fit: BoxFit.cover) // local file image
+            : (imageUrl != null && imageUrl.isNotEmpty)
+            ? Image.network(imageUrl, fit: BoxFit.cover) // network image
+            : Column( // placeholder
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.upload_file, color: Colors.grey, size: 30),
+            const SizedBox(height: 5),
+            Text(label, style: const TextStyle(color: Colors.grey)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -183,6 +280,9 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                   height: 30,
                 ),
                 LineTextField(
+                  count: 12,
+                  keyboardType: TextInputType.number,
+                  readyOnly: authController.isKyc(),
                   title: "Aadhaar Number",
                   hintText: "Ex: ",
                   controller: aadhaarCt,
@@ -193,12 +293,14 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 Row(
                   children: [
                     _buildDocumentField(
+                      imageURL: adharfront!,
                       label: 'Aadhar Card ',
                       docType: 'aadhar_front',
                       file: _kycDocs.aadharFront,
 
                     ),
                     _buildDocumentField(
+                      imageURL: adharback!,
                       label: '',
                       docType: 'aadhar_back',
                       file: _kycDocs.aadharBack,
@@ -207,6 +309,8 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 ),
 
                 LineTextField(
+                  count: 10,
+                  readyOnly: authController.isKyc(),
                   title: "Pan Number",
                   hintText: "Ex: ",
                   controller: panCt,
@@ -217,12 +321,15 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 ),
 
                 _buildDocumentField(
+                  imageURL: panImage!,
+
                   label: 'Pan Number',
                   docType: 'psu',
                   file: _kycDocs.psuImage,
 
                 ),
                 LineTextField(
+                  readyOnly: authController.isKyc(),
                   title: "License Number",
                   hintText: "Ex: ",
                   controller: licenseCt,
@@ -235,12 +342,14 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 Row(
                   children: [
                     _buildDocumentField(
+                      imageURL: liencefornt!,
                       label: 'License Number',
                       docType: 'license_front',
                       file: _kycDocs.licenseFront,
 
                     ),
                     _buildDocumentField(
+                      imageURL: lienceback!,
                       label: '',
                       docType: 'license_back',
                       file: _kycDocs.licenseBack,
@@ -249,6 +358,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 ),
 
                 LineTextField(
+                  readyOnly: authController.isKyc(),
                   title: "Insurance Number",
                   hintText: "Ex: ",
                   controller: insuranceCt,
@@ -259,6 +369,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 ),
 
                 _buildDocumentField(
+                  imageURL: insurancefront!,
                   label: 'Insurance Number',
                   docType: 'insurance',
                   file: _kycDocs.insuranceImage,

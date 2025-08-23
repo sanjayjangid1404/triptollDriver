@@ -98,10 +98,13 @@ class _WalletViewState extends State<WalletView> {
       builder: (authController) {
 
         double totalAmount = 0;
-        if(authController.walletResponseList.isNotEmpty) {
+        if (authController.walletResponseList.isNotEmpty) {
           totalAmount = authController.walletResponseList
-            .map((e) => double.parse(e.walletAmount??"0")) // sab amount nikal lo
-            .reduce((a, b) => a + b); // add kar do
+              .map((e) {
+            double amount = double.tryParse(e.walletAmount ?? "0") ?? 0;
+            return (e.trnType?.toLowerCase() == "debit") ? -amount : amount;
+          })
+              .reduce((a, b) => a + b);
         }
        return Scaffold(
         appBar: AppBar(

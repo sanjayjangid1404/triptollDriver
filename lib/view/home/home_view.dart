@@ -396,18 +396,9 @@ class _HomeViewState extends State<HomeView> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+
                                   Text(
-                                    "${AppContants.rupessSystem}",
-                                    style: TextStyle(
-                                        color: TColor.secondary,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800),
-                                  ),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text(
-                                    authController.walletAmount,
+                                    "${AppContants.rupessSystem}"+authController.walletAmount,
                                     style: TextStyle(
                                         color: TColor.primaryText,
                                         fontSize: 25,
@@ -441,22 +432,22 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                   ),
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  constraints: const BoxConstraints(minWidth: 15),
-                                  child: const Text(
-                                    "3",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                )
+                                // Container(
+                                //   padding: const EdgeInsets.symmetric(
+                                //       horizontal: 8, vertical: 1),
+                                //   decoration: BoxDecoration(
+                                //     color: Colors.red,
+                                //     borderRadius: BorderRadius.circular(30),
+                                //   ),
+                                //   constraints: const BoxConstraints(minWidth: 15),
+                                //   child: const Text(
+                                //     "3",
+                                //     style: TextStyle(
+                                //       color: Colors.white,
+                                //       fontSize: 10,
+                                //     ),
+                                //   ),
+                                // )
                               ],
                             ),
                           ),

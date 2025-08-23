@@ -36,7 +36,7 @@ class WalletRow extends StatelessWidget {
             width: 8,
           ),
           Text(
-            AppContants.rupessSystem+(wObj.walletAmount??"0"),
+            (wObj.trnType?.toLowerCase() == "debit" ?"-":"+") + AppContants.rupessSystem+( (wObj.walletAmount??"0")),
             style: TextStyle(color: TColor.primaryText, fontSize: 16),
           ),
         ],

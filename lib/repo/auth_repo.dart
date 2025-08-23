@@ -25,8 +25,20 @@ class AuthRepo{
 
   Future<Response> incomeDriver({String? userID}) async {
     print("call");
-    return await apiClient.getData(
-        "${AppContants.incomeDriverURL}?user_id=$userID");
+    return await apiClient.postMultipartData(
+        AppContants.incomeDriverURL,{
+      "user_id":userID.toString(),
+      "user_type":"driver",
+    },[]);
+  }
+
+  Future<Response> paymentHistory({String? userID}) async {
+    print("call");
+    return await apiClient.postMultipartData(
+        AppContants.paymentHistoryURL,{
+      "user_id":userID.toString(),
+      "user_type":"driver",
+    },[]);
   }
 
   Future<Response> updateDriverLocation({String? userID,String? lat,String? long}) async {
@@ -168,8 +180,11 @@ class AuthRepo{
 
   Future<Response> getWalletHistory({String? userID}) async {
     print("call");
-    return await apiClient.getData(
-        "${AppContants.getWalletHistoryURL}?user_id=$userID&user_type=driver");
+    return await apiClient.postMultipartData(
+        "${AppContants.getWalletHistoryURL}",{
+      "user_id":userID.toString(),
+      "user_type":"driver",
+    },[]);
   }
 
   Future<Response> saveFirebaseToken({String? userID}) async {

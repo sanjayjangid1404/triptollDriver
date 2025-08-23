@@ -36,6 +36,7 @@ class AppContants
   static String imageURL = "https://triptoll.in/app-admin/";
   static String loginUrl = "User/login/tbl_driver";
   static String incomeDriverURL = "Driver/getWalletAmount";
+  static String paymentHistoryURL = "Driver/getPaymentHistory";
   static String driverBasicInfoURL = "Driver/createDriver";
   static String getCityURL = "home/getCity";
   static String updateDriverBankDetailURL = "Driver/updateDriverBankDetail";

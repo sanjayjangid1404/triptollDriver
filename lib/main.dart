@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 // import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
+import 'package:audioplayers/audioplayers.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -35,19 +36,149 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'common/route_helper.dart';
 
 SharedPreferences? prefs;
+final AudioPlayer player = AudioPlayer();
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
+Future<void> showNotification() async {
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+  AndroidNotificationDetails(
+    'location_tracker_channel',
+    'Location Tracker Notifications',
+    channelDescription: 'Channel for location-based notifications',
+    importance: Importance.max,
+    priority: Priority.high,
+    playSound: true,
+    sound: RawResourceAndroidNotificationSound('booking'), // 🔔 custom sound
+  );
+
+  const NotificationDetails platformChannelSpecifics =
+  NotificationDetails(android: androidPlatformChannelSpecifics);
+
+  await flutterLocalNotificationsPlugin.show(
+    0,
+    'New Booking - Triptoll',
+    'You have a new booking!',
+    platformChannelSpecifics,
+  );
+}
+
+
+
+// Background service handler
+
+
+// iOS background callback
+@pragma('vm:entry-point')
+Future<bool> onIosBackground() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  return true;
+}
+
+// Play sound in background
+Future<void> playSoundInBackground() async {
+  try {
+    final player = AudioPlayer();
+    await player.setReleaseMode(ReleaseMode.loop);
+
+    // Play sound for 15 seconds (adjust as needed)
+    await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0);
+    await Future.delayed(Duration(seconds: 15));
+    await player.stop();
+    await player.dispose();
+  } catch (e) {
+    print("Error playing sound in background: $e");
+  }
+}
+
+Future<void> setupFirebaseMessaging() async {
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // Request notification permissions
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  // Handle background messages
+
+
+  // Handle messages when the app is in the foreground
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Foreground message received: ${message.data}');
+
+    // Play sound immediately for foreground notifications
+    playSound();
+  });
+
+  // Handle when the app is opened from a terminated state
+  RemoteMessage? initialMessage = await messaging.getInitialMessage();
+  if (initialMessage != null) {
+    _handleMessage(initialMessage);
+  }
+
+  // Handle when the app is in the background and opened from a notification
+  FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+}
+
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Background message received: ${message.notification?.title}");
+
+  // Sound play
+  final player = AudioPlayer();
+  await player.play(AssetSource("assets/sounds/booking.mp3"));
+
+  // ✅ App open करने के लिए
+  if (Platform.isAndroid) {
+    final service = FlutterBackgroundService();
+    service.invoke("openApp");
+  }
+}
+
+void _handleMessage(RemoteMessage message) {
+  print('Notification opened app: ${message.data}');
+  // Play sound when notification opens the app
+  playSound();
+}
+
+// Function to play sound in foreground
+Future<void> playSound() async {
+  try {
+    final player = AudioPlayer();
+    await player.setReleaseMode(ReleaseMode.loop);
+    await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0);
+
+    // Stop after 15 seconds (adjust as needed)
+    Future.delayed(Duration(seconds: 15), () async {
+      await player.stop();
+      await player.dispose();
+    });
+  } catch (e) {
+    print("Error playing sound: $e");
+  }
+}
 
 void main() async {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
-
-
   DBHelper.shared().db;
-
-
   prefs = await SharedPreferences.getInstance();
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await _handleLocationPermissions();
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher'); // आपकी app icon
+  const InitializationSettings initializationSettings =
+  InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   // 2. Only start service if permissions are granted
   if (await _checkLocationPermissionGranted()) {
@@ -75,6 +206,9 @@ void main() async {
   configLoading();
   ServiceCall.getStaticDateApi();
 }
+
+
+
 
 Future<bool> _checkLocationPermissionGranted() async {
   final status = await Geolocator.checkPermission();
@@ -135,6 +269,9 @@ void configLoading() {
     ..dismissOnTap = false;
 }
 
+Future<void> stopRingtone() async {
+  await player.stop();
+}
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -158,7 +295,7 @@ class _MyApp extends State<MyApp> {
 
     AppContants.getToken();
      var initialzationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/logo');
+    AndroidInitializationSettings('@mipmap/ic_launcher');
 
     var initialzationSettingsIOS =
     DarwinInitializationSettings(
@@ -170,15 +307,22 @@ class _MyApp extends State<MyApp> {
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
       if (notification != null && android != null) {
-        if (kDebugMode) {
-          print("onMessage: ${notification.title}/${notification.body}/${notification.titleLocKey}");
-          print("onMessage type: ${message.data['type']}/${message.data}");
+
+        await showNotification();
+        if(notification.title!.toLowerCase().contains("new booking - triptoll")){
+
+          await player.setReleaseMode(ReleaseMode.loop);
+          await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0,);
+
         }
+        print("onMessage: ${notification.title}/${notification.body}/${notification.titleLocKey}");
+        print("onMessage type: ${message.data['type']}/${message.data}");
+
 
 
 
@@ -207,9 +351,37 @@ class _MyApp extends State<MyApp> {
       }
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        print("onMessage: ${notification.title}/${notification.body}/${notification.titleLocKey}");
+        print("onMessage type: ${message.data['type']}/${message.data}");
+
+      if(notification.title!.toLowerCase().contains("new booking - triptoll")){
+
+        await player.setReleaseMode(ReleaseMode.loop);
+        await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0);
+      }
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode, // id
+        notification.title,    // title
+        notification.body,     // body
+        NotificationDetails(   // notification details
+          android: AndroidNotificationDetails(
+            'channel_id',
+            'channel_name',
+            channelDescription: 'your channel description',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+        payload: "", // optional data
+      );
 
 
+      }
     });
   }
   @override
@@ -234,3 +406,5 @@ class _MyApp extends State<MyApp> {
     );
   }
 }
+
+

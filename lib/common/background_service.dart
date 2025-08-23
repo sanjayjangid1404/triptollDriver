@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
@@ -12,6 +14,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:taxi_driver/common/appContants.dart';
+
+import '../main.dart';
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -111,6 +115,19 @@ void onStart(ServiceInstance service) async {
   service.on('stopService').listen((event) {
     service.stopSelf();
   });
+
+  var initialzationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  var initialzationSettingsIOS =
+  DarwinInitializationSettings(
+    requestAlertPermission: true,
+    requestBadgePermission: true,
+    requestSoundPermission: true,);
+  var initializationSettings =
+  InitializationSettings(android: initialzationSettingsAndroid,iOS: initialzationSettingsIOS);
+  flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
 
   // Location tracking every 3 seconds
   Timer.periodic(const Duration(seconds: 6), (timer) async {
@@ -213,3 +230,4 @@ Future<void> _sendLocationToServer(String? userID,double lat, double lng,String?
     debugPrint('Error sending location: $e');
   }
 }
+

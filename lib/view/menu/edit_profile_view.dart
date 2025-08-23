@@ -84,6 +84,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                 height: 30,
               ),
               LineTextField(
+
+                readyOnly: authController.isKyc(),
                 title: "First name",
                 hintText: "Ex: Amit",
                 controller: txtFirstName,
@@ -92,6 +94,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                 height: 8,
               ),
               LineTextField(
+                readyOnly: authController.isKyc(),
                 title: "Last name",
                 hintText: "Ex: Patel",
                 controller: txtLastName,
@@ -154,6 +157,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                 height: 8,
               ),
               LineTextField(
+                readyOnly: authController.isKyc(),
                 title: "Email Address",
                 hintText: "Ex: 123@gmail.com,",
                 controller: txtEmail,

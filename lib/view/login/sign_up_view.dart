@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
@@ -85,6 +86,7 @@ class _SignUpViewState extends State<SignUpView> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        startTimer();
 
 
         setState(() {
@@ -107,6 +109,37 @@ class _SignUpViewState extends State<SignUpView> {
 
     setState(() {
       isLoading = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  bool isOtpButtonEnabled = true; // by default enabled
+  int secondsRemaining = 0;
+  Timer? _timer;
+
+  void startTimer() {
+    setState(() {
+      isOtpButtonEnabled = false;
+      secondsRemaining = 30;
+    });
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (secondsRemaining > 1) {
+        setState(() {
+          secondsRemaining--;
+        });
+      } else {
+        timer.cancel();
+        setState(() {
+          isOtpButtonEnabled = true;
+          secondsRemaining = 0;
+        });
+      }
     });
   }
   @override
@@ -245,23 +278,34 @@ class _SignUpViewState extends State<SignUpView> {
                           enabledBorder: InputBorder.none,
                           hintText: "9876543210",
                           suffixIcon: InkWell(
-                            onTap: (){
-
-                              if(txtMobile.text.isNotEmpty && txtMobile.text.length ==10) {
+                            onTap: isOtpButtonEnabled
+                                ? () {
+                              if (txtMobile.text.isNotEmpty &&
+                                  txtMobile.text.length == 10) {
                                 sendOtp();
                                 setState(() {
                                   otpVerify = false;
                                 });
-                              }
-                              else {
+                              } else {
                                 showCustomSnackBar("Invalid Mobile no");
                               }
-                            },
+                            }
+                                : null,
                             child: Padding(
                               padding: EdgeInsets.all(12.0),
-                              child: Text("GET OTP",style: TextStyle(fontSize: 14,color: Colors.green,fontWeight: FontWeight.bold),),
+                              child: Text(
+                                isOtpButtonEnabled
+                                    ? "GET OTP"
+                                    : "Retry in $secondsRemaining s", // timer dikhega
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isOtpButtonEnabled ? Colors.green : Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          )
+                          ),
+
                         ),
                       ),
                     )

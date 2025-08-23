@@ -9,7 +9,9 @@ class LineTextField extends StatelessWidget {
   final bool? obscureText;
   final Widget? right;
   final int minLines;
+  final int? count;
   final int maxLines;
+  final bool readyOnly;
 
   const LineTextField(
       {super.key,
@@ -20,6 +22,8 @@ class LineTextField extends StatelessWidget {
       this.obscureText,
       this.right,
       this.minLines = 1,
+      this.count,
+      this.readyOnly = false,
       this.maxLines = 1});
 
   @override
@@ -33,8 +37,10 @@ class LineTextField extends StatelessWidget {
           style: TextStyle(color: TColor.placeholder, fontSize: 14),
         ),
         TextField(
+          readOnly: readyOnly,
           controller: controller,
           keyboardType: keyboardType,
+          maxLength: count,
           obscureText: obscureText ?? false,
           minLines: minLines,
           maxLines: maxLines,
@@ -43,6 +49,7 @@ class LineTextField extends StatelessWidget {
             fontSize: 16,
           ),
           decoration: InputDecoration(
+            counter: SizedBox(),
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
             hintText: hintText,

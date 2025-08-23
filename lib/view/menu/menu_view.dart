@@ -7,6 +7,7 @@ import 'package:taxi_driver/common_widget/icon_title_cell.dart';
 import 'package:taxi_driver/common_widget/menu_row.dart';
 import 'package:taxi_driver/controller/authController.dart';
 import 'package:taxi_driver/view/home/driver_my_rides_view.dart';
+import 'package:taxi_driver/view/home/home_view.dart';
 import 'package:taxi_driver/view/login/welcome_view.dart';
 import 'package:taxi_driver/view/menu/earning_view.dart';
 import 'package:taxi_driver/view/menu/ratings_view.dart';
@@ -15,6 +16,14 @@ import 'package:taxi_driver/view/menu/settings_view.dart';
 import 'package:taxi_driver/view/menu/summary_view.dart';
 import 'package:taxi_driver/view/menu/wallet_view.dart';
 import 'package:taxi_driver/view/user/user_my_rides_view.dart';
+
+import '../../common_widget/setting_row.dart';
+import '../login/bank_detail_view.dart';
+import '../login/document_upload_view.dart';
+import '../payment/payment_list.dart';
+import 'change_password_view.dart';
+import 'my_profile_view.dart';
+import 'my_vehicle_view.dart';
 
 class MenuView extends StatefulWidget {
   const MenuView({super.key});
@@ -29,6 +38,7 @@ class _MenuViewState extends State<MenuView> {
     return GetBuilder<AuthController>(
       builder: (AuthController authController) =>
        Scaffold(
+         backgroundColor: TColor.lightWhite,
         body: Column(
           children: [
             authController.driverInResponse!=null ?
@@ -83,7 +93,7 @@ class _MenuViewState extends State<MenuView> {
                               icon: "assets/img/earnings.png",
                               onPressed: () {
                                 context.push(
-                                  const EarningView(),
+                                  const PaymentList(),
                                 );
                               }),
                           InkWell(
@@ -179,11 +189,15 @@ class _MenuViewState extends State<MenuView> {
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     MenuRow(
                         title: "Home",
                         icon: "assets/img/home.png",
-                        onPressed: () {}),
+                        onPressed: () {
+
+                          Get.offAll(HomeView());
+                        }),
                     MenuRow(
                         title: "My Rides",
                         icon: "assets/img/summary.png",
@@ -196,26 +210,88 @@ class _MenuViewState extends State<MenuView> {
                           // }
 
                         }),
+
+                    Container(
+                      width: double.infinity,
+                      color: TColor.primary.withOpacity(0.1),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        child: Text(
+                          "Account",
+                          style: TextStyle(
+                            color: TColor.primaryText,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
                     MenuRow(
-                        title: "Summary",
-                        icon: "assets/img/summary.png",
+                        title: "My Profile",
+                        icon: "assets/img/sm_profile.png",
                         onPressed: () {
-                          context.push(const SummaryView());
+                          context.push(const MyProfileView());
                         }),
                     MenuRow(
-                        title: "My Subscription",
-                        icon: "assets/img/my_subscription.png",
-                        onPressed: () {}),
+                        title: "My Vehicle",
+                        icon: "assets/img/sm_my_vehicle.png",
+                        onPressed: () {
+                          context.push(const MyVehicleView());
+                        }),
                     MenuRow(
-                        title: "Notifications",
-                        icon: "assets/img/notification.png",
-                        onPressed: () {}),
+                        title: "Personal Documents",
+                        icon: "assets/img/sm_document.png",
+                        onPressed: () {
+                          context.push(
+                              DocumentUploadView(title: "Personal Document",id: authController.getUserID()??"",isEdit: true,));
+                        }),
                     MenuRow(
-                        title: "Settings",
+                        title: "Bank details",
+                        icon: "assets/img/sm_bank.png",
+                        onPressed: () {
+                          context.push( BankDetailView(driverID: authController.getUserID()??"",isEdit: true,));
+                        }),
+                    MenuRow(
+                        title: "Change Password",
+                        icon: "assets/img/sm_password.png",
+                        onPressed: () {
+                          context.push(const ChangePasswordView());
+                        }),
+                    // MenuRow(
+                    //     title: "Summary",
+                    //     icon: "assets/img/summary.png",
+                    //     onPressed: () {
+                    //       context.push(const SummaryView());
+                    //     }),
+
+                    Container(
+                      width: double.infinity,
+                      color: TColor.primary.withOpacity(0.1),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        child: Text(
+                          "Support",
+                          style: TextStyle(
+                            color: TColor.primaryText,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                    MenuRow(
+                        title: "Setting",
                         icon: "assets/img/setting.png",
                         onPressed: () {
                           context.push(const SettingsView());
                         }),
+                    MenuRow(
+                        title: "Notifications",
+                        icon: "assets/img/notification.png",
+                        onPressed: () {
+
+                        }),
+
                     MenuRow(
                         title: "Logout",
                         icon: "assets/img/logout.png",

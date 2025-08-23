@@ -56,40 +56,7 @@ class _SettingsViewState extends State<SettingsView> {
               const SizedBox(
                 height: 8,
               ),
-              SettingRow(
-                  title: "My Profile",
-                  icon: "assets/img/sm_profile.png",
-                  onPressed: () {
-                    context.push(const MyProfileView());
-                  }),
-              SettingRow(
-                  title: "My Vehicle",
-                  icon: "assets/img/sm_my_vehicle.png",
-                  onPressed: () {
-                    context.push(const MyVehicleView());
-                  }),
-              SettingRow(
-                  title: "Personal Documents",
-                  icon: "assets/img/sm_document.png",
-                  onPressed: () {
-                    context.push(
-                         DocumentUploadView(title: "Personal Document",id: authController.getUserID()??"",isEdit: true,));
-                  }),
-              SettingRow(
-                  title: "Bank details",
-                  icon: "assets/img/sm_bank.png",
-                  onPressed: () {
-                     context.push( BankDetailView(driverID: authController.getUserID()??"",isEdit: true,));
-                  }),
-              SettingRow(
-                  title: "Change Password",
-                  icon: "assets/img/sm_password.png",
-                  onPressed: () {
-                    context.push(const ChangePasswordView());
-                  }),
-              const SizedBox(
-                height: 15,
-              ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Text(
@@ -123,7 +90,7 @@ class _SettingsViewState extends State<SettingsView> {
                   title: "Supports",
                   icon: "assets/img/sm_profile.png",
                   onPressed: () {
-                    context.push(const SupportListView());
+                   // context.push(const SupportListView());
                   }),
             ],
           ),

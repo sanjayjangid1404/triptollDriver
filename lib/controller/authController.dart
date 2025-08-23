@@ -15,6 +15,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/color_extension.dart';
+import 'package:taxi_driver/main.dart';
 import 'package:taxi_driver/model/booking_details_response.dart';
 import 'package:taxi_driver/model/booking_list_response.dart';
 import 'package:taxi_driver/model/booking_notification_response.dart';
@@ -180,10 +181,10 @@ class AuthController extends GetxController implements GetxService
       if (_locationUpdateTimer == null || !_locationUpdateTimer!.isActive) {
         _updateDriverLocationOnServer(position.latitude, position.longitude);
 
-        _locationUpdateTimer = Timer(const Duration(seconds: 3), () {
-          // Timer khatam hone par next call allow hoga
-          _updateDriverLocationOnServer(position.latitude, position.longitude);
-        });
+        // _locationUpdateTimer = Timer(const Duration(seconds: 3), () {
+        //   // Timer khatam hone par next call allow hoga
+        //   _updateDriverLocationOnServer(position.latitude, position.longitude);
+        // });
       }
     });
   }
@@ -344,10 +345,49 @@ class AuthController extends GetxController implements GetxService
     if(response.statusCode==200 || response.statusCode ==400)
     {
 
-      if(response.body["amount"]!=null){
-        walletAmount = (double.parse((response.body["amount"]??0).toString())).toStringAsFixed(0);
+      if(response.body["balance_amount"]!=null){
+        walletAmount = (double.parse((response.body["balance_amount"]??0).toString())).toStringAsFixed(0);
         update();
       }
+
+    }
+    else {
+
+
+      // dynamic data = jsonDecode(response.body);
+
+      ApiChecker.checkApi(response);
+
+
+
+
+    }
+
+    isLoading = false;
+    update();
+
+
+
+  }
+
+  Future<void>paymentHistory()
+  async {
+
+    isLoading = true;
+
+    update();
+    print(getUserDeviceID());
+
+
+
+    Response response = await authRepo.paymentHistory(userID: getUserID());
+
+  //  LoginResponse? loginResponse;
+
+    if(response.statusCode==200 || response.statusCode ==400)
+    {
+
+
 
     }
     else {
@@ -671,6 +711,7 @@ class AuthController extends GetxController implements GetxService
     if(response.statusCode==200 || response.statusCode ==400)
     {
 
+      stopRingtone();
 
 
 
@@ -1162,6 +1203,7 @@ class AuthController extends GetxController implements GetxService
 
     if(response.statusCode==200 || response.statusCode ==400)
     {
+      stopRingtone();
       authRepo.saveUserBooking(orderID.toString());
       hasShownSheet = false;
 
@@ -1246,6 +1288,7 @@ class AuthController extends GetxController implements GetxService
 
         runningOrderResponse = RunningOrderResponse.fromJson(response.body);
 
+        checkAndStartBookingNotification(context);
 
         if(response.body["status"] == false){
           checkAndStartBookingNotification(context);
@@ -1911,6 +1954,7 @@ class AuthController extends GetxController implements GetxService
                 children: [
                   InkWell(
                     onTap: () {
+                      stopRingtone();
                      // Navigator.pop(context); // Close the bottom sheet
                       bookingStatusChange(
                         status: "cancel",
