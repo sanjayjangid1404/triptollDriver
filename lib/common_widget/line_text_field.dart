@@ -11,6 +11,7 @@ class LineTextField extends StatelessWidget {
   final int minLines;
   final int? count;
   final int maxLines;
+  final TextCapitalization textCapitalization;
   final bool readyOnly;
 
   const LineTextField(
@@ -20,6 +21,7 @@ class LineTextField extends StatelessWidget {
       this.controller,
       this.keyboardType,
       this.obscureText,
+      this.textCapitalization = TextCapitalization.none,
       this.right,
       this.minLines = 1,
       this.count,
@@ -39,6 +41,7 @@ class LineTextField extends StatelessWidget {
         TextField(
           readOnly: readyOnly,
           controller: controller,
+          textCapitalization: textCapitalization!,
           keyboardType: keyboardType,
           maxLength: count,
           obscureText: obscureText ?? false,
@@ -55,8 +58,9 @@ class LineTextField extends StatelessWidget {
             hintText: hintText,
             suffixIcon: right,
             hintStyle: TextStyle(
-              color: TColor.secondaryText,
+              color: Colors.grey,
               fontSize: 16,
+
             ),
           ),
         ),

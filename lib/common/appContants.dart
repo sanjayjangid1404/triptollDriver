@@ -38,6 +38,8 @@ class AppContants
   static String incomeDriverURL = "Driver/getWalletAmount";
   static String paymentHistoryURL = "Driver/getPaymentHistory";
   static String driverBasicInfoURL = "Driver/createDriver";
+  static String driverFAQURl = "Home/getFaq/driver";
+  static String ticketRezURL = "Driver/ticketRezByDriver";
   static String getCityURL = "home/getCity";
   static String updateDriverBankDetailURL = "Driver/updateDriverBankDetail";
   static String updateDriverVehicleDetail = "Driver/updateDriverVehicleDetail";

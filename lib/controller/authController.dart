@@ -36,6 +36,7 @@ import '../common/driver_notification_service.dart';
 import '../common/globs.dart';
 import '../model/category_type_response.dart' hide Data;
 import '../model/city_response.dart';
+import '../model/faq_driver_response.dart';
 import '../model/running_order_response.dart';
 import '../model/subCategoryVehicle.dart' hide Data;
 import '../model/vehicle_data.dart' hide Data;
@@ -98,7 +99,7 @@ class AuthController extends GetxController implements GetxService
     _bookingNotificationTimer?.cancel();
 
     _bookingNotificationTimer = Timer.periodic(Duration(seconds: 10), (timer) {
-      getBookingNotification(context);
+     // getBookingNotification(context);
     });
   }
 
@@ -181,10 +182,10 @@ class AuthController extends GetxController implements GetxService
       if (_locationUpdateTimer == null || !_locationUpdateTimer!.isActive) {
         _updateDriverLocationOnServer(position.latitude, position.longitude);
 
-        // _locationUpdateTimer = Timer(const Duration(seconds: 3), () {
-        //   // Timer khatam hone par next call allow hoga
-        //   _updateDriverLocationOnServer(position.latitude, position.longitude);
-        // });
+        _locationUpdateTimer = Timer(const Duration(seconds: 10), () {
+          // Timer khatam hone par next call allow hoga
+          _updateDriverLocationOnServer(position.latitude, position.longitude);
+        });
       }
     });
   }
@@ -194,10 +195,10 @@ class AuthController extends GetxController implements GetxService
     try {
       print("🚀 Updating location with lat: $latitude, long: $longitude");
 
-      // await updateDriverLocation(
-      //   lat: latitude.toString(),
-      //   long: longitude.toString(),
-      // );
+      await updateDriverLocation(
+        lat: latitude.toString(),
+        long: longitude.toString(),
+      );
 
       print("✅ Location updated successfully");
     } catch (e) {
@@ -735,7 +736,7 @@ class AuthController extends GetxController implements GetxService
 
   }
 
-  Future<void>saveDriverBasicDetails(body)
+  Future<void>saveDriverBasicDetails(body,File? adhaarF)
   async {
 
     isUploading = true;
@@ -744,6 +745,7 @@ class AuthController extends GetxController implements GetxService
     update();
     print(getUserDeviceID());
     String? token = "";
+    List<MultipartBody> multipartBody = [];
 
     if(Platform.isAndroid)
     {
@@ -753,12 +755,16 @@ class AuthController extends GetxController implements GetxService
     {
       token = await FirebaseMessaging.instance.getAPNSToken();
     }
+
+    if(adhaarF!=null){
+      multipartBody.add(MultipartBody("profile_img", XFile(adhaarF.path)));
+    }
     body.addAll({
       "device_token":token.toString()
     });
 
 
-    Response response = await authRepo.driverBasicInfo(body);
+    Response response = await authRepo.driverBasicInfo(body,multipartBody);
 
   //  LoginResponse? loginResponse;
 
@@ -813,6 +819,48 @@ class AuthController extends GetxController implements GetxService
 
 
       Get.offAll(MobileNumberView());
+      update();
+    }
+    else {
+
+
+
+
+      ApiChecker.checkApi(response);
+
+
+
+
+    }
+
+    isRegistration = false;
+    update();
+
+
+
+  }
+
+  Future<void>changePassword(body)
+  async {
+
+    isRegistration = true;
+
+    update();
+
+
+
+    Response response = await authRepo.updatePassword(body);
+
+    //  LoginResponse? loginResponse;
+
+    if(response.statusCode==200 || response.statusCode ==400)
+    {
+
+      showCustomSnackBar(response.body["message"], getXSnackBar: false,isError: false);
+
+
+
+      Get.back();
       update();
     }
     else {
@@ -896,6 +944,8 @@ class AuthController extends GetxController implements GetxService
   //  LoginResponse? loginResponse;
 
     List<MultipartBody> multipartBody = [];
+
+
 
     if(adhaarF!=null){
       multipartBody.add(MultipartBody("adhar_front", XFile(adhaarF.path)));
@@ -996,6 +1046,35 @@ class AuthController extends GetxController implements GetxService
 
   }
 
+  Future<void>ticketRez(body)
+  async {
+
+    isUploading = true;
+
+    Response response = await authRepo.ticketRez(body);
+
+  //  LoginResponse? loginResponse;
+
+    if(response.statusCode==200 || response.statusCode ==400)
+    {
+
+      showCustomSnackBar("Ticket raise successfully",isError: false);
+
+      Get.back();
+    }
+    else {
+
+
+    }
+
+    isUploading = false;
+    Globs.hideHUD();
+    update();
+
+
+
+  }
+
   Future<void>updateDriverPaymentStatus(body)
   async {
 
@@ -1082,15 +1161,65 @@ class AuthController extends GetxController implements GetxService
 
   }
 
-  Future<void>vehicleDetailsUpload(body,String id,XFile? vehicle,XFile? frontImage,XFile?backImage)
+  List<FaqDriverResponse>faqDriverResponse = [];
+
+  Future<void>getDriverFAQ()
   async {
 
     isUploading = true;
 
 
+
+
+
+    Response response = await authRepo.driverFAQ();
+    faqDriverResponse = [];
+
+  //  LoginResponse? loginResponse;
+
+    if(response.statusCode==200 || response.statusCode ==400)
+    {
+
+
+      for(int i=0; i<response.body.length; i++){
+        faqDriverResponse.add(FaqDriverResponse.fromJson(response.body[i]));
+      }
+
+
+      update();
+
+
+
+
+
+
+
+
+
+    }
+    else {
+
+
+    }
+
+    isUploading = false;
+    Globs.hideHUD();
+    update();
+
+
+
+  }
+
+  Future<void>vehicleDetailsUpload(body,String id,XFile? vehicle,XFile? frontImage,XFile?backImage,BuildContext context,{bool isEdit = false})
+  async {
+
+    isUploading = true;
     update();
     List<MultipartBody> multipartBody = [];
-    
+
+    // print(frontImage!.path.toString());
+    // print(backImage!.path.toString());
+
     // if(vehicle!=null){
     //   multipartBody.add(MultipartBody("vehicle_image", XFile(vehicle.path)));
     // }
@@ -1123,18 +1252,13 @@ class AuthController extends GetxController implements GetxService
 
     if(response.statusCode==200 )
     {
-
-
+      if(isEdit){
+        driverInfo(context);
+        Get.back();
+      }
+      else {
         Get.to(  DocumentUploadView(title: "ID Proof",id:response.body["driver_id"].toString(),));
-
-
-
-
-
-
-
-
-
+      }
     }
     else {
 
@@ -1390,7 +1514,7 @@ class AuthController extends GetxController implements GetxService
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
-          showRideDetailsSheet(notificationResponse[0], context);
+       //   showRideDetailsSheet(notificationResponse[0], context);
         }
       });
 

@@ -199,8 +199,8 @@ Future<void> _sendLocationToServer(String? userID,double lat, double lng,String?
 
     print('${AppContants.baseURl}${AppContants.updateDriverLocation}');
     print(jsonEncode({
-      'lat': lat.toString(),
-      'long': lng.toString(),
+      'lat': lat.toStringAsFixed(14),
+      'long': lng.toStringAsFixed(14),
       "user_id": userID,
       "booking_id": bookingID??"0",
 
@@ -214,8 +214,8 @@ Future<void> _sendLocationToServer(String? userID,double lat, double lng,String?
 
       },
       body: jsonEncode({
-        'lat': lat.toString(),
-        'long': lng.toString(),
+        'lat': lat.toStringAsFixed(14),
+        'long': lng.toStringAsFixed(14),
         'user_id': userID,
         "booking_id": bookingID??"0",
       }),

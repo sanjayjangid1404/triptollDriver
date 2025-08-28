@@ -547,7 +547,7 @@ class _UserHomeViewState extends State<UserHomeView> {
             mdShowAlert(
             Globs.appName, responseObj[KKey.message] as String? ?? MSG.success, () {});
         }else{
-          mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail  , () { });
+        //  mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail  , () { });
         }
       }, failure: (err) async {
           Globs.hideHUD();

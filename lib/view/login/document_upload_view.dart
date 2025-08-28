@@ -220,6 +220,8 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
       child: Container(
         width: 120,
         height: 100,
+
+
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(8),
@@ -293,14 +295,14 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 Row(
                   children: [
                     _buildDocumentField(
-                      imageURL: adharfront!,
+                      imageURL: adharfront??"",
                       label: 'Aadhar Card ',
                       docType: 'aadhar_front',
                       file: _kycDocs.aadharFront,
 
                     ),
                     _buildDocumentField(
-                      imageURL: adharback!,
+                      imageURL: adharback??"",
                       label: '',
                       docType: 'aadhar_back',
                       file: _kycDocs.aadharBack,
@@ -313,6 +315,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                   readyOnly: authController.isKyc(),
                   title: "Pan Number",
                   hintText: "Ex: ",
+                  textCapitalization: TextCapitalization.characters,
                   controller: panCt,
                 ),
 
@@ -321,7 +324,8 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 ),
 
                 _buildDocumentField(
-                  imageURL: panImage!,
+                  imageURL: panImage??"",
+
 
                   label: 'Pan Number',
                   docType: 'psu',
@@ -331,6 +335,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 LineTextField(
                   readyOnly: authController.isKyc(),
                   title: "License Number",
+                  textCapitalization: TextCapitalization.characters,
                   hintText: "Ex: ",
                   controller: licenseCt,
                 ),
@@ -342,14 +347,14 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 Row(
                   children: [
                     _buildDocumentField(
-                      imageURL: liencefornt!,
+                      imageURL: liencefornt??"",
                       label: 'License Number',
                       docType: 'license_front',
                       file: _kycDocs.licenseFront,
 
                     ),
                     _buildDocumentField(
-                      imageURL: lienceback!,
+                      imageURL: lienceback??"",
                       label: '',
                       docType: 'license_back',
                       file: _kycDocs.licenseBack,
@@ -360,6 +365,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 LineTextField(
                   readyOnly: authController.isKyc(),
                   title: "Insurance Number",
+                  textCapitalization: TextCapitalization.characters,
                   hintText: "Ex: ",
                   controller: insuranceCt,
                 ),
@@ -369,7 +375,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 ),
 
                 _buildDocumentField(
-                  imageURL: insurancefront!,
+                  imageURL: insurancefront??"",
                   label: 'Insurance Number',
                   docType: 'insurance',
                   file: _kycDocs.insuranceImage,
@@ -387,6 +393,35 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                  authController.isUploading ? Center(child: CircularProgressIndicator(color: TColor.primary,),):
                 RoundButton(
                   onPressed: () {
+
+                    if(widget.isEdit){
+                      if(aadhaarCt.text.isEmpty){
+                        showCustomSnackBar("Enter Aadhaar Number");
+                      }
+                      else if(licenseCt.text.isEmpty){
+                        showCustomSnackBar("Enter License Number");
+                      }
+                      else {
+                        var body = {
+                          "driver_id": widget.id,
+                          "adhar_no": aadhaarCt.text,
+                          "pan_no": panCt.text,
+                          "license_no": licenseCt.text,
+                          "insurance": insuranceCt.text,
+                        };
+                        authController.updateDriverKyc(
+                            body,context,isEdit: widget.isEdit, adhaarF:_kycDocs.aadharFront!=null ? XFile(_kycDocs.aadharFront!.path):null,
+                            adhaarb: _kycDocs.aadharBack!=null ? XFile(_kycDocs.aadharBack!.path):null,
+                            insur:_kycDocs.insuranceImage!=null ? XFile(_kycDocs.insuranceImage!.path):null,
+                            licenseNumberB:_kycDocs.licenseFront!=null ? XFile(_kycDocs.licenseFront!.path):null,
+                            lienB: _kycDocs.licenseBack!=null ?XFile(_kycDocs.licenseBack!.path):null,
+                            panImage:_kycDocs.psuImage!=null ? XFile(_kycDocs.psuImage!.path):null);
+                      }
+
+                    }
+                    else {
+
+
 
                     if(aadhaarCt.text.isEmpty){
                       showCustomSnackBar("Enter Aadhaar Number");
@@ -425,6 +460,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                           licenseNumberB:_kycDocs.licenseFront!=null ? XFile(_kycDocs.licenseFront!.path):null,
                           lienB: _kycDocs.licenseBack!=null ?XFile(_kycDocs.licenseBack!.path):null,
                           panImage:_kycDocs.psuImage!=null ? XFile(_kycDocs.psuImage!.path):null);
+                    }
                     }
                   },
                   title: "NEXT",

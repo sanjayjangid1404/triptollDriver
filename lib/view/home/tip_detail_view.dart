@@ -8,6 +8,7 @@ import 'package:taxi_driver/common/globs.dart';
 import 'package:taxi_driver/common/service_call.dart';
 import 'package:taxi_driver/common_widget/title_subtitle_row.dart';
 import 'package:taxi_driver/model/booking_list_response.dart';
+import 'package:taxi_driver/view/home/support/faq.dart';
 
 class TipDetailsView extends StatefulWidget {
   final BookingListResponse obj;
@@ -77,7 +78,9 @@ class _TipDetailsViewState extends State<TipDetailsView>{
         ),
         actions: [
           TextButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => FaqScreen(),));
+            },
             icon: Image.asset(
               "assets/img/question_mark.png",
               width: 20,

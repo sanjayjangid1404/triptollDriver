@@ -112,15 +112,15 @@ class _MyVehicleViewState extends State<MyVehicleView> {
                       ),
                   itemCount: 1),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-            //   child: RoundButton(
-            //       title: "ADD A VEHICLE",
-            //       onPressed: () async {
-            //         await context.push(const AddVehicleView());
-            //         getCarsListApi();
-            //       }),
-            // ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+              child: RoundButton(
+                  title: "UPDATE VEHICLE",
+                  onPressed: () async {
+                    await context.push( VehicleDocumentUploadView(id: authController.getUserID()??"",isEdit: true,));
+
+                  }),
+            ),
             const SizedBox(
               height: 15,
             ),
@@ -133,67 +133,9 @@ class _MyVehicleViewState extends State<MyVehicleView> {
   //TODO: Action
 
   //TODO: ServiceCall
-  void getCarsListApi() {
-    Globs.showHUD();
 
-    ServiceCall.post({}, SVKey.svCarList, isTokenApi: true,
-        withSuccess: (responseObj) async {
-      Globs.hideHUD();
 
-      if (responseObj[KKey.status] == "1") {
-        listArr = responseObj[KKey.payload] as List? ?? [];
-      } else {
-        listArr = [];
-      }
 
-      if (mounted) {
-        setState(() {});
-      }
-    }, failure: (err) async {
-      Globs.hideHUD();
-      mdShowAlert("Error", err.toString(), () {});
-    });
-  }
 
-  void carsDeleteApi(Map<String, dynamic> parameter, int deleteIndex) {
-    Globs.showHUD();
 
-    ServiceCall.post(parameter, SVKey.svDeleteCar, isTokenApi: true,
-        withSuccess: (responseObj) async {
-      Globs.hideHUD();
-
-      if (responseObj[KKey.status] == "1") {
-        listArr.removeAt(deleteIndex);
-      } else {
-        listArr = [];
-      }
-      if (mounted) {
-        setState(() {});
-      }
-    }, failure: (err) async {
-      Globs.hideHUD();
-      mdShowAlert("Error", err.toString(), () {});
-    });
-  }
-
-  void setCarRunningApi(Map<String, dynamic> parameter) {
-    Globs.showHUD();
-
-    ServiceCall.post(parameter, SVKey.svSetRunningCar, isTokenApi: true,
-        withSuccess: (responseObj) async {
-      Globs.hideHUD();
-
-      if (responseObj[KKey.status] == "1") {
-        listArr = responseObj[KKey.payload] as List? ?? [];
-      } else {
-        mdShowAlert("Error", responseObj[KKey.message].toString(), () {});
-      }
-      if (mounted) {
-        setState(() {});
-      }
-    }, failure: (err) async {
-      Globs.hideHUD();
-      mdShowAlert("Error", err.toString(), () {});
-    });
-  }
 }

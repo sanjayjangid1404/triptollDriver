@@ -41,7 +41,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
     // TODO: implement initState
     super.initState();
 
-    getBrandList();
+    //getBrandList();
   }
 
   @override
@@ -94,7 +94,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
                       otherFlag = 1;
                       //Display New Enter Brand
                     } else {
-                      getModelList({"brand_id": bObj["brand_id"].toString()});
+
                     }
 
                     setState(() {});
@@ -127,7 +127,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
                       otherFlag = 2;
                       //Display New Enter Model
                     } else {
-                      getSeriesList({"model_id": mObj["model_id"].toString()});
+
                     }
 
                     setState(() {});
@@ -240,16 +240,8 @@ class _AddVehicleViewState extends State<AddVehicleView> {
 
 
               
-              const SizedBox(
-                height: 25,
-              ),
-              RoundButton(
-                onPressed: submitCarAction,
-                title: "REGISTER",
-              ),
-              const SizedBox(
-                height: 25,
-              ),
+
+
             ],
           ),
         ),
@@ -301,86 +293,10 @@ class _AddVehicleViewState extends State<AddVehicleView> {
 
     endEditing();
 
-    submitCarApi({
-      "other_status":otherFlag.toString(),
-      "brand": otherFlag == 1 ? txtBrandName.text : selectBrandObj!["brand_id"].toString(),
-      "model": otherFlag > 0 && otherFlag <= 2 ? txtModelName.text : selectModelObj!["model_id"].toString(),
-      "series": otherFlag > 0 ? txtSeries.text : selectSeriesObj!["series_id"].toString() ,
-      "seat": txtSeat.text.toString(),
-      "car_number": txtNumberPlate.text
-    });
 
   }
 
   //TODO: ServiceCall
 
-  void getBrandList() {
-    Globs.showHUD();
-    ServiceCall.post({}, SVKey.svBrandList, isTokenApi: true,
-        withSuccess: (responseObj) async {
-      Globs.hideHUD();
-      if ((responseObj[KKey.status] as String? ?? "") == "1") {
-        brandArr = responseObj[KKey.payload] as List? ?? [];
-      } else {
-        brandArr = [];
-      }
 
-      setState(() {});
-    }, failure: (err) async {
-      mdShowAlert("Error", err, () {});
-    });
-  }
-
-  void getModelList(Map<String, dynamic> parameter) {
-    Globs.showHUD();
-    ServiceCall.post(parameter, SVKey.svModelList, isTokenApi: true,
-        withSuccess: (responseObj) async {
-      Globs.hideHUD();
-      if ((responseObj[KKey.status] as String? ?? "") == "1") {
-        modelArr = responseObj[KKey.payload] as List? ?? [];
-      } else {
-        modelArr = [];
-      }
-
-      setState(() {});
-    }, failure: (err) async {
-      mdShowAlert("Error", err, () {});
-    });
-  }
-
-  void getSeriesList(Map<String, dynamic> parameter) {
-    Globs.showHUD();
-    ServiceCall.post(parameter, SVKey.svSeriesList, isTokenApi: true,
-        withSuccess: (responseObj) async {
-      Globs.hideHUD();
-      if ((responseObj[KKey.status] as String? ?? "") == "1") {
-        seriesArr = responseObj[KKey.payload] as List? ?? [];
-      } else {
-        seriesArr = [];
-      }
-
-      setState(() {});
-    }, failure: (err) async {
-      mdShowAlert("Error", err, () {});
-    });
-  }
-
-  void submitCarApi(Map<String, String> parameter) {
-    Globs.showHUD();
-    ServiceCall.multipart(parameter, SVKey.svAddCar,
-        isTokenApi: true, imgObj: {"image": selectImage! }, withSuccess: (responseObj) async {
-      Globs.hideHUD();
-      if ((responseObj[KKey.status] ?? "") == "1") {
-  
-        mdShowAlert("Success", responseObj[KKey.message] ?? MSG.success, () {
-          Navigator.pop(context);
-        });
-      } else {
-        mdShowAlert("Error", responseObj[KKey.message] ?? MSG.fail, () {});
-      }
-    }, failure: (err) async {
-      Globs.hideHUD();
-      mdShowAlert("Error", err, () {});
-    });
-  }
 }

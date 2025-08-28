@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
 import 'package:taxi_driver/common/globs.dart';
 import 'package:taxi_driver/common/service_call.dart';
 import 'package:taxi_driver/common_widget/line_text_field.dart';
 import 'package:taxi_driver/common_widget/round_button.dart';
+
+import '../../controller/authController.dart';
 
 class ChangePasswordView extends StatefulWidget {
   const ChangePasswordView({super.key});
@@ -54,26 +57,26 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
           padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 20),
           child: Column(
             children: [
-              LineTextField(
-                title: "Password",
-                hintText: "******",
-                controller: txtCurrentPassword,
-                obscureText: showCurrentPassword,
-                right: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        showCurrentPassword = !showCurrentPassword;
-                      });
-                    },
-                    icon: Image.asset(
-                      "assets/img/password_show.png",
-                      width: 25,
-                      height: 25,
-                    )),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
+              // LineTextField(
+              //   title: "Password",
+              //   hintText: "******",
+              //   controller: txtCurrentPassword,
+              //   obscureText: showCurrentPassword,
+              //   right: IconButton(
+              //       onPressed: () {
+              //         setState(() {
+              //           showCurrentPassword = !showCurrentPassword;
+              //         });
+              //       },
+              //       icon: Image.asset(
+              //         "assets/img/password_show.png",
+              //         width: 25,
+              //         height: 25,
+              //       )),
+              // ),
+              // const SizedBox(
+              //   height: 15,
+              // ),
               LineTextField(
                 title: "New Password",
                 hintText: "******",
@@ -129,10 +132,10 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   //TODO: Action
 
   void actionSubmit() {
-    if (txtCurrentPassword.text.isEmpty) {
-      mdShowAlert("error", "Please enter current password", () {});
-      return;
-    }
+    // if (txtCurrentPassword.text.isEmpty) {
+    //   mdShowAlert("error", "Please enter current password", () {});
+    //   return;
+    // }
     if (txtNewPassword.text.isEmpty) {
       mdShowAlert("error", "Please enter new password", () {});
       return;
@@ -145,11 +148,14 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
 
     endEditing();
 
-    apiChangePassword({
-      "old_password": txtCurrentPassword.text,
-      "new_password": txtNewPassword.text
+    Get.find<AuthController>().changePassword({
+      "id":Get.find<AuthController>().getUserID()??"",
+      "password":txtNewPassword.text.trim(),
+      "user_type" : "driver",
     });
   }
+
+
 
   //TODO: ApiCalling
 

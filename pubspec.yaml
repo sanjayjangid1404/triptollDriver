@@ -38,7 +38,7 @@ dependencies:
   fl_country_code_picker: ^0.1.9+1
   flutter_otp_text_field: ^1.1.1
   otp_timer_button: ^1.1.0
-  flutter_osm_plugin: ^1.4.1
+#  flutter_osm_plugin: ^1.4.1
   flutter_timer_countdown: ^1.0.7
   google_maps_flutter :
   fluro :
@@ -51,12 +51,15 @@ dependencies:
   location:
   flutter_rating_bar: ^4.0.1
   fl_chart: ^0.68.0
-  firebase_core: ^4.0.0
-  firebase_auth: ^6.0.0
+  firebase_core:
+  firebase_auth:
+  share_plus :
+  lottie:
   permission_handler:
   flutter_easyloading: ^3.0.5
   shared_preferences: ^2.2.2
   intl:
+  audioplayers: ^6.0.0
   firebase_messaging:
   cached_network_image: ^3.3.0
   flutter_local_notifications: ^19.4.0
@@ -64,6 +67,7 @@ dependencies:
   flutter_timezone: ^4.1.1
   http: ^1.1.2
   bloc: ^9.0.0
+  flutter_html:
   flutter_bloc: ^9.1.1
   equatable: ^2.0.5
   image_picker: ^1.0.5
@@ -77,7 +81,7 @@ dependencies:
   geolocator: ^14.0.2
   path_provider: ^2.1.2
   razorpay_flutter:
-
+  in_app_update :
 
 dev_dependencies:
   flutter_test:
@@ -104,6 +108,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/img/
+    - assets/
+    - assets/sounds/booking.mp3
+    - assets/lottie/success.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

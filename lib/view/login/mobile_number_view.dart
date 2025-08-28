@@ -29,6 +29,7 @@ class _MobileNumberViewState extends State<MobileNumberView> {
   TextEditingController txtMobile = TextEditingController();
   TextEditingController passwordMobile = TextEditingController();
   late CountryCode countryCode;
+  bool _obscureText = true;
 
   @override
   void initState() {
@@ -123,11 +124,24 @@ class _MobileNumberViewState extends State<MobileNumberView> {
               TextField(
                 controller: passwordMobile,
                 keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
+                obscureText: _obscureText,
+                decoration:  InputDecoration(
                   contentPadding: EdgeInsets.zero,
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   hintText: "Password",
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText; // toggle password visibility
+                      });
+                    },
+                  ),
+
                 ),
               ),
               const Divider(),

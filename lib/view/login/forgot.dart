@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -57,6 +58,7 @@ class _SignupState extends State<Forgot> {
       print(response.body);
 
       if (response.statusCode == 200) {
+        startTimer();
         final data = jsonDecode(response.body);
 
 
@@ -80,6 +82,37 @@ class _SignupState extends State<Forgot> {
 
     setState(() {
       isLoading = false;
+    });
+  }
+
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+  bool isOtpButtonEnabled = true; // by default enabled
+  int secondsRemaining = 0;
+  Timer? _timer;
+
+  void startTimer() {
+    setState(() {
+      isOtpButtonEnabled = false;
+      secondsRemaining = 30;
+    });
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (secondsRemaining > 1) {
+        setState(() {
+          secondsRemaining--;
+        });
+      } else {
+        timer.cancel();
+        setState(() {
+          isOtpButtonEnabled = true;
+          secondsRemaining = 0;
+        });
+      }
     });
   }
   @override
@@ -169,16 +202,16 @@ class _SignupState extends State<Forgot> {
                       borderRadius: BorderRadius.circular(4),
                     ),
 
-                    suffixIcon: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
+                    suffixIcon:
+                      Padding(
+                        padding: EdgeInsets.all(12.0),
                           child: GestureDetector(
-                            onTap: () {
+                            onTap:isOtpButtonEnabled
+                                ? () {
                               // TODO: Navigate to signup screen
 
                               if(phoneCt.text.isNotEmpty && phoneCt.text.length ==10) {
+                                startTimer();
                                 authController.forgetPassword({
                                   "user_type" : "driver",
                                   "login_id":phoneCt.text,
@@ -202,22 +235,20 @@ class _SignupState extends State<Forgot> {
                               else{
                                 showCustomSnackBar("Enter valid OTP");
                               }
-                            },
-                            child:  Text(
-                              "Get OTP",
+                            }:null,
+                            child: Text(
+                              isOtpButtonEnabled
+                                  ? "GET OTP"
+                                  : "Retry in $secondsRemaining s", // timer dikhega
                               style: TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: 'Roboto',
-                                  color: TColor.primary,
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.bold,
-                                  decorationColor: TColor.primary
+                                fontSize: 14,
+                                color: isOtpButtonEnabled ? Colors.green : Colors.grey,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+
 
                     contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10), // Adjust the vertical padding
                     hintText: "Mobile Number",

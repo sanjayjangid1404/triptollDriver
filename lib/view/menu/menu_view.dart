@@ -17,7 +17,9 @@ import 'package:taxi_driver/view/menu/summary_view.dart';
 import 'package:taxi_driver/view/menu/wallet_view.dart';
 import 'package:taxi_driver/view/user/user_my_rides_view.dart';
 
+import '../../common/appContants.dart';
 import '../../common_widget/setting_row.dart';
+import '../home/support/faq.dart';
 import '../login/bank_detail_view.dart';
 import '../login/document_upload_view.dart';
 import '../payment/payment_list.dart';
@@ -33,6 +35,14 @@ class MenuView extends StatefulWidget {
 }
 
 class _MenuViewState extends State<MenuView> {
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(
@@ -63,24 +73,29 @@ class _MenuViewState extends State<MenuView> {
                               color: Colors.white,
                             ),
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                "assets/img/question_mark.png",
-                                width: 20,
-                                height: 20,
-                                color: Colors.white,
-                              ),
-                              Text(
-                                "Help",
-                                style: TextStyle(
-                                  color: TColor.primaryTextW,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                          InkWell(
+                            onTap: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => FaqScreen(),));
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  "assets/img/question_mark.png",
+                                  width: 20,
+                                  height: 20,
+                                  color: Colors.white,
                                 ),
-                              )
-                            ],
+                                Text(
+                                  "Help",
+                                  style: TextStyle(
+                                    color: TColor.primaryTextW,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                )
+                              ],
+                            ),
                           )
                         ],
                       ),
@@ -106,7 +121,9 @@ class _MenuViewState extends State<MenuView> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(50),
-                                      child: Image.asset(
+                                      child:authController.driverInResponse!=null && authController.driverInResponse!.file_name!=null && authController.driverInResponse!.file_name!.isNotEmpty ?
+                                      Image.network("${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.file_name!}", width: 100,
+                                        height: 100,fit: BoxFit.cover,): Image.asset(
                                         "assets/img/u1.png",
                                         width: 100,
                                         height: 100,
@@ -132,7 +149,7 @@ class _MenuViewState extends State<MenuView> {
                                             width: 4,
                                           ),
                                            Text(
-                                              "4.89",
+                                             authController.driverInResponse!=null && authController.driverInResponse!.ratings!=null && authController.driverInResponse!.ratings!.isNotEmpty ?"${authController.driverInResponse!.ratings!}":"",
                                               style: TextStyle(
                                                 color: TColor.primaryText,
                                                 fontSize: 13,

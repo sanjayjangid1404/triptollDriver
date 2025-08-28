@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/custom_snackbar.dart';
@@ -38,6 +40,26 @@ class _SignUpViewState extends State<SignUpView> {
   bool _isPasswordVisible = false;
   CityResponse? selectedCategory;
   String OTP = "";
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+    await _picker.pickImage(source: ImageSource.gallery); // gallery ya camera
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  } Future<void> _pickImageCamera() async {
+    final XFile? pickedFile =
+    await _picker.pickImage(source: ImageSource.camera); // gallery ya camera
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -175,6 +197,38 @@ class _SignUpViewState extends State<SignUpView> {
                 const SizedBox(
                   height: 30,
                 ),
+
+                Center(
+                  child: Stack(
+                    children: [
+                      // Circular profile image
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.grey[300],
+                        backgroundImage:
+                        _image != null ? FileImage(_image!) : null, // show picked image
+                        child: _image == null
+                            ? Icon(Icons.person, size: 60, color: Colors.white)
+                            : null,
+                      ),
+                      // Edit button
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: _pickDocumentImage,
+                          child: CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.blue,
+                            child: Icon(Icons.edit, color: Colors.white, size: 20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 15,),
                 LineTextField(
                   title: "First name",
                   hintText: "Ex: Amit",
@@ -271,11 +325,17 @@ class _SignUpViewState extends State<SignUpView> {
                     Expanded(
                       child: TextField(
                         controller: txtMobile,
+
                         keyboardType: TextInputType.phone,
+                        maxLength: 10,
                         decoration:  InputDecoration(
                           contentPadding: EdgeInsets.symmetric(vertical: 12),
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,
+                          counter: SizedBox(),
+                          hintStyle: TextStyle(
+                            color: Colors.grey
+                          ),
                           hintText: "9876543210",
                           suffixIcon: InkWell(
                             onTap: isOtpButtonEnabled
@@ -467,6 +527,9 @@ class _SignUpViewState extends State<SignUpView> {
                     else if(!isSHowOTP ){
                       showCustomSnackBar("Verify mobile number");
                     }
+                    else if(_image==null){
+                      showCustomSnackBar("Please select self image");
+                    }
                     else {
 
                       /*first_name:vijay
@@ -487,7 +550,7 @@ otp:123456*/
                         "city_id":selectedCategory!.id.toString()
 
                       };
-                      authController.saveDriverBasicDetails(body);
+                      authController.saveDriverBasicDetails(body,_image);
                     }
 
 
@@ -503,5 +566,60 @@ otp:123456*/
         ),
       ),
     );
+  }
+
+  Future<void> _pickDocumentImage() async {
+    try {
+      print("Value=>${Get.find<AuthController>().isKyc()}");
+      if (!Get.find<AuthController>().isKyc()) {
+        // Bottom Sheet Open
+        showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (BuildContext ctx) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Wrap(
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ListTile(
+                    leading: const Icon(Icons.camera_alt, color: Colors.blue),
+                    title: const Text("Take Photo from Camera"),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      _pickImageCamera();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo, color: Colors.green),
+                    title: const Text("Choose from Gallery"),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      _pickImage();
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to pick image: ${e.toString()}')),
+      );
+    }
   }
 }

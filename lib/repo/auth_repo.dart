@@ -72,10 +72,10 @@ class AuthRepo{
     },[]);
   }
 
-  Future<Response> driverBasicInfo(body) async {
+  Future<Response> driverBasicInfo(body,List<MultipartBody> multipartBody) async {
 
     return await apiClient.postMultipartData(
-        AppContants.driverBasicInfoURL,body,[]);
+        AppContants.driverBasicInfoURL,body,multipartBody);
   }
 
   Future<Response> updateDriverBankDetail(body) async {
@@ -84,10 +84,22 @@ class AuthRepo{
         AppContants.updateDriverBankDetailURL,body,[]);
   }
 
+  Future<Response> ticketRez(body) async {
+
+    return await apiClient.postMultipartData(
+        AppContants.ticketRezURL,body,[]);
+  }
+
   Future<Response> getCity() async {
 
     return await apiClient.getData(
         AppContants.getCityURL);
+  }
+
+  Future<Response> driverFAQ() async {
+
+    return await apiClient.getData(
+        AppContants.driverFAQURl);
   }
 
   Future<Response> updateDriverKyc(body,List<MultipartBody> multipartBody) async {

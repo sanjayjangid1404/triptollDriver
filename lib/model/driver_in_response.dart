@@ -82,7 +82,8 @@ class DriverInResponse {
       String? uniqId, 
       dynamic ownerId, 
       String? categoryId, 
-      dynamic weight, 
+      String? file_name,
+      dynamic weight,
       dynamic vehicleId, 
       dynamic referralCode, 
       dynamic executiveCode, 
@@ -159,6 +160,7 @@ class DriverInResponse {
     _uniqId = uniqId;
     _ownerId = ownerId;
     _categoryId = categoryId;
+    _file_name = file_name;
     _weight = weight;
     _vehicleId = vehicleId;
     _referralCode = referralCode;
@@ -239,6 +241,7 @@ class DriverInResponse {
     _uniqId = json['uniq_id'];
     _ownerId = json['owner_id'];
     _categoryId = json['category_id'];
+    _file_name = json['file_name'];
     _weight = json['weight'];
     _vehicleId = json['vehicle_id'];
     _referralCode = json['referral_code'];
@@ -317,6 +320,7 @@ class DriverInResponse {
   String? _uniqId;
   dynamic _ownerId;
   String? _categoryId;
+  String? _file_name;
   dynamic _weight;
   dynamic _vehicleId;
   dynamic _referralCode;
@@ -394,6 +398,7 @@ DriverInResponse copyWith({  String? id,
   String? uniqId,
   dynamic ownerId,
   String? categoryId,
+  String? file_name,
   dynamic weight,
   dynamic vehicleId,
   dynamic referralCode,
@@ -471,6 +476,7 @@ DriverInResponse copyWith({  String? id,
   uniqId: uniqId ?? _uniqId,
   ownerId: ownerId ?? _ownerId,
   categoryId: categoryId ?? _categoryId,
+  file_name: file_name ?? _file_name,
   weight: weight ?? _weight,
   vehicleId: vehicleId ?? _vehicleId,
   referralCode: referralCode ?? _referralCode,
@@ -549,6 +555,7 @@ DriverInResponse copyWith({  String? id,
   String? get uniqId => _uniqId;
   dynamic get ownerId => _ownerId;
   String? get categoryId => _categoryId;
+  String? get file_name => _file_name;
   dynamic get weight => _weight;
   dynamic get vehicleId => _vehicleId;
   dynamic get referralCode => _referralCode;
@@ -629,6 +636,7 @@ DriverInResponse copyWith({  String? id,
     map['uniq_id'] = _uniqId;
     map['owner_id'] = _ownerId;
     map['category_id'] = _categoryId;
+    map['file_name'] = _file_name;
     map['weight'] = _weight;
     map['vehicle_id'] = _vehicleId;
     map['referral_code'] = _referralCode;

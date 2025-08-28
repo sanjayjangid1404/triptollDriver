@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
@@ -7,8 +8,10 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 // import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:lottie/lottie.dart' as ls;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/common/color_extension.dart';
@@ -24,7 +27,9 @@ import 'package:taxi_driver/view/home/tip_request_view.dart';
 import 'package:taxi_driver/view/menu/menu_view.dart';
 
 import '../../controller/authController.dart';
+import '../../main.dart';
 import '../../model/booking_notification_response.dart';
+import '../login/document_upload_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -33,7 +38,7 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   bool isOpen = true;
 
   bool isDriverOnline = false;
@@ -41,6 +46,9 @@ class _HomeViewState extends State<HomeView> {
   LatLng? _currentPosition;
   bool _isLoading = true;
   late Razorpay _razorpay;
+  late Razorpay _razorpay2;
+  bool isSheetOpen = false;
+   AnimationController? controller;
 
 
 
@@ -74,6 +82,35 @@ class _HomeViewState extends State<HomeView> {
 
 
 
+  Stream<BookingNotificationResponse?> bookingStream() {
+    return Stream.periodic(const Duration(seconds: 5)).asyncMap((_) async {
+      try {
+        print({
+          "driver_id":Get.find<AuthController>().getUserID()
+        });
+        final response = await http.post(
+          Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
+          body: jsonEncode({
+            "driver_id":Get.find<AuthController>().getUserID()
+          })
+        );
+
+        print("respnse=>${response.body}");
+
+
+        if (response.statusCode == 200) {
+          final json = jsonDecode(response.body);
+          if (json["status"] == true && json["bookings"] != null) {
+            return BookingNotificationResponse.fromJson(json["bookings"][0]);
+          }
+        }
+      } catch (e) {
+        print("Error: $e");
+      }
+      return null; // no new booking
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -86,18 +123,24 @@ class _HomeViewState extends State<HomeView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
 
 
+      controller = AnimationController(vsync: this);
       // configureBackgroundGeolocation();
       Get.find<AuthController>().incomeDriver();
       Get.find<AuthController>().driverOnlineTIme();
       Get.find<AuthController>().driverOnlineTotalTIme();
+      Get.find<AuthController>().getDriverFAQ();
 
       Get.find<AuthController>().driverInfo(context);
      // Get.find<AuthController>().getBookingNotification();
       _getCurrentLocation();
       _razorpay = Razorpay();
+      _razorpay2 = Razorpay();
       _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+      _razorpay2.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess2);
       _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+      _razorpay2.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError2);
       _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+      _razorpay2.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet2);
 
 
       setState(() {
@@ -127,13 +170,13 @@ class _HomeViewState extends State<HomeView> {
     // }
   }
 
+
+
   @override
   void dispose() {
-    // TODO: implement dispose
+    controller!.dispose();
     super.dispose();
-
   }
-
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
 
@@ -150,6 +193,31 @@ class _HomeViewState extends State<HomeView> {
       "amount":Get.find<AuthController>().getRegistrationFee().toString(),
       "transaction_id":response.paymentId.toString(),
       "payment_status":"success",
+      "type":"registration",
+    };
+
+    Get.find<AuthController>().updateDriverPaymentStatus(body);
+
+    // Navigate to success screen or process booking
+    // Get.to(ReviewBooking(data: bookingData));
+  }
+
+  void _handlePaymentSuccess2(PaymentSuccessResponse response) {
+
+    // Payment success logic
+    //Get.snackbar('Success', 'Payment ID: ${response.paymentId}');
+    print("✅ Payment Successful!");
+    print("Payment ID: ${response.paymentId}");
+    print("Order ID: ${response.orderId}");
+    print("Signature: ${response.signature}");
+    print("Signature: ${response.signature}");
+
+    var body = {
+      "driver_id":Get.find<AuthController>().getUserID().toString(),
+      "amount":Get.find<AuthController>().walletAmount.toString(),
+      "transaction_id":response.paymentId.toString(),
+      "payment_status":"success",
+      "type":"wallet",
     };
 
     Get.find<AuthController>().updateDriverPaymentStatus(body);
@@ -162,27 +230,66 @@ class _HomeViewState extends State<HomeView> {
     // Payment failure logic
       Get.snackbar('Error', 'Payment Fail');
 
+  }void _handlePaymentError2(PaymentFailureResponse response) {
+    // Payment failure logic
+      Get.snackbar('Error', 'Payment Fail');
+
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
     // External wallet logic
     Get.snackbar('External Wallet', '${response.walletName}');
+  }void _handleExternalWallet2(ExternalWalletResponse response) {
+    // External wallet logic
+    Get.snackbar('External Wallet', '${response.walletName}');
   }
 
   String generateOrderId() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var random = Random();
-    return (10000000 + random.nextInt(90000000)).toString(); // 8 digit random
+    String randomString = List.generate(14, (index) => chars[random.nextInt(chars.length)]).join();
+
+    return "order_$randomString";
   }
 
-  void _openRazorpayPayment() {
+  void _openRazorpayPayment(String id,amount) {
     String customOrderId = generateOrderId();
     print(customOrderId);
+    print(Get.find<AuthController>().getRegistrationFee()??"0");
     var options = {
-      'key': 'rzp_live_oG0h8ePD7JSECO',
+      'key': 'rzp_live_RAJBCQWCkgqpEb',
       'amount': (double.parse((Get.find<AuthController>().getRegistrationFee()??"0").toString()) * 100).round(), // Convert to paise
       'name': 'Triptoll',
       'description': 'Booking Payment',
-      'order_id': customOrderId, // custom 8 digit order id
+     'order_id': id, // custom 8 digit order id
+      'prefill': {
+        'contact': '${Get.find<AuthController>().getUserPhone().toString()}',
+        'email': 'tritoll@gmail.com'
+      },
+      'theme': {
+        'color': '#FF6B6B' // Your app theme color
+      }
+    };
+    print(options);
+
+    try {
+      _razorpay.open(options);
+
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+  }
+
+  void _openRazorpayWallet(String id,amount) {
+    String customOrderId = generateOrderId();
+    print(customOrderId);
+    print(Get.find<AuthController>().getRegistrationFee()??"0");
+    var options = {
+      'key': 'rzp_live_RAJBCQWCkgqpEb',
+      'amount': (double.parse((calculateRequiredPayment(Get.find<AuthController>().walletAmount)??"0").toString()) * 100).round(), // Convert to paise
+      'name': 'Triptoll',
+      'description': 'Booking Payment',
+      'order_id': id, // custom 8 digit order id
       'prefill': {
         'contact': '${Get.find<AuthController>().getUserPhone().toString()}',
         'email': 'tritoll@gmail.com'
@@ -193,16 +300,87 @@ class _HomeViewState extends State<HomeView> {
     };
 
     try {
-      _razorpay.open(options);
+      _razorpay2.open(options);
 
     } catch (e) {
       debugPrint('Error: $e');
+    }
+  }
+
+  Future<String?> createRazorpayOrderId({required int amount}) async {
+    const String keyId = 'rzp_live_RAJBCQWCkgqpEb';      // 🔑 Your Key ID
+    const String keySecret = 'DfWgvxPob2CSxM147onlshnF';  // 🔒 Your Key Secret (⚠️ sensitive!)
+
+    final String basicAuth = 'Basic ' + base64Encode(utf8.encode('$keyId:$keySecret'));
+
+    final url = Uri.parse('https://api.razorpay.com/v1/orders');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'authorization': basicAuth,
+      },
+      body: jsonEncode({
+        "amount": amount,     // amount in paise (₹500 = 50000)
+        "currency": "INR",
+        "receipt": "receipt_${DateTime.now().millisecondsSinceEpoch}"
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      print("data=>$data");
+
+      if(data["id"]!=null){
+        _openRazorpayPayment(data['id'].toString(),amount);
+      }
+      return data['id']; // <-- This is the order_id
+    } else {
+      print("Failed to create order: ${response.statusCode} ${response.body}");
+      return null;
+    }
+  }
+
+  Future<String?> createWalletOrderID({required int amount}) async {
+    const String keyId = 'rzp_live_RAJBCQWCkgqpEb';      // 🔑 Your Key ID
+    const String keySecret = 'DfWgvxPob2CSxM147onlshnF';  // 🔒 Your Key Secret (⚠️ sensitive!)
+
+    final String basicAuth = 'Basic ' + base64Encode(utf8.encode('$keyId:$keySecret'));
+
+    final url = Uri.parse('https://api.razorpay.com/v1/orders');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'authorization': basicAuth,
+      },
+      body: jsonEncode({
+        "amount": amount,     // amount in paise (₹500 = 50000)
+        "currency": "INR",
+        "receipt": "receipt_${DateTime.now().millisecondsSinceEpoch}"
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      print(data);
+
+      if(data["id"]!=null){
+        _openRazorpayWallet(data['id'].toString(),amount);
+      }
+      return data['id']; // <-- This is the order_id
+    } else {
+      print("Failed to create order: ${response.statusCode} ${response.body}");
+      return null;
     }
   }
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(
       builder: (AuthController authController) {
+        print((int.parse(authController.walletAmount.toString())<= -99) );
 
 
         // if(authController.runningOrderResponse!=null && authController.runningOrderResponse!.data!=null){
@@ -267,7 +445,7 @@ class _HomeViewState extends State<HomeView> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  authController.driverInResponse!=null ?   Padding(
+                  authController.driverInResponse!=null && authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: FullWidthDriverStatusSwitch(authController: authController),
                   ):SizedBox(),
@@ -424,7 +602,10 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
-                                      child: Image.asset(
+                                      child:authController.driverInResponse!=null && authController.driverInResponse!.file_name!=null && authController.driverInResponse!.file_name!.isNotEmpty ? 
+                                      Image.network("${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.file_name!}", width: 40,
+                                        height: 40,fit: BoxFit.cover,):
+                                      Image.asset(
                                         "assets/img/u1.png",
                                         width: 40,
                                         height: 40,
@@ -455,13 +636,84 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
 
+                    InkWell(
+                      onTap: (){
+                        _shareReferral();
+                      },
+                      child: Container(
+
+                        margin: EdgeInsets.symmetric(horizontal: 15),
+
+                        decoration: BoxDecoration(
+
+                          borderRadius: BorderRadius.circular(15),
+
+
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.asset("assets/img/refergif.gif"),
+                        )
+
+                        /*Row(
+                          children: [
+                            Expanded(
+                              child: ls.Lottie.asset(
+                                'assets/lottie/success.json',
+                                controller: controller,
+                                onLoaded: (comp) {
+                                  // कुल ड्यूरेशन सेट करके एक बार चलाएँ (या repeat भी कर सकते हैं)
+                                  controller!
+                                    ..duration = comp.duration
+                                    ..forward(); // एक बार प्ले
+                                   controller!.repeat();  // अगर लगातार चलाना हो
+                                },
+                                // साइज कंट्रोल
+                                width: 80,
+                                height: 100,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            Text("Refer And\nEarn",style: TextStyle(fontSize: 30,color: Colors.black,fontWeight: FontWeight.w800),textAlign: TextAlign.center,)
+                          ],
+                        ),*/
+                      ),
+                    ),
+
                   //  Text(authController.todayLoginTIme+" Hour Today Login Time",style: TextStyle(fontSize: 14,color: Colors.black.withOpacity(0.7),fontWeight: FontWeight.bold),)
                   ],
                 ),
               ),
 
-              authController.isPayment() ? authController.isKyc() ?  SizedBox():
+              authController.isPayment() ? authController.isKyc() ?(int.parse(authController.walletAmount.toString())>= -99)?   SizedBox():
               AlertDialog(
+                title: Text('Pay Wallet Amount'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Wallet Fee: ${AppContants.rupessSystem} ${authController.walletAmount}'),
+                    SizedBox(height: 10),
+                    Text('Please proceed to payment to complete your Wallet fee.'),
+                  ],
+                ),
+                actions: <Widget>[
+
+                  ElevatedButton(
+                    child: Text('Pay Now'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green, // Background color
+                    ),
+                    onPressed: () {
+
+                      createWalletOrderID(amount: (double.parse((calculateRequiredPayment(Get.find<AuthController>().walletAmount)??"0").toString()) * 100).round());
+                      // Handle payment logic here
+                     // _openRazorpayWallet();
+
+                    },
+                  ),
+                ],
+              ): AlertDialog(
                 title: Row(
                   children: [
                     Icon(Icons.warning, color: Colors.orange),
@@ -502,6 +754,23 @@ class _HomeViewState extends State<HomeView> {
                         ],
                       ),
                     ),
+                    SizedBox(height: 8),
+                    InkWell(
+                      onTap: (){
+                        context.push(
+                            DocumentUploadView(title: "Personal Document",id: authController.getUserID()??"",isEdit: true,));
+                      },
+                      child: Container(
+                        height: 30,
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),color: TColor.primary
+                        ),
+                        child: Text("Complete Now",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
+                      ),
+                    )
 
                   ],
                 ),
@@ -529,13 +798,34 @@ class _HomeViewState extends State<HomeView> {
                       backgroundColor: Colors.green, // Background color
                     ),
                     onPressed: () {
+
+
                       // Handle payment logic here
-                      _openRazorpayPayment();
+                      createRazorpayOrderId(amount: (double.parse((Get.find<AuthController>().getRegistrationFee()??"0").toString()) * 100).round());
+
 
                     },
                   ),
                 ],
-              )
+              ),
+
+              authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?   StreamBuilder<BookingNotificationResponse?>(
+                stream: bookingStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData &&
+                      snapshot.data != null &&
+                      !isSheetOpen) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      isSheetOpen = true;
+                      showRideDetailsSheet(snapshot.data!).then((_) {
+                        // reset so agle booking pe dobara open ho jaye
+                        isSheetOpen = false;
+                      });
+                    });
+                  }
+                  return const SizedBox.shrink();
+                },
+              ):SizedBox(),
             ],
           ),
                ),
@@ -543,32 +833,22 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  int calculateRequiredPayment(String? walletAmountStr) {
+    // null या invalid string handle करने के लिए
+    int walletAmount = int.tryParse(walletAmountStr ?? "0") ?? 0;
 
-  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const R = 6371.0; // Earth's radius in kilometers
-
-    // Convert degrees to radians
-    double dLat = _toRadians(lat2 - lat1);
-    double dLon = _toRadians(lon2 - lon1);
-
-    // Apply Haversine formula
-    double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_toRadians(lat1)) * cos(_toRadians(lat2)) *
-            sin(dLon / 2) * sin(dLon / 2);
-
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    double distance = R * c; // Distance in kilometers
-
-    return distance;
+    // अगर negative balance है तो उसका absolute value payment करना होगा
+    if (walletAmount < 0) {
+      return walletAmount.abs();
+    } else {
+      return 0; // positive या zero balance पर payment की जरूरत नहीं
+    }
   }
 
-  double _toRadians(double degree) {
-    return degree * (pi / 180);
-  }
-  // In your parent widget where you want to show the bottom sheet
-  void showRideDetailsSheet(BookingNotificationResponse notificationResponse,AuthController authController) {
-    showModalBottomSheet(
+  Future<void> showRideDetailsSheet(BookingNotificationResponse notificationResponse) async{
+   return  showModalBottomSheet(
       context: context,
+      isDismissible: false,
       isScrollControlled: true, // Allows the sheet to take up more space
       backgroundColor: Colors.transparent, // Makes the rounded corners visible
       builder: (context) => Container(
@@ -582,13 +862,20 @@ class _HomeViewState extends State<HomeView> {
         ),
         child: DraggableScrollableSheet(
           expand: false,
-          initialChildSize: 0.3, // Initial height (40% of screen)
+          shouldCloseOnMinExtent: false,
+          initialChildSize: 0.5, // Initial height (40% of screen)
           minChildSize: 0.3, // Minimum height when dragged down
           maxChildSize: 0.7, // Maximum height when dragged up
           builder: (context, scrollController) {
-            return SingleChildScrollView(
-              controller: scrollController,
-              child: _buildRideDetailsContent(notificationResponse,authController),
+            return  WillPopScope(
+              onWillPop: () async {
+                // ❌ back button से बंद नहीं होने देना
+                return false;
+              },
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: _buildRideDetailsContent(notificationResponse),
+              ),
             );
           },
         ),
@@ -596,41 +883,22 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  String referralCode = "12345678";
 
-  void showRunningDetailsSheet(Orders notificationResponse,AuthController authController) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allows the sheet to take up more space
-      backgroundColor: Colors.transparent, // Makes the rounded corners visible
-      builder: (context) => Container(
-        padding: const EdgeInsets.only(top: 20), // Space for the drag handle
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.3, // Initial height (40% of screen)
-          minChildSize: 0.3, // Minimum height when dragged down
-          maxChildSize: 0.7, // Maximum height when dragged up
-          builder: (context, scrollController) {
-            return SingleChildScrollView(
-              controller: scrollController,
-              child: _buildRunningDetailsContent(notificationResponse,authController),
-            );
-          },
-        ),
-      ),
-    );
+  _shareReferral() async {
+    // Play Store link with referral parameter
+    const String packageName = 'service.triptoll.in'; // Apna package name daalein
+    final String shareLink = 'https://play.google.com/store/apps/details?id=$packageName&referrer=$referralCode';
+
+    final String shareText = 'Check out this amazing app! Use my referral code: $referralCode\n\n$shareLink';
+
+    // Copy to clipboard
+
+
+    // Share using device's share dialog
+    await Share.share(shareText);
   }
-
-
-
-// The content of your bottom sheet (your original Column widget with slight modifications)
-  Widget _buildRideDetailsContent(BookingNotificationResponse bookingResponse,AuthController authController) {
+  Widget _buildRideDetailsContent(BookingNotificationResponse bookingResponse) {
     return Column(
       children: [
         // Drag handle indicator
@@ -672,29 +940,7 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            "assets/img/rate_tip.png",
-                            width: 15,
-                            height: 15,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            "5",
-                            style: TextStyle(
-                              color: TColor.secondaryText,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
               const SizedBox(height: 15),
@@ -702,23 +948,23 @@ class _HomeViewState extends State<HomeView> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Row(
                   children: [
-                  Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: TColor.secondary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Text(
-                      "${bookingResponse.pickupAddress ?? ""}",
-                      style: TextStyle(
-                        color: TColor.primaryText,
-                        fontSize: 15,
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: TColor.secondary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Text(
+                        "${bookingResponse.pickupAddress ?? ""}",
+                        style: TextStyle(
+                          color: TColor.primaryText,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
-                  ),
                   ],
                 ),
               ),
@@ -749,12 +995,14 @@ class _HomeViewState extends State<HomeView> {
                 children: [
                   InkWell(
                     onTap: () {
-                      Navigator.pop(context); // Close the bottom sheet
-                      authController.bookingStatusChange(
-                        status: "cancel",
-                        amount: bookingResponse.totalAmount,
-                        orderID: bookingResponse.orderId,
-                        cus_id:bookingResponse.cusId,
+                      stopRingtone();
+                      // Navigator.pop(context); // Close the bottom sheet
+                     Get.find<AuthController>().bookingStatusChange(
+                          status: "cancel",
+                          amount: bookingResponse.totalAmount,
+                          orderID: bookingResponse.orderId,
+                          cus_id:bookingResponse.cusId,
+                          value: 0
                       );
                     },
                     child: Container(
@@ -773,11 +1021,11 @@ class _HomeViewState extends State<HomeView> {
                     child: InkWell(
                       onTap: () {
                         Navigator.pop(context); // Close the bottom sheet
-                        authController.bookingStatusChange(
-                          status: "accept",
-                          amount: bookingResponse.totalAmount,
-                          orderID: bookingResponse.orderId,
-                          cus_id:bookingResponse.cusId,
+                        Get.find<AuthController>(). accpetBooking(
+
+                            orderID: bookingResponse.id,
+                            cus_id:bookingResponse.cusId,
+                            value: 0
                         );
                       },
                       child: Container(
@@ -835,6 +1083,64 @@ class _HomeViewState extends State<HomeView> {
       ],
     );
   }
+
+
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const R = 6371.0; // Earth's radius in kilometers
+
+    // Convert degrees to radians
+    double dLat = _toRadians(lat2 - lat1);
+    double dLon = _toRadians(lon2 - lon1);
+
+    // Apply Haversine formula
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(lat1)) * cos(_toRadians(lat2)) *
+            sin(dLon / 2) * sin(dLon / 2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double distance = R * c; // Distance in kilometers
+
+    return distance;
+  }
+
+  double _toRadians(double degree) {
+    return degree * (pi / 180);
+  }
+  // In your parent widget where you want to show the bottom sheet
+
+  void showRunningDetailsSheet(Orders notificationResponse,AuthController authController) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows the sheet to take up more space
+      backgroundColor: Colors.transparent, // Makes the rounded corners visible
+      builder: (context) => Container(
+        padding: const EdgeInsets.only(top: 20), // Space for the drag handle
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.3, // Initial height (40% of screen)
+          minChildSize: 0.3, // Minimum height when dragged down
+          maxChildSize: 0.7, // Maximum height when dragged up
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: _buildRunningDetailsContent(notificationResponse,authController),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+
+
+// The content of your bottom sheet (your original Column widget with slight modifications)
 
   Widget _buildRunningDetailsContent(Orders bookingResponse,AuthController authController) {
     return Column(
@@ -1143,9 +1449,10 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        _maxSlideDistance = constraints.maxWidth - 92; // 60 is thumb width
+        _maxSlideDistance = constraints.maxWidth - 160; // 60 is thumb width
 
         return GestureDetector(
+
           behavior: HitTestBehavior.translucent,
           onHorizontalDragStart: (details) {
             _dragStartX = details.globalPosition.dx;
@@ -1192,7 +1499,7 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
           child: Container(
             width: double.infinity,
             height: 60,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 50),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
               color: _isOnline ? TColor.primary : TColor.red,

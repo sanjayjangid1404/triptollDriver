@@ -81,7 +81,7 @@ Future<bool> onIosBackground() async {
 Future<void> playSoundInBackground() async {
   try {
     final player = AudioPlayer();
-    await player.setReleaseMode(ReleaseMode.loop);
+   // await player.setReleaseMode(ReleaseMode.loop);
 
     // Play sound for 15 seconds (adjust as needed)
     await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0);
@@ -130,8 +130,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Background message received: ${message.notification?.title}");
 
   // Sound play
-  final player = AudioPlayer();
-  await player.play(AssetSource("assets/sounds/booking.mp3"));
+
+  //await player.setReleaseMode(ReleaseMode.loop);
+
+  await player.play(AssetSource("sounds/booking.mp3"));
 
   // ✅ App open करने के लिए
   if (Platform.isAndroid) {
@@ -149,15 +151,15 @@ void _handleMessage(RemoteMessage message) {
 // Function to play sound in foreground
 Future<void> playSound() async {
   try {
-    final player = AudioPlayer();
+
     await player.setReleaseMode(ReleaseMode.loop);
     await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0);
 
     // Stop after 15 seconds (adjust as needed)
-    Future.delayed(Duration(seconds: 15), () async {
-      await player.stop();
-      await player.dispose();
-    });
+    // Future.delayed(Duration(seconds: 15), () async {
+    //   await player.stop();
+    //   await player.dispose();
+    // });
   } catch (e) {
     print("Error playing sound: $e");
   }
@@ -284,18 +286,40 @@ class MyApp extends StatefulWidget {
 
 class _MyApp extends State<MyApp> {
 
+  String? referralCode;
+  String? installedViaReferral;
+
+
+  @override
+  void dispose() {
+
+    super.dispose();
+  }
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
+
+
+
+
+
+  // Handle the deep link containing referral code
+
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
 
+
     AppContants.getToken();
      var initialzationSettingsAndroid =
     AndroidInitializationSettings('@mipmap/ic_launcher');
+
+     if(Get.find<AuthController>().isLoggedIn()){
+       Get.find<AuthController>().getBookingNotification(context);
+     }
 
     var initialzationSettingsIOS =
     DarwinInitializationSettings(

@@ -10,6 +10,11 @@ import 'package:taxi_driver/view/menu/change_password_view.dart';
 import 'package:taxi_driver/view/menu/contact_us_view.dart';
 import 'package:taxi_driver/view/menu/my_profile_view.dart';
 import 'package:taxi_driver/view/menu/my_vehicle_view.dart';
+import 'package:taxi_driver/view/page/refund.dart';
+import 'package:taxi_driver/view/page/terms_and_condition.dart';
+
+import '../page/privacy.dart';
+import '../page/shipping.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -71,27 +76,30 @@ class _SettingsViewState extends State<SettingsView> {
               SettingRow(
                   title: "Terms & Conditions",
                   icon: "assets/img/sm_document.png",
-                  onPressed: () {}),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => TermsAndCondition(),));
+                  }),
               SettingRow(
                   title: "Privacy Policies",
                   icon: "assets/img/sm_document.png",
-                  onPressed: () {}),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => PrivacyPolicyPage(),));
+                  }),
+
               SettingRow(
-                  title: "About",
-                  icon: "assets/img/sm_document.png",
-                  onPressed: () {}),
-              SettingRow(
-                  title: "Contact us",
+                  title: "Refund Policy",
                   icon: "assets/img/sm_profile.png",
                   onPressed: () {
-                    context.push(const ContactUsView());
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Refund(),));
                   }),
+
               SettingRow(
-                  title: "Supports",
+                  title: "Shipping Policy",
                   icon: "assets/img/sm_profile.png",
                   onPressed: () {
-                   // context.push(const SupportListView());
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Shipping(),));
                   }),
+
             ],
           ),
         ):SizedBox(),
