@@ -45,7 +45,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
   String editfuelType = "";
 
   String rcBackImage = "";
-  List<String>fuelType = ["Petrol","Diesel","Electric","CNG"];
+  List<String>fuelType = ["Petrol","Diesel","Electric","CNG","EV"];
   final VehicleImages _images = VehicleImages();
   final ImagePicker _picker = ImagePicker();
 
@@ -86,15 +86,14 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
       Get.find<AuthController>().getAllVehicleData();
 
       if(Get.find<AuthController>().driverInResponse!=null){
-
-        vehicleModelCt.text = Get.find<AuthController>().driverInResponse!.model??"";
+        vehicleModelCt.text = Get.find<AuthController>().driverInResponse!.vehicleType??"";
         vehicleNumberCt.text = Get.find<AuthController>().driverInResponse!.vehicleNumber??"";
         rcNumberCt.text = Get.find<AuthController>().driverInResponse!.rcNo??"";
         editCategoryName = Get.find<AuthController>().driverInResponse!.categoryName??"";
         editfuelType = Get.find<AuthController>().driverInResponse!.vehicleType??"";
         editCategoryID = Get.find<AuthController>().driverInResponse!.categoryId??"";
         editRegistrationFees = Get.find<AuthController>().driverInResponse!.registrationFees??"0";
-        selectedFuel = Get.find<AuthController>().driverInResponse!.vehicleType??null;
+        selectedFuel = Get.find<AuthController>().driverInResponse!.vehicleType?? 'Petrol';
         rcforntImage = AppContants.imageURL+"/uploaded_files/id_proof_img/"+(Get.find<AuthController>().driverInResponse!.rcFrontImg??"");
         rcBackImage = AppContants.imageURL+"/uploaded_files/id_proof_back_img/"+(Get.find<AuthController>().driverInResponse!.rcBackImg??"");
 

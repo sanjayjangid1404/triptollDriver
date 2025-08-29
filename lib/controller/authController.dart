@@ -46,7 +46,7 @@ import '../view/home/order/category_list_page.dart';
 import '../view/home/tip_request_view.dart';
 import '../view/login/document_upload_view.dart';
 
-
+import 'package:http/http.dart' as http;
 
 class AuthController extends GetxController implements GetxService
 {
@@ -2014,15 +2014,29 @@ class AuthController extends GetxController implements GetxService
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      "${calculateDistance(double.parse(bookingResponse.pickupLat??"0"),double.parse(bookingResponse.pickupLong??"0"),double.parse(bookingResponse.dropLat??"0"),double.parse(bookingResponse.dropLong??"0")).toStringAsFixed(2)}  KM",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: TColor.secondaryText,
-                        fontSize: 18,
+                    child: FutureBuilder<Map<String, dynamic>>(
+                      future: calculateDistance(
+                        double.parse(bookingResponse.pickupLat ?? "0"),
+                        double.parse(bookingResponse.pickupLong ?? "0"),
+                        double.parse(bookingResponse.dropLat ?? "0"),
+                        double.parse(bookingResponse.dropLong ?? "0"),
                       ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Text("Calculating...", textAlign: TextAlign.center, style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                        } else if (snapshot.hasError) {
+                          return Text( "Error: ${snapshot.error}", textAlign: TextAlign.center, style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                        } else {
+                          final chosen = snapshot.data!['chosen'];
+                          final km = (chosen['distanceValue'] as int) / 1000.0;
+                          final duration = chosen['durationText'];
+                          return Text("${km.toStringAsFixed(2)} KM • $duration",
+                              textAlign: TextAlign.center, style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                        }
+                      },
                     ),
                   ),
+
 
                 ],
               ),
@@ -2239,13 +2253,26 @@ class AuthController extends GetxController implements GetxService
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      "${calculateDistance(double.parse(bookingResponse.pickupLat??"0"),double.parse(bookingResponse.pickupLong??"0"),double.parse(bookingResponse.dropLat??"0"),double.parse(bookingResponse.dropLong??"0")).toStringAsFixed(2)}  KM",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: TColor.secondaryText,
-                        fontSize: 18,
+                    child: FutureBuilder<Map<String, dynamic>>(
+                      future: calculateDistance(
+                        double.parse(bookingResponse.pickupLat ?? "0"),
+                        double.parse(bookingResponse.pickupLong ?? "0"),
+                        double.parse(bookingResponse.dropLat ?? "0"),
+                        double.parse(bookingResponse.dropLong ?? "0"),
                       ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Text("Calculating...", textAlign: TextAlign.center, style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                        } else if (snapshot.hasError) {
+                          return Text(  "Error: ${snapshot.error}", textAlign: TextAlign.center, style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                        } else {
+                          final chosen = snapshot.data!['chosen'];
+                          final km = (chosen['distanceValue'] as int) / 1000.0;
+                          final duration = chosen['durationText'];
+                          return Text("${km.toStringAsFixed(2)} KM • $duration",
+                              textAlign: TextAlign.center, style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                        }
+                      },
                     ),
                   ),
                   /*Expanded(
@@ -2553,23 +2580,90 @@ class AuthController extends GetxController implements GetxService
     }
   }
 
-  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const R = 6371.0; // Earth's radius in kilometers
+  // double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  //   const R = 6371.0; // Earth's radius in kilometers
+  //
+  //   // Convert degrees to radians
+  //   double dLat = _toRadians(lat2 - lat1);
+  //   double dLon = _toRadians(lon2 - lon1);
+  //
+  //   // Apply Haversine formula
+  //   double a = sin(dLat / 2) * sin(dLat / 2) +
+  //       cos(_toRadians(lat1)) * cos(_toRadians(lat2)) *
+  //           sin(dLon / 2) * sin(dLon / 2);
+  //
+  //   double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  //   double distance = R * c; // Distance in kilometers
+  //
+  //   return distance;
+  // }
+  Future<Map<String, dynamic>> calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) async {
+    const apiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk";
 
-    // Convert degrees to radians
-    double dLat = _toRadians(lat2 - lat1);
-    double dLon = _toRadians(lon2 - lon1);
+    final url =
+    Uri.parse("https://routes.googleapis.com/directions/v2:computeRoutes");
 
-    // Apply Haversine formula
-    double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_toRadians(lat1)) * cos(_toRadians(lat2)) *
-            sin(dLon / 2) * sin(dLon / 2);
+    final headers = {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": apiKey,
+      "X-Goog-FieldMask": "routes.distanceMeters,routes.duration"
+    };
 
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    double distance = R * c; // Distance in kilometers
+    final body = jsonEncode({
+      "origin": {
+        "location": {
+          "latLng": {"latitude": lat1, "longitude": lon1}
+        }
+      },
+      "destination": {
+        "location": {
+          "latLng": {"latitude": lat2, "longitude": lon2}
+        }
+      },
+      "travelMode": "DRIVE"
+    });
 
-    return distance;
+    print("➡️ Sending request to $url");
+    print("➡️ Headers: $headers");
+    print("➡️ Body: $body");
+
+    final response = await http.post(url, headers: headers, body: body);
+
+    print("⬅️ Status Code: ${response.statusCode}");
+    print("⬅️ Response Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data["routes"] != null && data["routes"].isNotEmpty) {
+        final route = data["routes"][0];
+        final distance = route["distanceMeters"];
+        final durationRaw = route["duration"]; // e.g. "5234s"
+
+        // convert seconds → readable format
+        int seconds = int.tryParse(durationRaw.replaceAll("s", "")) ?? 0;
+        int hours = seconds ~/ 3600;
+        int minutes = (seconds % 3600) ~/ 60;
+        String durationText =
+        hours > 0 ? "${hours}h ${minutes}m" : "${minutes}m";
+
+        return {
+          "chosen": {
+            "distanceValue": distance,
+            "durationText": durationText,
+          }
+        };
+      } else {
+        throw Exception("No route found in response: $data");
+      }
+    } else {
+      throw Exception("Failed: ${response.statusCode} - ${response.body}");
+    }
   }
+
+
+
 
   double _toRadians(double degree) {
     return degree * (pi / 180);

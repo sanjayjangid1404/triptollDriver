@@ -809,7 +809,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 ],
               ),
 
-              authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?   StreamBuilder<BookingNotificationResponse?>(
+              authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?
+              StreamBuilder<BookingNotificationResponse?>(
                 stream: bookingStream(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData &&
@@ -884,7 +885,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   }
 
   String referralCode = "12345678";
-
+  double? roadDistance;
   _shareReferral() async {
     // Play Store link with referral parameter
     const String packageName = 'service.triptoll.in'; // Apna package name daalein
@@ -930,17 +931,56 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+                  // Expanded(
+                  //   child: Text(
+                  //     "${calculateDistance(double.parse(bookingResponse.pickupLat??"0"),double.parse(bookingResponse.pickupLong??"0"),double.parse(bookingResponse.dropLat??"0"),double.parse(bookingResponse.dropLong??"0")).toStringAsFixed(2)}  KM",
+                  //     textAlign: TextAlign.center,
+                  //     style: TextStyle(
+                  //       color: TColor.secondaryText,
+                  //       fontSize: 18,
+                  //     ),
+                  //   ),
+                  // ),
                   Expanded(
-                    child: Text(
-                      "${calculateDistance(double.parse(bookingResponse.pickupLat??"0"),double.parse(bookingResponse.pickupLong??"0"),double.parse(bookingResponse.dropLat??"0"),double.parse(bookingResponse.dropLong??"0")).toStringAsFixed(2)}  KM",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: TColor.secondaryText,
-                        fontSize: 18,
+                    child: FutureBuilder<double>(
+                      future: calculateDistance(
+                        double.parse(bookingResponse.pickupLat ?? "0"),
+                        double.parse(bookingResponse.pickupLong ?? "0"),
+                        double.parse(bookingResponse.dropLat ?? "0"),
+                        double.parse(bookingResponse.dropLong ?? "0"),
                       ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Text(
+                            "Calculating...",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: TColor.secondaryText,
+                              fontSize: 18,
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text(
+                            "Error: ${snapshot.error}",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: TColor.secondaryText,
+                              fontSize: 18,
+                            ),
+                          );
+                        } else {
+                          return Text(
+                            "${snapshot.data!.toStringAsFixed(2)} KM",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: TColor.secondaryText,
+                              fontSize: 18,
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ),
-
                 ],
               ),
               const SizedBox(height: 15),
@@ -1085,23 +1125,66 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   }
 
 
-  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const R = 6371.0; // Earth's radius in kilometers
+  // double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  //   const R = 6371.0; // Earth's radius in kilometers
+  //
+  //   // Convert degrees to radians
+  //   double dLat = _toRadians(lat2 - lat1);
+  //   double dLon = _toRadians(lon2 - lon1);
+  //
+  //   // Apply Haversine formula
+  //   double a = sin(dLat / 2) * sin(dLat / 2) +
+  //       cos(_toRadians(lat1)) * cos(_toRadians(lat2)) *
+  //           sin(dLon / 2) * sin(dLon / 2);
+  //
+  //   double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  //   double distance = R * c; // Distance in kilometers
+  //
+  //   return distance;
+  // }
+  Future<double> calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) async {
+    const apiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk"; // ⚠️ replace with your actual key
 
-    // Convert degrees to radians
-    double dLat = _toRadians(lat2 - lat1);
-    double dLon = _toRadians(lon2 - lon1);
+    final url = Uri.parse("https://routes.googleapis.com/directions/v2:computeRoutes");
 
-    // Apply Haversine formula
-    double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_toRadians(lat1)) * cos(_toRadians(lat2)) *
-            sin(dLon / 2) * sin(dLon / 2);
+    final headers = {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": apiKey,
+      "X-Goog-FieldMask":
+      "routes.distanceMeters,routes.duration" // we only fetch what we need
+    };
 
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    double distance = R * c; // Distance in kilometers
+    final body = jsonEncode({
+      "origin": {
+        "location": {
+          "latLng": {"latitude": lat1, "longitude": lon1}
+        }
+      },
+      "destination": {
+        "location": {
+          "latLng": {"latitude": lat2, "longitude": lon2}
+        }
+      },
+      "travelMode": "DRIVE"
+    });
 
-    return distance;
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data["routes"] != null && data["routes"].isNotEmpty) {
+        int meters = data["routes"][0]["distanceMeters"];
+        return meters / 1000.0; // ✅ KM
+      } else {
+        throw Exception("No route found");
+      }
+    } else {
+      throw Exception("Failed to fetch data: ${response.statusCode} - ${response.body}");
+    }
   }
+
 
   double _toRadians(double degree) {
     return degree * (pi / 180);
@@ -1174,14 +1257,54 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+                  // Expanded(
+                  //   child: Text(
+                  //     "${calculateDistance(double.parse(bookingResponse.pickupLat??"0"),double.parse(bookingResponse.pickupLong??"0"),double.parse(bookingResponse.dropLat??"0"),double.parse(bookingResponse.dropLong??"0")).toStringAsFixed(2)}  KM",
+                  //     textAlign: TextAlign.center,
+                  //     style: TextStyle(
+                  //       color: TColor.secondaryText,
+                  //       fontSize: 18,
+                  //     ),
+                  //   ),
+                  // ),
                   Expanded(
-                    child: Text(
-                      "${calculateDistance(double.parse(bookingResponse.pickupLat??"0"),double.parse(bookingResponse.pickupLong??"0"),double.parse(bookingResponse.dropLat??"0"),double.parse(bookingResponse.dropLong??"0")).toStringAsFixed(2)}  KM",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: TColor.secondaryText,
-                        fontSize: 18,
+                    child: FutureBuilder<double>(
+                      future: calculateDistance(
+                        double.parse(bookingResponse.pickupLat ?? "0"),
+                        double.parse(bookingResponse.pickupLong ?? "0"),
+                        double.parse(bookingResponse.dropLat ?? "0"),
+                        double.parse(bookingResponse.dropLong ?? "0"),
                       ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Text(
+                            "Calculating...",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: TColor.secondaryText,
+                              fontSize: 18,
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text(
+                            "Error: ${snapshot.error}",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: TColor.secondaryText,
+                              fontSize: 18,
+                            ),
+                          );
+                        } else {
+                          return Text(
+                            "${snapshot.data!.toStringAsFixed(2)} KM",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: TColor.secondaryText,
+                              fontSize: 18,
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ),
                   Expanded(

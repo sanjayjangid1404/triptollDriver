@@ -35,7 +35,7 @@
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
         <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBp3l_492Np2ZZjt__kZShZRtWsptF87BQ"/>
+            android:value="AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk"/>
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
             android:foregroundServiceType="location"
