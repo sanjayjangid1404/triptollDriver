@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/globs.dart';
 import 'package:taxi_driver/common/service_call.dart';
@@ -302,20 +303,25 @@ class _MenuViewState extends State<MenuView> {
                         onPressed: () {
                           context.push(const SettingsView());
                         }),
-                    MenuRow(
-                        title: "Notifications",
-                        icon: "assets/img/notification.png",
-                        onPressed: () {
-
-                        }),
+                    // MenuRow(
+                    //     title: "Notifications",
+                    //     icon: "assets/img/notification.png",
+                    //     onPressed: () {
+                    //
+                    //     }),
 
                     MenuRow(
                         title: "Logout",
                         icon: "assets/img/logout.png",
-                        onPressed: () {
-
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          prefs.clear();
                           Globs.udBoolSet(false, Globs.userLogin);
                           Globs.udSet({}, Globs.userPayload);
+                          authController.changeLoginStatus(
+                            status: "offline",
+                            context: context,
+                          );
                           Get.find<AuthController>().logoutUser();
 
                          // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const WelcomeView() ) , (route) => false);

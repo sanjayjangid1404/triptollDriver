@@ -69,7 +69,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Frequently Asked Questions",
+                      "Triptoll Help Desk",
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
               SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  "Triptoll was founded in Aug 2024 by Mr. M.S. Duhan and Mr. Virendra Tripathy. we are a trusted and reliable logistics delivery service provider, dedicated to making your relocation experience smooth, efficient, and stress-free. ",
+                  "Triptoll was founded in Aug 2024. we are a trusted and reliable logistics delivery service provider, dedicated to making your relocation experience smooth, efficient, and stress-free. ",
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[700],

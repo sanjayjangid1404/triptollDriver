@@ -20,6 +20,7 @@ import 'package:taxi_driver/model/booking_details_response.dart';
 import 'package:taxi_driver/model/booking_list_response.dart';
 import 'package:taxi_driver/model/booking_notification_response.dart';
 import 'package:taxi_driver/model/driver_in_response.dart';
+import 'package:taxi_driver/model/payment_history_model.dart';
 import 'package:taxi_driver/view/home/home_view.dart';
 import 'package:taxi_driver/view/login/bank_detail_view.dart';
 import 'package:taxi_driver/view/login/mobile_number_view.dart';
@@ -37,12 +38,14 @@ import '../common/globs.dart';
 import '../model/category_type_response.dart' hide Data;
 import '../model/city_response.dart';
 import '../model/faq_driver_response.dart';
+import '../model/missed_order_list_model.dart';
 import '../model/running_order_response.dart';
 import '../model/subCategoryVehicle.dart' hide Data;
 import '../model/vehicle_data.dart' hide Data;
 import '../model/wallet_response.dart';
 import '../repo/auth_repo.dart';
 import '../view/home/order/category_list_page.dart';
+import '../view/home/support/faq.dart';
 import '../view/home/tip_request_view.dart';
 import '../view/login/document_upload_view.dart';
 
@@ -51,8 +54,13 @@ import 'package:http/http.dart' as http;
 class AuthController extends GetxController implements GetxService
 {
 
-  AuthRepo authRepo;
 
+  DateTime? onlineStartTime;
+  Duration totalOnlineDuration = Duration.zero;
+  String time = '0 h 0 m';
+
+
+  AuthRepo authRepo;
   AuthController({required this.authRepo});
   bool isLoading = false;
   bool isBookingProcess = false;
@@ -933,7 +941,6 @@ class AuthController extends GetxController implements GetxService
     isUploading = true;
 
     update();
-    print(adhaarF!.path);
 
 
 
@@ -1114,6 +1121,7 @@ class AuthController extends GetxController implements GetxService
   }
 
   List<CityResponse>  cityResponse = [];
+  List<PaymentHistoryModel>  paymentResponse = [];
   Future<void>getCity()
   async {
 
@@ -1154,6 +1162,44 @@ class AuthController extends GetxController implements GetxService
     }
 
     isUploading = false;
+    Globs.hideHUD();
+    update();
+
+
+
+  }
+
+  Future<void>getPaymentList(body)
+  async {
+    Response response = await authRepo.paymentHistoryRepo(body);
+    paymentResponse = [];
+
+  //  LoginResponse? loginResponse;
+
+    if(response.statusCode==200 || response.statusCode ==400)
+    {
+
+
+      for(int i=0; i<response.body.length; i++){
+        paymentResponse.add(PaymentHistoryModel.fromJson(response.body[i]));
+      }
+
+
+      update();
+
+
+
+
+
+
+
+
+
+    }
+    else {
+
+
+    }
     Globs.hideHUD();
     update();
 
@@ -1690,6 +1736,7 @@ class AuthController extends GetxController implements GetxService
   bool getAllBookingLoading = false;
 
   List<BookingListResponse>bookingListResponse = [];
+  List<MissedOrderListModel> missedOrderListModel = [];
 
   Future<void>getAllBooking({String? status,String? limit,String? offset})
   async {
@@ -1738,9 +1785,34 @@ class AuthController extends GetxController implements GetxService
 
 
   }
+  Future<void>getMissedOrder(body)
+  async {
+    Response response = await authRepo.missedOrderRepo(body);
+    missedOrderListModel = [];
+    if(response.statusCode==200 || response.statusCode ==400)
+    {
+      for(int i=0; i<response.body.length; i++){
+        missedOrderListModel.add(MissedOrderListModel.fromJson(response.body[i]));
+      }
 
+
+      update();
+
+
+    }
+    else {
+
+
+    }
+    Globs.hideHUD();
+    update();
+
+
+
+  }
   bool isBookingDetails = false;
   BookingDetailsResponse? bookingDetailsResponse = BookingDetailsResponse();
+  PaymentHistoryModel? paymentHistoryModel = PaymentHistoryModel();
   Future<void>getBookingDetails({String? bookingID,String? driverLat,String? driverLng})
   async {
 
@@ -1797,8 +1869,6 @@ class AuthController extends GetxController implements GetxService
 
 
   }
-
-
 
 
 
@@ -2205,35 +2275,50 @@ class AuthController extends GetxController implements GetxService
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const CircleAvatar(
-                      radius: 30,
-                      backgroundImage: NetworkImage('https://randomuser.me/api/portraits/men/1.jpg'),
-                    ),
-                    const SizedBox(width: 15),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(
-                          '${bookingResponse.senderName}',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        const CircleAvatar(
+                          radius: 30,
+                          backgroundImage: NetworkImage('https://randomuser.me/api/portraits/men/1.jpg'),
                         ),
-                        InkWell(
-                          onTap: (){
-                            AppContants.makePhoneCall(bookingResponse.senderContactNumber.toString());
+                        const SizedBox(width: 15),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${bookingResponse.senderName}',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            InkWell(
+                              onTap: (){
+                                AppContants.makePhoneCall(bookingResponse.senderContactNumber.toString());
 
-                          },
-                          child: Row(
-                            children: [
-                              Icon(Icons.call_outlined, color: Colors.blue, size: 16),
-                              const SizedBox(width: 5),
-                               Text('${bookingResponse.senderContactNumber}'),
-                            ],
-                          ),
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(Icons.call_outlined, color: Colors.blue, size: 16),
+                                  const SizedBox(width: 5),
+                                  Text('${bookingResponse.senderContactNumber}'),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-
+                    InkWell(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => FaqScreen(),));
+                      },
+                      child: Image.asset('assets/img/help.png',
+                        height: 40,
+                      ),
+                    )
                   ],
                 ),
               ),

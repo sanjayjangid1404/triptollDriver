@@ -149,6 +149,16 @@ class AuthRepo{
 
     });
   }
+  Future<Response> paymentHistoryRepo(body) async {
+    print("call:::::::::::::::::::");
+    return await apiClient.postMultipartData(
+        AppContants.getPaymentHistoryUrl,body,[]);
+  }
+  Future<Response> missedOrderRepo(body) async {
+    print("call:::::::::::::::::::");
+    return await apiClient.postMultipartData(
+        AppContants.getMissedOrdersUrl,body,[]);
+  }
 
   Future<Response> orderPicked({String? userID,String? bookingId}) async {
     print("call");

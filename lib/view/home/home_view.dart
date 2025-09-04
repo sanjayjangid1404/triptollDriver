@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -149,7 +150,11 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
     });
     isDriverOnline = Globs.udValueBool("is_online");
-
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (isDriverOnline) {
+        setState(() {});
+      }
+    });
     // if (ServiceCall.userType == 2) {
     //   LocationHelper.shared().startInit();
     //
@@ -171,7 +176,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   }
 
 
-
+  Timer? _timer;
   @override
   void dispose() {
     controller!.dispose();
@@ -235,7 +240,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       Get.snackbar('Error', 'Payment Fail');
 
   }
-
+  AuthController authController  = Get.find<AuthController>();
   void _handleExternalWallet(ExternalWalletResponse response) {
     // External wallet logic
     Get.snackbar('External Wallet', '${response.walletName}');
@@ -534,7 +539,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               ),
                               Expanded(
                                 child: IconTitleSubtitleButton(
-                                    title: authController.todayLoginTIme+" H",
+                                    // title: authController.todayLoginTIme+" H",
+                                    title: authController.time.toString(),
                                     subtitle: "Today Online",
                                     icon: "assets/img/cancelleation.png",
                                     onPressed: () {}),
@@ -1144,7 +1150,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   // }
   Future<double> calculateDistance(
       double lat1, double lon1, double lat2, double lon2) async {
-    const apiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk"; // ⚠️ replace with your actual key
+    const apiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk";
 
     final url = Uri.parse("https://routes.googleapis.com/directions/v2:computeRoutes");
 
@@ -1152,7 +1158,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey,
       "X-Goog-FieldMask":
-      "routes.distanceMeters,routes.duration" // we only fetch what we need
+      "routes.distanceMeters,routes.duration"
     };
 
     final body = jsonEncode({
@@ -1536,38 +1542,127 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
   @override
   void initState() {
     super.initState();
-    _isOnline = widget.authController.driverInResponse?.loginStatus.toString() == "online";
+    loadStoredData().then((_) {
+      setState(() {
+        widget.authController.time = _formatDuration();
+      });
+    });
+
+    _isOnline =
+        widget.authController.driverInResponse?.loginStatus.toString() ==
+            "online";
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
     _animationController.value = _isOnline ? 1.0 : 0.0;
     _thumbPosition = _isOnline ? _maxSlideDistance : 0.0;
-  }
 
+    if (_isOnline) {
+      widget.authController.onlineStartTime = DateTime.now(); // start tracking if already online
+    }
+    widget.authController.time = _formatDuration();
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (_isOnline) {
+        setState(() {
+        widget.authController.time = _formatDuration();
+      });
+      }
+    });
+  }
+  Timer? _timer;
   @override
   void dispose() {
+    _timer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
 
-  void _toggleStatus(bool newStatus) {
+  Future<void> loadStoredData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final seconds = prefs.getInt('online_seconds') ?? 0;
+    final startMillis = prefs.getInt('online_startTime');
+    final lastSavedDate = prefs.getString('last_saved_date');
+
+    final today = DateTime.now().toIso8601String().split("T").first;
+
+    if (lastSavedDate != today) {
+      // ✅ नया दिन → reset
+      await prefs.setInt('online_seconds', 0);
+      await prefs.setString('last_saved_date', today);
+
+      setState(() {
+        widget.authController.totalOnlineDuration = Duration.zero;
+        widget.authController.onlineStartTime = null;
+        widget.authController.time = "0 h 0 m";
+      });
+    } else {
+      // ✅ पुराना दिन → continue
+      setState(() {
+        widget.authController.totalOnlineDuration = Duration(seconds: seconds);
+        if (startMillis != null) {
+          widget.authController.onlineStartTime =
+              DateTime.fromMillisecondsSinceEpoch(startMillis);
+        }
+        widget.authController.time = _formatDuration();
+      });
+    }
+  }
+
+  Future<void> saveStoredData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+        'online_seconds', widget.authController.totalOnlineDuration.inSeconds);
+
+    if (widget.authController.onlineStartTime != null) {
+      await prefs.setInt('online_startTime',
+          widget.authController.onlineStartTime!.millisecondsSinceEpoch);
+    } else {
+      await prefs.remove('online_startTime');
+    }
+    await prefs.setString(
+        'last_saved_date', DateTime.now().toIso8601String().split("T").first);
+  }
+
+  void _toggleStatus(bool newStatus) async {
     setState(() {
       _isOnline = newStatus;
+
       if (newStatus) {
+        // Going Online
         _animationController.forward();
         _thumbPosition = _maxSlideDistance;
+        widget.authController.onlineStartTime = DateTime.now();
+        saveStoredData();   // ✅ start time भी save होगा
       } else {
+        // Going Offline
+        if (widget.authController.onlineStartTime != null) {
+          final session = DateTime.now().difference(widget.authController.onlineStartTime!);
+          widget.authController.totalOnlineDuration += session;
+        }
+        widget.authController.onlineStartTime = null;
+        saveStoredData();   // ✅ total duration save होगा
         _animationController.reverse();
         _thumbPosition = 0.0;
       }
+
       widget.authController.changeLoginStatus(
         status: newStatus ? "online" : "offline",
         context: context,
       );
     });
   }
+  String _formatDuration() {
+    Duration total = widget.authController.totalOnlineDuration;
 
+    if (_isOnline && widget.authController.onlineStartTime != null) {
+      total += DateTime.now().difference(widget.authController.onlineStartTime!);
+    }
+
+    final hours = total.inHours;
+    final minutes = total.inMinutes.remainder(60);
+    return "$hours h $minutes m";
+  }
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -1669,6 +1764,7 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
                         ),
                         child: Center(
                           child: Text(
+                            // _formatDuration(),
                             _isOnline ? "ON" : "OFF",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,

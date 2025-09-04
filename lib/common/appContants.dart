@@ -71,6 +71,8 @@ class AppContants
   static String getAllBookingURL = "Booking/getAllBooking";
   static String getBookingDetails = "Booking/getBookingDetail";
   static String driverDetailsURL = "Driver/getDriverDetails";
+  static String getPaymentHistoryUrl = "Driver/getPaymentHistory";
+  static String getMissedOrdersUrl = "Driver/getMissedOrders";
   static String categoryVehicleURL = "home/getVehicleByCategoryId/";
   static String verifyOtpURl = "verify-otp";
   static String myComplaintURl = "get-my-complaints";

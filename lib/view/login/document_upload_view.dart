@@ -17,6 +17,7 @@ import 'package:taxi_driver/view/login/bank_detail_view.dart';
 
 import '../../common_widget/line_text_field.dart';
 import '../../common_widget/round_button.dart';
+import 'package:image/image.dart' as img;
 
 class DocumentUploadView extends StatefulWidget {
   final String title;
@@ -36,6 +37,22 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
   TextEditingController panCt = TextEditingController();
   final KYCDocument _kycDocs = KYCDocument();
   final ImagePicker _picker = ImagePicker();
+
+  Future<File> convertPngToJpg(File pngFile) async {
+    final bytes = await pngFile.readAsBytes();
+    final image = img.decodeImage(bytes);
+
+    if (image == null) {
+      throw Exception("Could not decode image");
+    }
+
+    final jpgBytes = img.encodeJpg(image, quality: 90);
+    final jpgFile = File(pngFile.path.replaceAll(".png", ".jpg"));
+
+    await jpgFile.writeAsBytes(jpgBytes);
+    return jpgFile;
+  }
+
   String? panImage;
   String? adharfront;
   String? adharback;
@@ -103,7 +120,16 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                     onTap: () async {
                       Navigator.pop(ctx);
                       final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-                      _savePickedImage(image, docType);
+                      if (image != null) {
+                        File file = File(image.path);
+
+                        // Convert if PNG
+                        if (file.path.toLowerCase().endsWith(".png")) {
+                          file = await convertPngToJpg(file);
+                        }
+
+                        _savePickedImage(file, docType); // pass jpg file
+                      }
                     },
                   ),
                   ListTile(
@@ -112,7 +138,16 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                     onTap: () async {
                       Navigator.pop(ctx);
                       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-                      _savePickedImage(image, docType);
+                      if (image != null) {
+                        File file = File(image.path);
+
+                        // Convert if PNG
+                        if (file.path.toLowerCase().endsWith(".png")) {
+                          file = await convertPngToJpg(file);
+                        }
+
+                        _savePickedImage(file, docType); // pass jpg file
+                      }
                     },
                   ),
                 ],
@@ -129,7 +164,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
   }
 
   /// helper function
-  void _savePickedImage(XFile? image, String docType) {
+  void _savePickedImage(File? image, String docType) {
     if (image != null) {
       setState(() {
         switch (docType) {

@@ -19,6 +19,7 @@ import 'package:taxi_driver/view/login/subscription_plan_view.dart';
 import '../../common_widget/line_text_field.dart';
 import '../../controller/authController.dart';
 import '../../model/vehicle_data.dart';
+import 'package:image/image.dart' as img;
 
 class VehicleDocumentUploadView extends StatefulWidget {
   String id;
@@ -48,26 +49,44 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
   List<String>fuelType = ["Petrol","Diesel","Electric","CNG","EV"];
   final VehicleImages _images = VehicleImages();
   final ImagePicker _picker = ImagePicker();
+  Future<File> convertPngToJpg(File pngFile) async {
+    final bytes = await pngFile.readAsBytes();
+    final image = img.decodeImage(bytes);
 
-  Future<void> _pickImage(ImageSource source, bool isVehicleImage,bool isBack) async {
+    if (image == null) {
+      throw Exception("Could not decode image");
+    }
+
+    final jpgBytes = img.encodeJpg(image, quality: 90);
+    final jpgFile = File(pngFile.path.replaceAll(".png", ".jpg"));
+
+    await jpgFile.writeAsBytes(jpgBytes);
+    return jpgFile;
+  }
+
+  Future<void> _pickImage(ImageSource source, bool isVehicleImage, bool isBack) async {
     try {
       final XFile? image = await _picker.pickImage(source: source);
       if (image != null) {
+        File file = File(image.path);
+
+        // Convert if PNG
+        if (file.path.toLowerCase().endsWith(".png")) {
+          file = await convertPngToJpg(file);
+        }
+
         setState(() {
           if (isVehicleImage) {
-            _images.vehicleImage = File(image.path);
+            _images.vehicleImage = file;
           } else {
             // Handle RC images
-            if(isBack){
-              _images.rcBackImage = File(image.path);
+            if (isBack) {
+              _images.rcBackImage = file;
+            } else {
+              _images.rcFrontImage = file;
             }
-            else {
-              _images.rcFrontImage = File(image.path);
-            }
-
           }
         });
-
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +94,6 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
       );
     }
   }
-
 
   @override
   void initState() {

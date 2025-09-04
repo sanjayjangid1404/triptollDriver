@@ -22,15 +22,18 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
   List ridesArr = [];
   double totalAmount = 0.0;
   double driverAmount = 0.0;
-
+  AuthController authController  = Get.find<AuthController>();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
 
+      Get.find<AuthController>().getMissedOrder({
+        "driver_id":authController.getUserID().toString(),
+      });
+      Get.find<AuthController>().getAllBooking(status: "paid",limit: "100",offset: "10");
 
-      Get.find<AuthController>().getAllBooking(status: "all",limit: "100",offset: "10");
 
       setState(() {
 
@@ -43,255 +46,361 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(
       builder: (AuthController authController) =>
-       Scaffold(
-        appBar: AppBar(
-          elevation: 0.5,
-          backgroundColor: Colors.white,
-          leading: IconButton(
-            onPressed: () {
-              context.pop();
-            },
-            icon: Image.asset(
-              "assets/img/back.png",
-              width: 25,
-              height: 25,
+          DefaultTabController(
+            length: 2,
+         child: Scaffold(
+          appBar: AppBar(
+            elevation: 0.5,
+            backgroundColor: Colors.white,
+            leading: IconButton(
+              onPressed: () {
+                context.pop();
+              },
+              icon: Image.asset(
+                "assets/img/back.png",
+                width: 25,
+                height: 25,
+              ),
+            ),
+            centerTitle: true,
+            title: Text(
+              "My Rides",
+              style: TextStyle(
+                  color: TColor.primaryText,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    "${AppContants.rupessSystem} ${totalAmount.toStringAsFixed(2)}",
+                    style: TextStyle(
+                        color: TColor.primary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800),
+                  ))
+            ],
+            bottom: const TabBar(
+              indicatorColor: Colors.green,
+              labelColor: Colors.green,
+              unselectedLabelColor: Colors.grey,
+              tabs: [
+                Tab(text: "Completed"),
+                Tab(text: "Missed"),
+              ],
             ),
           ),
-          centerTitle: true,
-          title: Text(
-            "My Rides",
-            style: TextStyle(
-                color: TColor.primaryText,
-                fontSize: 18,
-                fontWeight: FontWeight.w800),
-          ),
-          actions: [
-            TextButton(
-                onPressed: () {},
-                child: Text(
-                  "${AppContants.rupessSystem} ${totalAmount.toStringAsFixed(2)}",
-                  style: TextStyle(
-                      color: TColor.primary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800),
-                ))
-          ],
-        ),
-        body: ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
-            itemBuilder: (context, index) {
-              var rObj = authController.bookingListResponse[index];
+          body: TabBarView(
+              children: [
+                ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+                    itemBuilder: (context, index) {
+                      var rObj = authController.bookingListResponse[index];
 
-              var km = 10;
-              var rideTotalAmount =
-                  double.tryParse(rObj.totalAmount.toString()) ?? 0.0;
-              var driverAmount =
-                  double.tryParse(rObj.totalAmount.toString()) ?? 0.0;
-              return InkWell(
-                onTap: () {
-                  context.push(TipDetailsView(obj: rObj));
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black12, blurRadius: 2)
-                      ]),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Image.asset("assets/img/logo.png",height: 40,),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Expanded(
-                              child: Column(
+                      var km = 10;
+                      var rideTotalAmount =
+                          double.tryParse(rObj.totalAmount.toString()) ?? 0.0;
+                      var driverAmount =
+                          double.tryParse(rObj.totalAmount.toString()) ?? 0.0;
+                      return InkWell(
+                        onTap: () {
+                          context.push(TipDetailsView(obj: rObj));
+                        },
+                        child: Container(
+                          padding:
+                          const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(5),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black12, blurRadius: 2)
+                              ]),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                rObj.receiverName ?? "",
-                                style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w800),
+                              Row(
+                                children: [
+                                  Image.asset("assets/img/logo.png",height: 40,),
+                                  const SizedBox(
+                                    width: 15,
+                                  ),
+                                  Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            rObj.receiverName ?? "",
+                                            style: TextStyle(
+                                                color: TColor.primaryText,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w800),
+                                          ),
+                                          Text(
+                                            rObj!.addDate!=null ?  "${AppContants.changeDateFormat(rObj!.addDate!, "dd MMM yyyy")}":"",
+                                            style: TextStyle(
+                                                color: TColor.secondaryText, fontSize: 12),
+                                          )
+                                        ],
+                                      )),
+                                  Text(
+                                    rObj!.orderStatus??"",
+                                    style: TextStyle(
+                                        color:Colors.black,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700),
+                                  )
+                                ],
                               ),
-                              Text(
-                                  rObj!.addDate!=null ?  "${AppContants.changeDateFormat(rObj!.addDate!, "dd MMM yyyy")}":"",
-                                style: TextStyle(
-                                    color: TColor.secondaryText, fontSize: 12),
-                              )
+                              const Divider(),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  const SizedBox(
+                                    width: 15,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      rObj.pickupAddress as String? ?? "",
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        color: TColor.primaryText,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10,),
+
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                        color: TColor.red,
+                                        borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  const SizedBox(
+                                    width: 15,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      rObj.dropAddress as String? ?? "",
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        color: TColor.primaryText,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (rObj.orderStatus == "pickup")
+                                const SizedBox(
+                                  height: 8,
+                                ),
+
+                              if (rObj.orderStatus == "delivered")
+                                Column(
+                                  children: [
+                                    const Divider(),
+                                    const SizedBox(
+                                      height: 8,
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Total Distance: ",
+                                          maxLines: 2,
+                                          style: TextStyle(
+                                              color: TColor.primaryText,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                        Text(
+                                          "${km.toStringAsFixed(1)} KM",
+                                          maxLines: 2,
+                                          style: TextStyle(
+                                            color: TColor.primaryText,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Text(
+                                          "Duration: ",
+                                          maxLines: 2,
+                                          style: TextStyle(
+                                              color: TColor.primaryText,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                        Text(
+                                          "",
+                                          maxLines: 2,
+                                          style: TextStyle(
+                                            color: TColor.primaryText,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Driver Amount: ",
+                                          style: TextStyle(
+                                              color: TColor.primaryText,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                        Text(
+                                          "${AppContants.rupessSystem} ${driverAmount.toStringAsFixed(2)}",
+                                          style: TextStyle(
+                                              color: TColor.secondary,
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Total Amount: ",
+                                          style: TextStyle(
+                                              color: TColor.primaryText,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                        Text(
+                                          "${AppContants.rupessSystem} ${rideTotalAmount.toStringAsFixed(2)}",
+                                          style: TextStyle(
+                                              color: TColor.primary,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w800),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )
                             ],
-                          )),
-                          Text(
-                            rObj!.orderStatus??"",
-                            style: TextStyle(
-                                color:Colors.black,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700),
-                          )
-                        ],
-                      ),
-                      const Divider(),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(10)),
                           ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Expanded(
-                            child: Text(
-                              rObj.pickupAddress as String? ?? "",
-                              maxLines: 2,
-                              style: TextStyle(
-                                color: TColor.primaryText,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10,),
-
-                      Row(
-                        children: [
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                                color: TColor.red,
-                                borderRadius: BorderRadius.circular(10)),
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Expanded(
-                            child: Text(
-                              rObj.dropAddress as String? ?? "",
-                              maxLines: 2,
-                              style: TextStyle(
-                                color: TColor.primaryText,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (rObj.orderStatus == "pickup")
-                        const SizedBox(
-                          height: 8,
                         ),
+                      );
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(
+                      height: 15,
+                    ),
+                    itemCount: authController.bookingListResponse.length),
+                ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+                    itemBuilder: (context, index) {
+                      var rObj = authController.missedOrderListModel[index];
 
-                      if (rObj.orderStatus == "delivered")
-                        Column(
-                          children: [
-                            const Divider(),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "Total Distance: ",
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                      color: TColor.primaryText,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                Text(
-                                  "${km.toStringAsFixed(1)} KM",
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 15,
+                      var km = 10;
+                      var rideTotalAmount =
+                          double.tryParse(rObj.totalAmount.toString()) ?? 0.0;
+                      var driverAmount =
+                          double.tryParse(rObj.totalAmount.toString()) ?? 0.0;
+                      return InkWell(
+                        onTap: () {
+                          // context.push(TipDetailsView(obj: rObj));
+                        },
+                        child: Container(
+                          padding:
+                          const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(5),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black12, blurRadius: 2)
+                              ]),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Image.asset("assets/img/logo.png",height: 40,),
+                                        const SizedBox(
+                                          width: 15,
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                rObj.firstName ?? "Unknown",
+                                                style: TextStyle(
+                                                    color: TColor.primaryText,
+                                                    fontSize: 17,
+                                                    fontWeight: FontWeight.w800),
+                                              ),
+                                              Text(
+                                                rObj!.bookingDate!=null ?  "${AppContants.changeDateFormat(rObj!.bookingDate!, "dd MMM yyyy")}":"",
+                                                style: TextStyle(
+                                                    color: TColor.secondaryText, fontSize: 12),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  "Duration: ",
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                      color: TColor.primaryText,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                Text(
-                                  "",
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Driver Amount: ",
-                                  style: TextStyle(
-                                      color: TColor.primaryText,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                Text(
-                                  "${AppContants.rupessSystem} ${driverAmount.toStringAsFixed(2)}",
-                                  style: TextStyle(
-                                      color: TColor.secondary,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Total Amount: ",
-                                  style: TextStyle(
-                                      color: TColor.primaryText,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                Text(
-                                  "${AppContants.rupessSystem} ${rideTotalAmount.toStringAsFixed(2)}",
-                                  style: TextStyle(
-                                      color: TColor.primary,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w800),
-                                ),
-                              ],
-                            ),
-                          ],
-                        )
-                    ],
-                  ),
-                ),
-              );
-            },
-            separatorBuilder: (context, index) => const SizedBox(
-                  height: 15,
-                ),
-            itemCount: authController.bookingListResponse.length),
-      ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                           rObj.bookedDriver == null ? 'Missed' : '${rObj.orderStatus ?? ""}     ',
+                                        style: TextStyle(
+                                            color:Colors.red,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w700),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      Text(
+                                          '${AppContants.rupessSystem}${rObj.totalAmount ?? '0.0'}',
+                                        style: TextStyle(
+                                            color:Colors.black,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(
+                      height: 15,
+                    ),
+                    itemCount: authController.missedOrderListModel.length),
+              ]
+          )
+         ),
+       ),
     );
   }
 
