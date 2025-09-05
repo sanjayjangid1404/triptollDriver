@@ -33,6 +33,7 @@ class _SignUpViewState extends State<SignUpView> {
   // TextEditingController txtHomeAddress = TextEditingController();
   TextEditingController txtMobile = TextEditingController();
   TextEditingController emailCt = TextEditingController();
+  TextEditingController referralCt = TextEditingController();
   late CountryCode countryCode;
   TextEditingController txtPassword = TextEditingController();
   bool isSHowOTP = false;
@@ -457,6 +458,14 @@ class _SignUpViewState extends State<SignUpView> {
                  const SizedBox(
                   height: 8,
                 ),
+                LineTextField(
+                  title: "Referral code",
+                  hintText: "Enter Referral Code",
+                  controller: referralCt,
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -547,7 +556,8 @@ otp:123456*/
                         "password":txtPassword.text,
                         "otp":otpCt.text,
                         "gender":"male",
-                        "city_id":selectedCategory!.id.toString()
+                        "city_id":selectedCategory!.id.toString(),
+                        "referral_code":referralCt.text.trim(),
 
                       };
                       authController.saveDriverBasicDetails(body,_image);
