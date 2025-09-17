@@ -75,9 +75,11 @@ class BookingNotificationResponse {
       String? pickedTime, 
       String? deliveryTime, 
       dynamic cancelledTime, 
-      String? startTrip, 
+      dynamic isFake,
+      String? startTrip,
       String? addDate,}){
     _id = id;
+    _isFake = isFake;
     _orderId = orderId;
     _cusId = cusId;
     _driverId = driverId;
@@ -121,6 +123,7 @@ class BookingNotificationResponse {
     _id = json['id'];
     _orderId = json['order_id'];
     _cusId = json['cus_id'];
+    _isFake = json['is_fake'];
     _driverId = json['driver_id'];
     _asignedDriver = json['asigned_driver'];
     _categoryId = json['category_id'];
@@ -173,6 +176,7 @@ class BookingNotificationResponse {
   String? _readStatus;
   dynamic _acceptTime;
   dynamic _closeTime;
+  dynamic _isFake;
   String? _discount;
   String? _discountPercentage;
   String? _paymentType;
@@ -211,6 +215,7 @@ BookingNotificationResponse copyWith({  String? id,
   String? readStatus,
   dynamic acceptTime,
   dynamic closeTime,
+  dynamic isFake,
   String? discount,
   String? discountPercentage,
   String? paymentType,
@@ -249,6 +254,7 @@ BookingNotificationResponse copyWith({  String? id,
   readStatus: readStatus ?? _readStatus,
   acceptTime: acceptTime ?? _acceptTime,
   closeTime: closeTime ?? _closeTime,
+  isFake: isFake ?? _isFake,
   discount: discount ?? _discount,
   discountPercentage: discountPercentage ?? _discountPercentage,
   paymentType: paymentType ?? _paymentType,
@@ -288,6 +294,7 @@ BookingNotificationResponse copyWith({  String? id,
   String? get readStatus => _readStatus;
   dynamic get acceptTime => _acceptTime;
   dynamic get closeTime => _closeTime;
+  dynamic get isFake => _isFake;
   String? get discount => _discount;
   String? get discountPercentage => _discountPercentage;
   String? get paymentType => _paymentType;

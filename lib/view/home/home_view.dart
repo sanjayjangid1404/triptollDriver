@@ -90,13 +90,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           "driver_id":Get.find<AuthController>().getUserID()
         });
         final response = await http.post(
-          Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
+          Uri.parse("https://dev.triptoll.in/api/Booking/findNewBookings"),
           body: jsonEncode({
             "driver_id":Get.find<AuthController>().getUserID()
           })
         );
 
-        print("respnse=>${response.body}");
+        print("respnse=>findNewBookings${response.body}");
 
 
         if (response.statusCode == 200) {
@@ -819,9 +819,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               StreamBuilder<BookingNotificationResponse?>(
                 stream: bookingStream(),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData &&
-                      snapshot.data != null &&
-                      !isSheetOpen) {
+                  if (snapshot.hasData && snapshot.data != null && !isSheetOpen) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       isSheetOpen = true;
                       showRideDetailsSheet(snapshot.data!).then((_) {
@@ -879,9 +877,142 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 // ❌ back button से बंद नहीं होने देना
                 return false;
               },
-              child: SingleChildScrollView(
+              child:
+              // notificationResponse.isFake == '0' ?
+              SingleChildScrollView(
                 controller: scrollController,
                 child: _buildRideDetailsContent(notificationResponse),
+              )
+                    // :
+              // SingleChildScrollView(
+              //   controller: scrollController,
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.center,
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       Align(
+              //         alignment: Alignment.topRight,
+              //         child:   InkWell(
+              //           onTap: () {
+              //             stopRingtone();
+              //             // Navigator.pop(context); // Close the bottom sheet
+              //             Get.find<AuthController>().bookingStatusChange(
+              //                 status: "cancel",
+              //                 amount: notificationResponse.totalAmount,
+              //                 orderID: notificationResponse.orderId,
+              //                 cus_id:notificationResponse.cusId,
+              //                 value: 0
+              //             );
+              //           },
+              //           child: Container(
+              //
+              //             margin: const EdgeInsets.only(left: 20),
+              //             padding: const EdgeInsets.all(6),
+              //             decoration: BoxDecoration(
+              //               color: TColor.red,
+              //               shape: BoxShape.circle,
+              //
+              //             ),
+              //             child: Icon(Icons.close,color: Colors.white,),
+              //           ),
+              //         ),
+              //       ),
+              //       Text('Order already taken.',
+              //         style: TextStyle(
+              //             fontSize: 20,
+              //             fontWeight: FontWeight.w500,
+              //             color: Colors.red
+              //         ),),
+              //       Text('Click fast next time',
+              //         style: TextStyle(
+              //             fontSize: 16,
+              //             fontWeight: FontWeight.w500,
+              //             color: Colors.black
+              //         ),),
+              //     ],
+              //   ),
+              // ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> showRideDetailsFakeSheet(BookingNotificationResponse notificationResponse) async{
+    return  showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      isScrollControlled: true, // Allows the sheet to take up more space
+      backgroundColor: Colors.transparent, // Makes the rounded corners visible
+      builder: (context) => Container(
+        padding: const EdgeInsets.only(top: 20), // Space for the drag handle
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: DraggableScrollableSheet(
+          expand: false,
+          shouldCloseOnMinExtent: false,
+          initialChildSize: 0.5, // Initial height (40% of screen)
+          minChildSize: 0.3, // Minimum height when dragged down
+          maxChildSize: 0.7, // Maximum height when dragged up
+          builder: (context, scrollController) {
+            return  WillPopScope(
+              onWillPop: () async {
+                // ❌ back button से बंद नहीं होने देना
+                return false;
+              },
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child:   InkWell(
+                        onTap: () {
+                          stopRingtone();
+                          // Navigator.pop(context); // Close the bottom sheet
+                          Get.find<AuthController>().bookingStatusChange(
+                              status: "cancel",
+                              amount: notificationResponse.totalAmount,
+                              orderID: notificationResponse.orderId,
+                              cus_id:notificationResponse.cusId,
+                              value: 0
+                          );
+                        },
+                        child: Container(
+
+                          margin: const EdgeInsets.only(left: 20),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: TColor.red,
+                            shape: BoxShape.circle,
+
+                          ),
+                          child: Icon(Icons.close,color: Colors.white,),
+                        ),
+                      ),
+                    ),
+                    Text('Order already taken.',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.red
+                      ),),
+                    Text('Click fast next time',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black
+                      ),),
+                  ],
+                ),
               ),
             );
           },
@@ -889,6 +1020,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       ),
     );
   }
+
 
   String referralCode = "12345678";
   double? roadDistance;

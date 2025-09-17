@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 // import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -50,7 +51,8 @@ Future<void> showNotification() async {
     importance: Importance.max,
     priority: Priority.high,
     playSound: true,
-    sound: RawResourceAndroidNotificationSound('booking'), // 🔔 custom sound
+    sound: RawResourceAndroidNotificationSound('booking'),
+    timeoutAfter: 30000,
   );
 
   const NotificationDetails platformChannelSpecifics =
@@ -81,7 +83,7 @@ Future<bool> onIosBackground() async {
 Future<void> playSoundInBackground() async {
   try {
     final player = AudioPlayer();
-   // await player.setReleaseMode(ReleaseMode.loop);
+    // await player.setReleaseMode(ReleaseMode.loop);
 
     // Play sound for 15 seconds (adjust as needed)
     await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0);
@@ -172,6 +174,7 @@ void main() async {
   DBHelper.shared().db;
   prefs = await SharedPreferences.getInstance();
   await Firebase.initializeApp();
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await _handleLocationPermissions();
   const AndroidInitializationSettings initializationSettingsAndroid =
@@ -202,8 +205,10 @@ void main() async {
     ServiceCall.userObj = Globs.udValue(Globs.userPayload) as Map? ?? {};
     ServiceCall.userType = ServiceCall.userObj["user_type"] as int? ?? 1;
   }
-
-
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   runApp(const MyApp());
   configLoading();
   ServiceCall.getStaticDateApi();
@@ -280,7 +285,7 @@ class MyApp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _MyApp();
 
-  // This widget is the root of your application.
+// This widget is the root of your application.
 
 }
 
@@ -314,12 +319,12 @@ class _MyApp extends State<MyApp> {
 
 
     AppContants.getToken();
-     var initialzationSettingsAndroid =
+    var initialzationSettingsAndroid =
     AndroidInitializationSettings('@mipmap/ic_launcher');
 
-     if(Get.find<AuthController>().isLoggedIn()){
-       Get.find<AuthController>().getBookingNotification(context);
-     }
+    if(Get.find<AuthController>().isLoggedIn()){
+      Get.find<AuthController>().getBookingNotification(context);
+    }
 
     var initialzationSettingsIOS =
     DarwinInitializationSettings(
@@ -337,26 +342,36 @@ class _MyApp extends State<MyApp> {
 
       if (notification != null && android != null) {
 
-        await showNotification();
-        if(notification.title!.toLowerCase().contains("new booking - triptoll")){
 
-          await player.setReleaseMode(ReleaseMode.loop);
-          await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0,);
-
+        // ✅ Timestamp condition
+        final int now = DateTime.now().millisecondsSinceEpoch;
+        final String? tsString = message.data['timestamp'];
+        int? sentTime = int.tryParse(tsString ?? '');
+        if (sentTime != null && (now - sentTime) <= 30000) {
+          // Play ringtone only if <= 30 seconds old
+          await showNotification();
+          if (notification.title!
+              .toLowerCase()
+              .contains("new booking - triptoll")) {
+            await player.setReleaseMode(ReleaseMode.loop);
+            await player.play(
+              AssetSource("sounds/booking.mp3"),
+              volume: 1.0,
+            );
+          }
+        } else {
+          debugPrint("⏳ Skipping music: notification too old or invalid timestamp");
         }
+
         print("onMessage: ${notification.title}/${notification.body}/${notification.titleLocKey}");
-        print("onMessage type: ${message.data['type']}/${message.data}");
-
-
-
-
-        // Check if 'type' key exists in message data
+        print("onMessage data: ${message.data}");
+        print("onMessage timestamp: ${message.data['timestamp']}");
 
         flutterLocalNotificationsPlugin.show(
-          notification.hashCode, // id
-          notification.title,    // title
-          notification.body,     // body
-          NotificationDetails(   // notification details
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
             android: AndroidNotificationDetails(
               'channel_id',
               'channel_name',
@@ -366,45 +381,55 @@ class _MyApp extends State<MyApp> {
             ),
             iOS: DarwinNotificationDetails(),
           ),
-          payload: "", // optional data
+          payload: "",
         );
-
-
-
-
       }
     });
+
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
+
       if (notification != null && android != null) {
-        print("onMessage: ${notification.title}/${notification.body}/${notification.titleLocKey}");
-        print("onMessage type: ${message.data['type']}/${message.data}");
+        print("onMessageOpenedApp: ${notification.title}/${notification.body}/${notification.titleLocKey}");
+        print("onMessageOpenedApp data: ${message.data}");
+        print("onMessageOpenedApp timestamp: ${message.data['timestamp']}");
 
-      if(notification.title!.toLowerCase().contains("new booking - triptoll")){
+        // ✅ Timestamp condition
+        final int now = DateTime.now().millisecondsSinceEpoch;
+        final String? tsString = message.data['timestamp'];
+        int? sentTime = int.tryParse(tsString ?? '');
+        if (sentTime != null && (now - sentTime) <= 30000) {
+          if (notification.title!
+              .toLowerCase()
+              .contains("new booking - triptoll")) {
+            await player.setReleaseMode(ReleaseMode.loop);
+            await player.play(
+              AssetSource("sounds/booking.mp3"),
+              volume: 1.0,
+            );
+          }
+        } else {
+          debugPrint("⏳ Skipping music: notification too old or invalid timestamp");
+        }
 
-        await player.setReleaseMode(ReleaseMode.loop);
-        await player.play(AssetSource("sounds/booking.mp3"), volume: 1.0);
-      }
-      flutterLocalNotificationsPlugin.show(
-        notification.hashCode, // id
-        notification.title,    // title
-        notification.body,     // body
-        NotificationDetails(   // notification details
-          android: AndroidNotificationDetails(
-            'channel_id',
-            'channel_name',
-            channelDescription: 'your channel description',
-            importance: Importance.max,
-            priority: Priority.high,
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              'channel_id',
+              'channel_name',
+              channelDescription: 'your channel description',
+              importance: Importance.max,
+              priority: Priority.high,
+            ),
+            iOS: DarwinNotificationDetails(),
           ),
-          iOS: DarwinNotificationDetails(),
-        ),
-        payload: "", // optional data
-      );
-
-
+          payload: "",
+        );
       }
     });
   }

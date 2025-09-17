@@ -113,7 +113,9 @@ class _MobileNumberViewState extends State<MobileNumberView> {
                         contentPadding: EdgeInsets.zero,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
-                        hintText: "9876543210",
+                        // hintText: "9876543210",
+                        hintText: "Enter Your Mobile Number",
+                        hintStyle: TextStyle(color: Colors.grey)
                       ),
                     ),
                   )
@@ -130,6 +132,7 @@ class _MobileNumberViewState extends State<MobileNumberView> {
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   hintText: "Password",
+                  hintStyle: TextStyle(color: Colors.grey),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureText ? Icons.visibility_off : Icons.visibility,

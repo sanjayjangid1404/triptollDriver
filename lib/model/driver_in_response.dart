@@ -316,7 +316,7 @@ class DriverInResponse {
     _review = json['review'];
     _totalRating = json['total_rating'];
   }
-  String? _id;
+  dynamic _id;
   String? _uniqId;
   dynamic _ownerId;
   String? _categoryId;

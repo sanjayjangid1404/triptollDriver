@@ -127,7 +127,7 @@ class _MyProfileViewState extends State<MyProfileView> {
                                       ),
                                        Expanded(
                                         child: TitleSubtitleCell(
-                                            title: "${authController.driverInResponse!.weight??"0"}", subtitle: "${authController.driverInResponse!.weightType??"KG"}"),
+                                            title: "${authController.driverInResponse!.weightName??"0"}", subtitle: "${authController.driverInResponse!.weightType??"KG"}"),
                                       )
                                     ],
                                   )

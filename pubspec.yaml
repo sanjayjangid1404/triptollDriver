@@ -83,7 +83,8 @@ dependencies:
   razorpay_flutter:
   in_app_update :
   image: ^4.2.0
-
+  firebase_crashlytics: ^5.0.1
+  flutter_overlay_window: ^0.5.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
