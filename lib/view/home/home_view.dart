@@ -90,7 +90,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           "driver_id":Get.find<AuthController>().getUserID()
         });
         final response = await http.post(
-          Uri.parse("https://dev.triptoll.in/api/Booking/findNewBookings"),
+          Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
           body: jsonEncode({
             "driver_id":Get.find<AuthController>().getUserID()
           })

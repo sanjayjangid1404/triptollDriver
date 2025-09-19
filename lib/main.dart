@@ -2,9 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 // import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -33,9 +37,20 @@ import 'package:taxi_driver/common/socket_manager.dart';
 import 'package:taxi_driver/cubit/login_cubit.dart';
 import 'package:taxi_driver/view/login/splash_view.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-
 import 'common/route_helper.dart';
 
+
+class OverlayHelper {
+  static const platform = MethodChannel("service.triptoll.in/overlay");
+
+  static Future<void> bringAppToFront() async {
+    try {
+      await platform.invokeMethod("bringToFront");
+    } catch (e) {
+      print("Overlay errordfjdf: $e");
+    }
+  }
+}
 SharedPreferences? prefs;
 final AudioPlayer player = AudioPlayer();
 
@@ -172,6 +187,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
   DBHelper.shared().db;
+  final port = ReceivePort();
+  IsolateNameServer.registerPortWithName(port.sendPort, "overlay_channel");
+
+  port.listen((message) {
+    if (message == "bringToFront") {
+      OverlayHelper.bringAppToFront();
+    }
+  });
   prefs = await SharedPreferences.getInstance();
   await Firebase.initializeApp();
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -209,6 +232,12 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
+  FlutterOverlayWindow.overlayListener.listen((event) async {
+    if (event == "open_app") {
+      await FlutterOverlayWindow.closeOverlay();
+      FlutterOverlayWindow.showOverlay();
+    }
+  });
   runApp(const MyApp());
   configLoading();
   ServiceCall.getStaticDateApi();
@@ -289,7 +318,7 @@ class MyApp extends StatefulWidget {
 
 }
 
-class _MyApp extends State<MyApp> {
+class _MyApp extends State<MyApp>  with WidgetsBindingObserver{
 
   String? referralCode;
   String? installedViaReferral;
@@ -297,9 +326,10 @@ class _MyApp extends State<MyApp> {
 
   @override
   void dispose() {
-
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
@@ -308,15 +338,20 @@ class _MyApp extends State<MyApp> {
 
 
 
-  // Handle the deep link containing referral code
-
+  Future<void> _checkOverlayPermission() async {
+    bool granted = await FlutterOverlayWindow.isPermissionGranted();
+    if (!granted) {
+      await FlutterOverlayWindow.requestPermission();
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-
+    WidgetsBinding.instance.addObserver(this);
+    _checkOverlayPermission();
 
     AppContants.getToken();
     var initialzationSettingsAndroid =
@@ -434,6 +469,37 @@ class _MyApp extends State<MyApp> {
     });
   }
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (Platform.isAndroid) {
+      if (state == AppLifecycleState.paused) {
+        _showOverlay();
+      } else if (state == AppLifecycleState.resumed) {
+        FlutterOverlayWindow.closeOverlay();
+      }
+    }
+  }
+
+  Future<void> _showOverlay() async {
+    bool? granted = await FlutterOverlayWindow.isPermissionGranted();
+    if (!granted) {
+      granted = await FlutterOverlayWindow.requestPermission();
+    }
+    if (granted == true) {
+      await FlutterOverlayWindow.showOverlay(
+        height: 100,
+        width: 100,
+        alignment: OverlayAlignment.centerRight,
+        flag: OverlayFlag.defaultFlag,
+        // flag: OverlayFlag.focusPointer,
+        enableDrag: true,
+      );
+    } else {
+      debugPrint("Overlay permission not granted");
+    }
+  }
+  @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Taxi Driver',
@@ -454,6 +520,40 @@ class _MyApp extends State<MyApp> {
       builder: EasyLoading.init(),
     );
   }
+}
+
+
+@pragma('vm:entry-point')
+void overlayMain() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: GestureDetector(
+          onTap: () {
+            // 🔥 Direct MethodChannel mat call kar
+            final sendPort = IsolateNameServer.lookupPortByName("overlay_channel");
+            sendPort?.send("bringToFront");
+          },
+          child: Center(
+            child: Container(
+              height: 60,
+              width: 60,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+              child: Image.asset("assets/img/logo.png", height: 60,
+                width: 60,),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 
