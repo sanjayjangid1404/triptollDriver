@@ -323,6 +323,7 @@ BookingNotificationResponse copyWith({  String? id,
     map['id'] = _id;
     map['order_id'] = _orderId;
     map['cus_id'] = _cusId;
+    map['is_fake'] = _isFake;
     map['driver_id'] = _driverId;
     map['asigned_driver'] = _asignedDriver;
     map['category_id'] = _categoryId;

@@ -23,6 +23,9 @@ class AppContants
   static String userID = "User ID";
   static String bookingID = "Booking ID";
   static String userName = "User Name";
+  static String maxTimeVar = "max time";
+  static String loadingCharges = "loading charges";
+  static String isLoadingTime = "is loading time";
   static String userKYC = "User KYC";
   static String userPayment = "User Payment";
   static String userFee= "User Fee";

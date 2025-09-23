@@ -160,22 +160,28 @@ class AuthRepo{
         AppContants.getMissedOrdersUrl,body,[]);
   }
 
-  Future<Response> orderPicked({String? userID,String? bookingId}) async {
+  Future<Response> orderPicked({String? userID,String? bookingId,String? loadingTime,String? loadingCharges}) async {
     print("call");
     return await apiClient.postData(
         AppContants.orderPickedURL,{
           "booking_id":bookingId!,
           "driver_id":userID!,
+          "loading_duration":loadingTime!,
+          "loading_charge":loadingCharges!,
+          "total_amount": '0',
 
     });
   }
 
-  Future<Response> orderDelivered({String? userID,String? bookingId}) async {
+  Future<Response> orderDelivered({String? userID,String? unloadDuration,String? unloadCharges,String? bookingId}) async {
     print("call");
     return await apiClient.postData(
         AppContants.orderDeliveredURL,{
           "booking_id":bookingId!,
           "driver_id":userID!,
+          "unloading_duration":unloadDuration,
+          "unloading_charge":unloadCharges,
+          "total_amount":'0',
 
     });
   }
@@ -385,6 +391,18 @@ class AuthRepo{
   Future<bool>saveUserName(String name)
   async{
     return await sharedPreferences.setString(AppContants.userName, name);
+  }
+  Future<bool>setMaxTime(String maxTime)
+  async{
+    return await sharedPreferences.setString(AppContants.maxTimeVar, maxTime);
+  }
+  Future<bool>setPricePerMinute(String setPricePer)
+  async{
+    return await sharedPreferences.setString(AppContants.loadingCharges, setPricePer);
+  }
+  Future<bool>saveIsLoadingTime(bool name)
+  async{
+    return await sharedPreferences.setBool(AppContants.isLoadingTime, name);
   }
 
   Future<bool>saveUserKyc(bool name)

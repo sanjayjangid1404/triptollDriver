@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
+import 'package:taxi_driver/common/custom_snackbar.dart';
 import 'package:taxi_driver/common/globs.dart';
 import 'package:taxi_driver/common/location_helper.dart';
 import 'package:taxi_driver/common/service_call.dart';
@@ -25,6 +26,7 @@ import 'package:taxi_driver/common_widget/Icon_title_subtitle_button.dart';
 import 'package:taxi_driver/model/running_order_response.dart';
 import 'package:taxi_driver/view/home/run_ride_view.dart';
 import 'package:taxi_driver/view/home/tip_request_view.dart';
+import 'package:taxi_driver/view/home/unloading_timer.dart';
 import 'package:taxi_driver/view/menu/menu_view.dart';
 
 import '../../controller/authController.dart';
@@ -820,6 +822,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 stream: bookingStream(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data != null && !isSheetOpen) {
+                    printSavedIds();
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       isSheetOpen = true;
                       showRideDetailsSheet(snapshot.data!).then((_) {
@@ -850,8 +853,78 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     }
   }
 
+  Future<void> saveFakeId(String id, dynamic isFake) async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool shouldSave = isFake == 1 || isFake == '1';
+
+    if (shouldSave) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
+      Map<String, int> timestamps = _decodeTimestamps(prefs.getString('fake_ids_time'));
+
+      if (!savedIds.contains(id)) {
+        savedIds.add(id);
+        timestamps[id] = now; // store timestamp
+        await prefs.setStringList('fake_ids', savedIds);
+        await prefs.setString('fake_ids_time', timestamps.toString());
+      }
+      Timer(const Duration(minutes: 10), () async {
+        await clearExpiredFakeIds();
+      });
+    }
+  }
+  Future<void> printSavedIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
+
+    if (savedIds.isEmpty) {
+      print("No IDs saved in local storage.");
+    } else {
+      print("Saved IDs in local storage:");
+      for (var id in savedIds) {
+        print(id);
+      }
+    }
+  }
+  Future<void> clearExpiredFakeIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
+    Map<String, int> timestamps = _decodeTimestamps(prefs.getString('fake_ids_time'));
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    const int expiry = 10 * 60 * 1000; // 10 minutes in ms
+
+    savedIds.removeWhere((id) {
+      final ts = timestamps[id];
+      return ts == null || now - ts > expiry;
+    });
+    timestamps.removeWhere((key, value) => !savedIds.contains(key));
+
+    await prefs.setStringList('fake_ids', savedIds);
+    await prefs.setString('fake_ids_time', timestamps.toString());
+  }
+
+  Map<String, int> _decodeTimestamps(String? data) {
+    if (data == null || data.isEmpty) return {};
+    // Convert "{id1: 123, id2: 456}" back to Map
+    final cleaned = data.replaceAll(RegExp(r'[{} ]'), '');
+    final pairs = cleaned.isEmpty ? [] : cleaned.split(',');
+    final map = <String, int>{};
+    for (var p in pairs) {
+      final kv = p.split(':');
+      if (kv.length == 2) {
+        map[kv[0]] = int.tryParse(kv[1]) ?? 0;
+      }
+    }
+    return map;
+  }
+
   Future<void> showRideDetailsSheet(BookingNotificationResponse notificationResponse) async{
-   return  showModalBottomSheet(
+    final prefs = await SharedPreferences.getInstance();
+    List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
+    final currentId = notificationResponse.id.toString();
+    return !savedIds.contains(currentId) ?
+    showModalBottomSheet(
       context: context,
       isDismissible: false,
       isScrollControlled: true, // Allows the sheet to take up more space
@@ -878,7 +951,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 return false;
               },
               child:
-              // notificationResponse.isFake == '0' ?
+              // notificationResponse.isFake == 0 || notificationResponse.isFake == '0' ?
               SingleChildScrollView(
                 controller: scrollController,
                 child: _buildRideDetailsContent(notificationResponse),
@@ -895,14 +968,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               //         child:   InkWell(
               //           onTap: () {
               //             stopRingtone();
-              //             // Navigator.pop(context); // Close the bottom sheet
-              //             Get.find<AuthController>().bookingStatusChange(
-              //                 status: "cancel",
-              //                 amount: notificationResponse.totalAmount,
-              //                 orderID: notificationResponse.orderId,
-              //                 cus_id:notificationResponse.cusId,
-              //                 value: 0
-              //             );
+              //             saveFakeId(notificationResponse.id.toString(),notificationResponse.isFake);
+              //             Navigator.pop(context);
               //           },
               //           child: Container(
               //
@@ -916,8 +983,14 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               //             child: Icon(Icons.close,color: Colors.white,),
               //           ),
               //         ),
-              //       ),
+              //       ).paddingSymmetric(horizontal: 20),
               //       Text('Order already taken.',
+              //         style: TextStyle(
+              //             fontSize: 20,
+              //             fontWeight: FontWeight.w500,
+              //             color: Colors.red
+              //         ),),
+              //       Text('Order #${notificationResponse.id.toString()}',
               //         style: TextStyle(
               //             fontSize: 20,
               //             fontWeight: FontWeight.w500,
@@ -929,6 +1002,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               //             fontWeight: FontWeight.w500,
               //             color: Colors.black
               //         ),),
+              //       LottieScreen()
               //     ],
               //   ),
               // ),
@@ -936,7 +1010,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           },
         ),
       ),
-    );
+    ) : null;
   }
 
   Future<void> showRideDetailsFakeSheet(BookingNotificationResponse notificationResponse) async{
@@ -966,7 +1040,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 // ❌ back button से बंद नहीं होने देना
                 return false;
               },
-              child: SingleChildScrollView(
+              child:   SingleChildScrollView(
                 controller: scrollController,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -977,14 +1051,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       child:   InkWell(
                         onTap: () {
                           stopRingtone();
-                          // Navigator.pop(context); // Close the bottom sheet
-                          Get.find<AuthController>().bookingStatusChange(
-                              status: "cancel",
-                              amount: notificationResponse.totalAmount,
-                              orderID: notificationResponse.orderId,
-                              cus_id:notificationResponse.cusId,
-                              value: 0
-                          );
+                          saveFakeId(notificationResponse.id.toString(),notificationResponse.isFake);
+                          Navigator.pop(context);
                         },
                         child: Container(
 
@@ -998,7 +1066,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                           child: Icon(Icons.close,color: Colors.white,),
                         ),
                       ),
-                    ),
+                    ).paddingSymmetric(horizontal: 20),
                     Text('Order already taken.',
                       style: TextStyle(
                           fontSize: 20,
@@ -1011,6 +1079,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                           fontWeight: FontWeight.w500,
                           color: Colors.black
                       ),),
+                    LottieScreen()
                   ],
                 ),
               ),
@@ -1197,7 +1266,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: () {
+                      onTap: bookingResponse.isFake == 0 || bookingResponse.isFake == '0' ?
+                          () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        authController.isLoadingTime = prefs.getBool(AppContants.isLoadingTime)!;
+                        print('dsdskdsds${ authController.isLoadingTime.toString()}');
+                        authController.maxTime = prefs.getString(AppContants.maxTimeVar)!;
+                        authController.loadingCharges = prefs.getString(AppContants.loadingCharges)!;
                         Navigator.pop(context); // Close the bottom sheet
                         Get.find<AuthController>(). accpetBooking(
 
@@ -1205,6 +1280,10 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                             cus_id:bookingResponse.cusId,
                             value: 0
                         );
+                      } : (){
+                        Get.back();
+                        saveFakeId(bookingResponse.id.toString(),bookingResponse.isFake);
+                        showRideDetailsFakeSheet(bookingResponse);
                       },
                       child: Container(
                         width: double.maxFinite,
