@@ -371,7 +371,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
                 SizedBox(height: 30,),
 
               authController.isUploading ? Center(child: CircularProgressIndicator(color: TColor.primary,),):
-              RoundButton(
+              authController.isKyc() ? SizedBox.shrink() : RoundButton(
                   onPressed: () {
 
                     if(widget.isEdit){

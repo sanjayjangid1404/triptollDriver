@@ -159,26 +159,26 @@ void onStart(ServiceInstance service) async {
 
 
       // Update notification
-      if (service is AndroidServiceInstance) {
-        flutterLocalNotificationsPlugin.show(
-          888,
-          'Location Updated',
-          'Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}',
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'location_tracker_channel',
-              'Location Tracker',
-              icon: 'ic_bg_service_small',
-              ongoing: true,
-            ),
-          ),
-        );
-
-        service.setForegroundNotificationInfo(
-          title: "Location Tracker",
-          content: "Updated at ${DateTime.now().toString().substring(11, 19)}",
-        );
-      }
+      // if (service is AndroidServiceInstance) {
+      //   flutterLocalNotificationsPlugin.show(
+      //     888,
+      //     'Location Updated',
+      //     'Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}',
+      //     const NotificationDetails(
+      //       android: AndroidNotificationDetails(
+      //         'location_tracker_channel',
+      //         'Location Tracker',
+      //         icon: 'ic_bg_service_small',
+      //         ongoing: true,
+      //       ),
+      //     ),
+      //   );
+      //
+      //   // service.setForegroundNotificationInfo(
+      //   //   title: "Location Tracker",
+      //   //   content: "Updated at ${DateTime.now().toString().substring(11, 19)}",
+      //   // );
+      // }
 
       debugPrint('Location Update: ${position.latitude}, ${position.longitude} at ${DateTime.now()}');
 

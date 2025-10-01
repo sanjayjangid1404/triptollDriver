@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/main.dart';
@@ -37,13 +40,21 @@ import '../common/driver_notification_service.dart';
 import '../common/globs.dart';
 import '../common/route_helper.dart';
 import '../model/category_type_response.dart' hide Data;
+import '../model/check_ticket_limit_model.dart';
 import '../model/city_response.dart';
+import '../model/daily_earnings_md.dart';
+import '../model/device_logout_model.dart';
 import '../model/faq_driver_response.dart';
+import '../model/getBookingsBydateAndDriver_model.dart';
+import '../model/inactive_wallet_model.dart';
+import '../model/life_time_earn_model.dart';
 import '../model/missed_order_list_model.dart';
+import '../model/monthly_earn_model.dart';
 import '../model/running_order_response.dart';
 import '../model/subCategoryVehicle.dart' hide Data;
 import '../model/vehicle_data.dart' hide Data;
 import '../model/wallet_response.dart';
+import '../model/weekly_earn.dart';
 import '../repo/auth_repo.dart';
 import '../view/home/order/category_list_page.dart';
 import '../view/home/show_timer.dart';
@@ -116,8 +127,12 @@ class AuthController extends GetxController implements GetxService {
   @override
   void onInit() {
     super.onInit();
-
-
+   // if(isLoggedIn()) {
+    getDeviceId();
+      Stream.periodic(const Duration(seconds: 15)).listen((_) {
+        checkDriverDevice(deviceId);
+      });
+    //}
     _checkLocationPermission();
   }
 
@@ -220,6 +235,56 @@ class AuthController extends GetxController implements GetxService {
     });
   }
 
+  Future<void>addWalletPaymentFun({String? amount, String? transitionId, required BuildContext context})
+  async {
+
+    isVehicle = true;
+
+    update();
+    print(getUserDeviceID());
+    subCategoryVehicle = null;
+
+
+
+    Response response = await authRepo.addWalletPayment(customerID: getUserID(),amount: amount,trnId: transitionId);
+
+    //  LoginResponse? loginResponse;
+
+    if(response.statusCode==200 || response.statusCode ==400)
+    {
+
+      QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          text: 'Transaction Completed Successfully!',
+          onConfirmBtnTap: (){
+            Get.offAll(HomeView());
+          }
+      );
+
+      // subCategoryVehicle = SubCategoryVehicle.fromJson(response.body);
+      //
+      // isVehicle = false;
+      update();
+    }
+    else {
+
+
+      // dynamic data = jsonDecode(response.body);
+
+      ApiChecker.checkApi(response);
+
+
+
+
+    }
+
+    isVehicle = false;
+    update();
+
+
+
+  }
   Future<void> _updateDriverLocationOnServer(double latitude,
       double longitude) async {
     try {
@@ -255,7 +320,7 @@ class AuthController extends GetxController implements GetxService {
     }
   }
 
-  Future<void> loginFunction(String email, String password) async {
+  Future<void> loginFunction(String email, String password,deviceToken) async {
     isLoading = true;
 
     update();
@@ -272,8 +337,8 @@ class AuthController extends GetxController implements GetxService {
 
     Response response = await authRepo.login(
         token: token,
-        phone: email, password:
-    password);
+        phone: email, password: password,
+    deviceToken: deviceToken);
 
     //  LoginResponse? loginResponse;
 
@@ -298,8 +363,8 @@ class AuthController extends GetxController implements GetxService {
         }
         authRepo.saveUserName(response.body['name']);
         authRepo.saveUserEmail(response.body['email']);
-        authRepo.setMaxTime(response.body['max_loading_time']);
-        authRepo.setPricePerMinute(response.body['loading_charge_per_min']);
+        authRepo.setMaxTime(response.body['max_loading_time'].toString());
+        authRepo.setPricePerMinute(response.body['loading_charge_per_min'].toString());
 
         if (response.body['is_loading_time'].toString() == "true") {
           authRepo.saveIsLoadingTime(true);
@@ -343,6 +408,142 @@ class AuthController extends GetxController implements GetxService {
     else {
       // dynamic data = jsonDecode(response.body);
 
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    update();
+  }
+  String deviceId = "Unknown";
+  Future<void> getDeviceId() async {
+    final deviceInfoPlugin = DeviceInfoPlugin();
+
+    try {
+      if (Platform.isAndroid) {
+        var androidInfo = await deviceInfoPlugin.androidInfo;
+        // setState(() {
+         deviceId = androidInfo.id;
+        // });
+      } else if (Platform.isIOS) {
+        var iosInfo = await deviceInfoPlugin.iosInfo;
+        // setState(() {
+          deviceId = iosInfo.identifierForVendor ?? "Unknown";
+        // });
+      }
+    } catch (e) {
+      // setState(() {
+       deviceId = "Failed to get device ID: $e";
+      // });
+    }
+  }
+  Future<void> checkDriverDevice(deviceToken) async {
+    update();
+    getDeviceId();
+    if(getUserID() != null && deviceToken != 'Unknown'){
+    Response response = await authRepo.checkDriverDevice(
+    deviceToken: deviceToken,
+    userID: getUserID());
+    deviceLogoutModel = DeviceLogoutModel();
+    if (response.statusCode == 200) {
+      deviceLogoutModel = DeviceLogoutModel.fromJson(response.body);
+      print('object:::::::::${response.body['is_valid'].toString()}');
+      if(response.body['is_valid'] == false){
+        logoutUser();
+        update();
+      }
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    update();
+    }
+  }
+
+  Future<void> getDailyEarningsFun(date) async {
+    // update();
+    getDeviceId();
+    Response response = await authRepo.getDailyEarnings(
+    date: date,
+    userID: getUserID());
+    if (response.statusCode == 200) {
+      dailyEarningsMd.value = DailyEarningsMd.fromJson(response.body);
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    update();
+  }
+  Future<void> getDateRangeEarningsFun({stateDate,endDate}) async {
+    // update();
+    getDeviceId();
+    Response response = await authRepo.getDateRangeEarnings(
+    endDate: endDate,
+    startDate: stateDate,
+    userID: getUserID());
+    if (response.statusCode == 200) {
+      weeklyEarn.value = WeeklyEarn.fromJson(response.body);
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    update();
+  }
+  Future<void> getDateRangeEarningsMonthFun({stateDate,endDate}) async {
+    // update();
+    getDeviceId();
+    Response response = await authRepo.getDateRangeEarnings(
+    endDate: endDate,
+    startDate: stateDate,
+    userID: getUserID());
+    if (response.statusCode == 200) {
+      monthlyEarnModel.value = MonthlyEarnModel.fromJson(response.body);
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    update();
+  }
+
+  Future<void> getLifetimeEarningsFun() async {
+    // update();
+    getDeviceId();
+    Response response = await authRepo.getLifetimeEarningsUrl(
+    userID: getUserID());
+    if (response.statusCode == 200) {
+      lifeTimeEarnModel.value = LifeTimeEarnModel.fromJson(response.body);
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    update();
+  }
+
+  List<GetBookingsBydateAndDriverModel>getBookingsBydateAndDriverModelList = [];
+  RxInt refreshInt = 0.obs;
+  Future<void> getBookingsBydateAndDriverFun(date) async {
+    // update();
+    getDeviceId();
+    getBookingsBydateAndDriverModelList = [];
+    Response response = await authRepo.getBookingsBydateAndDriver(
+    date: date,
+    userID: getUserID());
+    if (response.statusCode == 200 || response.statusCode == 400) {
+      refreshInt.value = DateTime.now().microsecondsSinceEpoch;
+      for (int i = 0; i < response.body.length; i++) {
+        getBookingsBydateAndDriverModelList.add(GetBookingsBydateAndDriverModel.fromJson(response.body[i]));
+      }
+    }
+    else {
       ApiChecker.checkApi(response);
     }
 
@@ -434,7 +635,8 @@ class AuthController extends GetxController implements GetxService {
   }
 
   List<WalletResponse>walletResponseList = [];
-
+  // List<InactiveWalletModel>walletInactiveList = [];
+  InactiveWalletModel inactiveWalletModel = InactiveWalletModel();
   Future<void> changeLoginStatus(
       {String? status, BuildContext? context}) async {
     isLoading = true;
@@ -539,6 +741,25 @@ class AuthController extends GetxController implements GetxService {
       for (int i = 0; i < response.body.length; i++) {
         walletResponseList.add(WalletResponse.fromJson(response.body[i]));
       }
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    update();
+  }
+  Future<void> getWalletInactiveHistory() async {
+    isLoading = true;
+
+    update();
+    print(getUserDeviceID());
+    Response response = await authRepo.getInactiveBalanceUrl(userID: getUserID());
+
+    //  LoginResponse? loginResponse;
+
+    if (response.statusCode == 200 || response.statusCode == 400) {
+      inactiveWalletModel = InactiveWalletModel.fromJson(response.body);
     }
     else {
       ApiChecker.checkApi(response);
@@ -882,6 +1103,24 @@ class AuthController extends GetxController implements GetxService {
     update();
   }
 
+  CheckTicketLimitModel checkTicketLimitModel = CheckTicketLimitModel();
+  DeviceLogoutModel deviceLogoutModel = DeviceLogoutModel();
+  Rx<DailyEarningsMd> dailyEarningsMd = DailyEarningsMd().obs;
+  Rx<LifeTimeEarnModel> lifeTimeEarnModel = LifeTimeEarnModel().obs;
+  Rx<WeeklyEarn> weeklyEarn = WeeklyEarn().obs;
+  Rx<MonthlyEarnModel> monthlyEarnModel = MonthlyEarnModel().obs;
+  Future<void> checkTicket(body) async {
+    Response response = await authRepo.checkTicketLimits(body);
+    if (response.statusCode == 200) {
+      checkTicketLimitModel = CheckTicketLimitModel.fromJson(response.body);
+
+    }
+    else {
+    }
+    Globs.hideHUD();
+    update();
+  }
+
   Future<void> updateDriverPaymentStatus(body) async {
     isUploading = true;
 
@@ -1181,7 +1420,8 @@ class AuthController extends GetxController implements GetxService {
   }
 
   Future<void> startTrip(String id, String status, BuildContext context,
-      String cusId, String orderID, String amount) async {
+      String cusId, String orderID, String amount) async
+  {
     isLoading = true;
     Globs.showHUD();
 
@@ -1218,6 +1458,56 @@ class AuthController extends GetxController implements GetxService {
       ApiChecker.checkApi(response);
     }
 
+    isLoading = false;
+    Globs.hideHUD();
+    update();
+  }
+  Future<void> startLoadingApi(String id, BuildContext context, String orderID,) async
+  {
+    isLoading = true;
+    Globs.showHUD();
+
+    update();
+    print(getUserDeviceID());
+
+
+    Response response = await authRepo.startLoading(bookingId: orderID,userID: id);
+
+    //  LoginResponse? loginResponse;
+
+    if (response.statusCode == 200 || response.statusCode == 400) {
+      hasShownSheet = false;
+      Get.offAll(HomeView());
+      update();
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+    isLoading = false;
+    Globs.hideHUD();
+    update();
+  }
+  Future<void> startUnLoadingApi(String id, BuildContext context, String orderID,) async
+  {
+    isLoading = true;
+    Globs.showHUD();
+
+    update();
+    print(getUserDeviceID());
+
+
+    Response response = await authRepo.startUnLoading(bookingId: orderID,userID: id);
+
+    //  LoginResponse? loginResponse;
+
+    if (response.statusCode == 200 || response.statusCode == 400) {
+      hasShownSheet = false;
+      Get.offAll(HomeView());
+      update();
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
     isLoading = false;
     Globs.hideHUD();
     update();
@@ -1601,15 +1891,13 @@ class AuthController extends GetxController implements GetxService {
       isDismissible: false,
       enableDrag: false,
       showDragHandle: false,
-
       isScrollControlled: true,
-      // Allows the sheet to take up more space
       backgroundColor: Colors.transparent,
-      // Makes the rounded corners visible
-      builder: (context) =>
-          Container(
+      builder: (context) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: Container(
             padding: const EdgeInsets.only(top: 20),
-            // Space for the drag handle
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -1620,35 +1908,27 @@ class AuthController extends GetxController implements GetxService {
             child: DraggableScrollableSheet(
               expand: false,
               shouldCloseOnMinExtent: false,
-
               initialChildSize: 0.5,
-              // Initial height (40% of screen)
               minChildSize: 0.2,
-              // Minimum height when dragged down
               maxChildSize: 0.7,
-              // Maximum height when dragged up
               builder: (context, scrollController) {
-                return WillPopScope(
-                  onWillPop: () async {
-                    // ❌ back button से बंद नहीं होने देना
-                    return false;
-                  },
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.3, // Match minChildSize
-                        ),
-                        child: _buildRunningDetailsContent(
-                            notificationResponse!, context)),
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height * 0.3,
+                    ),
+                    child: _buildRunningDetailsContent(
+                      notificationResponse!,
+                      context,
+                    ),
                   ),
                 );
               },
             ),
           ),
+        );
+      },
     );
   }
 
@@ -2158,7 +2438,6 @@ class AuthController extends GetxController implements GetxService {
 
                 ],
               ) :
-
               Row(
                 children: [
                   Expanded(
@@ -2207,154 +2486,160 @@ class AuthController extends GetxController implements GetxService {
                   SizedBox(
                     width: 10,
                   ),
+                  isLoadingTime == true ?
                   Expanded(
-                    child: Obx(() {
-                      return InkWell(
-                        onTap: isLoadingTime == true && loadingStart.value ==
-                            false && unloadingStart.value == false ? () {
-                          loadingStart.value = true;
-                          showCompletePayment.value = true;
-                          showUnLoading.value = false;
-                          print('click start time');
-                          print('click ${loadingStart.value.toString()}');
-                          print('click ${unloadingStart.value.toString()}');
-                        } :
-                        loadingStart.value == true ? () {
-                          print('fdjfdjfhdj${loadingStart.value.toString()}');
-                          loadingStart.value = false;
-                          unloadingStart.value = true;
-                          Navigator.pop(context);
-                          if (bookingResponse.orderStatus.toString()
-                              .toLowerCase() == "picked") {
-                            orderDelivered(
-                                orderID: bookingResponse.id.toString());
-                            showUnLoading.value = false;
-                            loadingStart.value = false;
-                            unloadingStart.value = false;
-                            showCompletePayment.value = false;
-                            //  startTrip(bookingResponse.id.toString(), "no",context,bookingResponse.cusId.toString(),bookingResponse.orderId.toString(),bookingResponse.amount.toString());
+                    child:  InkWell(
+                      onTap: () {
+                        // final status = bookingResponse.orderStatus.toString().toLowerCase();
 
-                          }
-                          else if (bookingResponse.orderStatus.toString()
-                              .toLowerCase() == "accpeted") {
-                            orderPicked(orderID: bookingResponse.id.toString());
-                            // startTrip(bookingResponse.id.toString(), "yes",context,bookingResponse.cusId.toString(),bookingResponse.orderId.toString(),bookingResponse.amount.toString());
-                          }
-                        } :
-                            () {
-                          loadingStart.value = false;
-                          unloadingStart.value = false;
-                          showCompletePayment.value = true;
-                          showUnLoading.value = true;
+                        if ( bookingResponse.orderStatus.toString().toLowerCase() == "accpeted") {
+                          startLoadingApi(getUserID().toString(), context, bookingResponse.id.toString());
+                          // checkDriverBooking(context);
+                        }
+                        else if (bookingResponse.orderStatus.toString().toLowerCase() == "loading") {
+                          orderPicked(orderID: bookingResponse.id.toString());
+                          // checkDriverBooking(context);
+                        }
+                        else if (bookingResponse.orderStatus.toString().toLowerCase() == "unloading") {
+                          orderDelivered(orderID: bookingResponse.id.toString());
+                          // checkDriverBooking(context);
+                        }
+                        else if(bookingResponse.orderStatus.toString().toLowerCase() == "picked" ){
+                          startUnLoadingApi(getUserID().toString(), context, bookingResponse.id.toString());
+                          // checkDriverBooking(context);
                           print('unloading');
-                        },
-                        child: Container(
-                          height: 40,
-                          margin: const EdgeInsets.symmetric(horizontal: 10),
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: TColor.primary,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: isLoadingTime == true ? Obx(() {
-                            return Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
-                                loadingStart.value == false &&
-                                    unloadingStart.value == false && showCompletePayment.value == false ?
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Start Loading",
-                                      style: TextStyle(
-                                        color: TColor.primaryTextW,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ) :
-                                loadingStart.value == true &&
-                                    unloadingStart.value == false &&
-                                    showCompletePayment.value == true ?
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      bookingResponse.orderStatus.toString()
-                                          .contains("picked")
-                                          ? "Completed"
-                                          : "Start Trip",
-                                      style: TextStyle(
-                                        color: TColor.primaryTextW,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ) :
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Unloading",
-                                      style: TextStyle(
-                                        color: TColor.primaryTextW,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                              ],
-                            );
-                          }) :
-                          Stack(
-                            alignment: Alignment.centerRight,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    bookingResponse.orderStatus.toString()
-                                        .contains("picked")
-                                        ? "Completed"
-                                        : "Start Trip",
-                                    style: TextStyle(
-                                      color: TColor.primaryTextW,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        }
+                      },
+                      child: Container(
+                        height: 40,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: TColor.primary,
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                      );
-                    }),
+                        child: isLoadingTime == true ?
+                        Stack(
+                          alignment: Alignment.centerRight,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  bookingResponse.orderStatus.toString().toLowerCase() == "accpeted" ?
+                                  "Start Loading"
+                                      :  bookingResponse.orderStatus.toString().toLowerCase() == "loading" ?
+                                  "Start Trip" :
+                                  bookingResponse.orderStatus.toString().toLowerCase() == "picked"
+                                      ? "Unloading" :
+                                  bookingResponse.orderStatus.toString().toLowerCase() == "unloading" ?
+                                  "Completed"
+                                      : "Unknown error",
+                                  style: TextStyle(
+                                    color: TColor.primaryTextW,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        )   :
+                        Stack(
+                          alignment: Alignment.centerRight,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  bookingResponse.orderStatus.toString()
+                                      .contains("picked")
+                                      ? "Completed"
+                                      : "Start Trip",
+                                  style: TextStyle(
+                                    color: TColor.primaryTextW,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  ) :
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+
+                        Navigator.pop(context);
+                        if(bookingResponse.orderStatus.toString().toLowerCase() == "picked" ){
+
+                          orderDelivered(orderID:bookingResponse.id.toString());
+
+                          //  startTrip(bookingResponse.id.toString(), "no",context,bookingResponse.cusId.toString(),bookingResponse.orderId.toString(),bookingResponse.amount.toString());
+
+
+                        }
+                        else if (bookingResponse.orderStatus.toString().toLowerCase() == "accpeted"){
+                          orderPicked(orderID:bookingResponse.id.toString());
+                          // startTrip(bookingResponse.id.toString(), "yes",context,bookingResponse.cusId.toString(),bookingResponse.orderId.toString(),bookingResponse.amount.toString());
+                        }
+                        else if(bookingResponse.orderStatus.toString().toLowerCase() == "loading"){
+                          orderPicked(orderID: bookingResponse.id.toString());
+                        }
+
+                      },
+                      child: Container(
+                        width: 100,
+                        height: 40,
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: TColor.primary,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.centerRight,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  bookingResponse.orderStatus.toString().contains("picked")  ? "Completed":"Start Trip",
+                                  style: TextStyle(
+                                    color: TColor.primaryTextW,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 35),
               // bookingResponse.orderStatus.toString().toLowerCase() == "delivered" && bookingResponse.paymentStatus.toString().toLowerCase() == "pending"  ?
-              Obx(() {
-                return isLoadingTime == true && loadingStart.value == true
-                    ? LoadingTimer(
-                  loadingChargePerMin: loadingCharges.toString(),
-                  maxLoadingTime: maxTime.toString(),)
-                    : SizedBox.shrink();
-              },),
-              Obx(() {
-                return isLoadingTime == true && unloadingStart.value == true &&
-                    showUnLoading.value == true
-                    ? UnLoadingTimer(
-                  loadingChargePerMin: loadingCharges.toString(),
-                  maxLoadingTime: maxTime.toString(),)
-                    : SizedBox.shrink();
-              },),
+              bookingResponse.orderStatus.toString().toLowerCase() ==
+                      "loading"
+                  ? LoadingTimer(
+                      loadingChargePerMin: loadingCharges.toString(),
+                      maxLoadingTime: maxTime.toString(),
+                    )
+                  : SizedBox.shrink(),
+              bookingResponse.orderStatus.toString().toLowerCase() ==
+                      "unloading"
+                  ? UnLoadingTimer(
+                      loadingChargePerMin: loadingCharges.toString(),
+                      maxLoadingTime: maxTime.toString(),
+                    )
+                  : SizedBox.shrink(),
               // : SizedBox.shrink(),
               const SizedBox(height: 25),
             ],

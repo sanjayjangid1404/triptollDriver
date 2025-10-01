@@ -43,6 +43,7 @@ class AppContants
   static String driverBasicInfoURL = "Driver/createDriver";
   static String driverFAQURl = "Home/getFaq/driver";
   static String ticketRezURL = "Driver/ticketRezByDriver";
+  static String checkTicketLimit = "Driver/checkTicketLimit";
   static String getCityURL = "home/getCity";
   static String updateDriverBankDetailURL = "Driver/updateDriverBankDetail";
   static String updateDriverVehicleDetail = "Driver/updateDriverVehicleDetail";
@@ -59,11 +60,16 @@ class AppContants
   static String accpetBookingURL = "Booking/accpetBooking";
   static String orderPickedURL = "Booking/orderPicked";
   static String orderDeliveredURL = "Booking/orderDelivered";
+  static String getBookingsBydateAndDriverURL = "Booking/getBookingsBydateAndDriver";
   static String driverOnlineTImeURL = "Driver/driver_online_time";
   static String getWalletHistoryURL = "Driver/getWalletHistory";
+  static String checkDriverDeviceURL = "Driver/checkDriverDevice";
+  static String getDailyEarningsURL = "Driver/getDailyEarnings";
   static String saveFirebaseTokenURL = "Home/saveFirebaseXToken";
   static String bookingStatusChangeURl = "Booking/changeBookingStatus/";
   static String startTripURL = "Booking/startTrip";
+  static String orderLoadingURL = "Booking/orderLoading";
+  static String orderUnloadingURL = "Booking/orderUnloading";
   static String checkDriverBooking = "Booking/check_running_order_driver";
   static String getBookingNotificationURL = "Booking/findNewBookings";
   static String getAllCategory = "home/getAllCategory";
@@ -76,9 +82,13 @@ class AppContants
   static String driverDetailsURL = "Driver/getDriverDetails";
   static String getPaymentHistoryUrl = "Driver/getPaymentHistory";
   static String getMissedOrdersUrl = "Driver/getMissedOrders";
+  static String getDateRangeEarningsUrl = "Driver/getDateRangeEarnings";
+  static String getLifetimeEarningsUrl = "Driver/getLifetimeEarnings";
+  static String getInactiveBalanceUrl = "Driver/getInactiveBalance?driver_id=";
   static String categoryVehicleURL = "home/getVehicleByCategoryId/";
   static String verifyOtpURl = "verify-otp";
   static String myComplaintURl = "get-my-complaints";
+  static String addCustomerWalletURL = "Customer/addCustomerWallet";
   static String getMyReferral = "get-my-referral-code";
   static String userMembership = "user-membership-details";
   static String userProfileURL = "get-latest-user-profile";

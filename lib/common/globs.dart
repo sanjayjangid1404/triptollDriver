@@ -128,7 +128,6 @@ class SVKey {
     static const svBookingDetail = "${baseUrl}booking_detail";
 
     static const svDriverSummary = "${baseUrl}driver_summary";
-
     static const svPersonalDocumentList = "${baseUrl}personal_document_list";
     static const svDriverUploadDocument = "${baseUrl}driver_update_document";
     static const svCarDocumentList = "${baseUrl}car_document_list";

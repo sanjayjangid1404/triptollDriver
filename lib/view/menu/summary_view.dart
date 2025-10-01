@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:taxi_driver/common/common_extension.dart';
 import 'package:taxi_driver/common/globs.dart';
 import 'package:taxi_driver/common/service_call.dart';
 import 'package:taxi_driver/common_widget/title_subtitle_cell.dart';
-import 'package:taxi_driver/common_widget/today_summary_row.dart';
-import 'package:taxi_driver/common_widget/weekly_summary_row.dart';
+import '../../common/appContants.dart';
+import '../../controller/authController.dart';
 
 class SummaryView extends StatefulWidget {
   const SummaryView({super.key});
@@ -27,17 +29,45 @@ class _SummaryViewState extends State<SummaryView>
 
   List weeklyTripsArr = [];
   List weeklyChartArr = [];
-
+  DateTime today = DateTime.now();
+  late DateTime startDate;
+  late DateTime endDate;
+  late DateTime startOfMonth;
+  late DateTime endOfMonth;
   @override
   void initState() {
     super.initState();
     controller = TabController(length: 2, vsync: this);
-    apiList();
+    // apiList();
+    DateTime today = DateTime.now();
+    startDate = today.subtract(Duration(days: 6)); // last 7 days
+    endDate = today;
+    Get.find<AuthController>().getDailyEarningsFun(_focusedDay.toString());
+    Get.find<AuthController>().getBookingsBydateAndDriverFun(_focusedDay.toString());
+    Get.find<AuthController>().getLifetimeEarningsFun();
+    Get.find<AuthController>().getDateRangeEarningsFun(
+      stateDate: startDate.toString().split(' ')[0],
+      endDate: endDate.toString().split(' ')[0],
+    );
+    DateTime now = DateTime.now();
+    startOfMonth = DateTime(now.year, now.month, 1);
+    endOfMonth = DateTime(now.year, now.month + 1, 0);
+    Get.find<AuthController>().getDateRangeEarningsMonthFun(
+      stateDate: startOfMonth.toString().split(' ')[0],
+      endDate: endOfMonth.toString().split(' ')[0],
+    );
   }
+
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   Widget build(BuildContext context) {
-    var todayTotal = double.tryParse(todayObj["total_amt"].toString()) ?? 0.0;
+    // var todayTotal = double.tryParse(Get
+    //     .find<AuthController>()
+    //     .dailyEarningsMd.value
+    //     .totalEarnings
+    //     .toString()) ?? 0.0;
     var todayCashTotal =
         double.tryParse(todayObj["cash_amt"].toString()) ?? 0.0;
     var todayOnlineTotal =
@@ -84,15 +114,15 @@ class _SummaryViewState extends State<SummaryView>
             labelColor: TColor.primary,
             unselectedLabelColor: TColor.placeholder,
             labelStyle:
-                const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
             unselectedLabelStyle:
-                const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
             tabs: const [
               Tab(
                 text: "TODAY",
               ),
               Tab(
-                text: "WEEKLY",
+                text: "STATEMENT",
               ),
             ],
           ),
@@ -105,334 +135,662 @@ class _SummaryViewState extends State<SummaryView>
             child: TabBarView(
               controller: controller,
               children: [
-                Container(
-                  color: TColor.lightWhite,
-                  child: SingleChildScrollView(
-                    child: Container(
-                      color: Colors.white,
-                      child: Column(
-                        children: [
-                          Container(
-                            width: double.maxFinite,
-                            height: 12,
-                            color: TColor.lightWhite,
-                          ),
-                          const SizedBox(
-                            height: 40,
-                          ),
-                          Text(
-                            DateTime.now()
-                                .stringFormat(format: "EEE, dd MMM yy"),
-                            style: TextStyle(
-                                color: TColor.secondaryText, fontSize: 16),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "\$",
-                                style: TextStyle(
-                                    color: TColor.primary,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800),
-                              ),
-                              Text(
-                                todayTotal.toStringAsFixed(2),
-                                style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w800),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              const SizedBox(
-                                height: 30,
-                              ),
-                              Container(
-                                width: double.maxFinite,
-                                height: 0.5,
-                                color: TColor.lightGray,
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TitleSubtitleCell(
-                                      title:
-                                          (todayObj["tips_count"] as int? ?? 0)
-                                              .toString(),
-                                      subtitle: "Trips",
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 80,
-                                    width: 0.5,
-                                    color: TColor.lightGray,
-                                  ),
-                                  Expanded(
-                                    child: TitleSubtitleCell(
-                                      title:
-                                          "\$${todayOnlineTotal.toStringAsFixed(2)}",
-                                      subtitle: "Online Trip",
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 80,
-                                    width: 0.5,
-                                    color: TColor.lightGray,
-                                  ),
-                                  Expanded(
-                                    child: TitleSubtitleCell(
-                                      title:
-                                          "\$${todayCashTotal.toStringAsFixed(2)}",
-                                      subtitle: "Cash Trip",
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Container(
-                                width: double.maxFinite,
-                                height: 60,
-                                color: TColor.lightWhite,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "TRIPS",
-                                  style: TextStyle(
-                                      color: TColor.primaryText,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w800),
-                                ),
-                              ),
-                              ListView.separated(
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
-                                itemBuilder: (context, index) {
-                                  var sObj = todayTripsArr[index] as Map? ?? {};
-
-                                  return TodaySummaryRow(
-                                    sObj: sObj,
-                                  );
-                                },
-                                separatorBuilder: (context, index) =>
-                                    const Divider(
-                                  indent: 40,
-                                ),
-                                itemCount: todayTripsArr.length,
-                              ),
-                            ],
-                          )
-                        ],
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 20,
                       ),
-                    ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.green,),
+                            borderRadius: BorderRadius.circular(12)
+                        ),
+                        child: TextButton(
+                          onPressed: () async {
+                            DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.utc(2000, 1, 1),
+                              lastDate: DateTime
+                                  .now(), // sirf past aur today tak hi chalega
+                            );
+
+                            if (pickedDate != null) {
+                              setState(() {
+                                _selectedDay = pickedDate;
+                              });
+
+                              String formattedDate =
+                              DateFormat('yyyy-MM-dd').format(pickedDate);
+
+                              // API call
+                              Get.find<AuthController>().getDailyEarningsFun(
+                                  formattedDate);
+                              Get.find<AuthController>()
+                                  .getBookingsBydateAndDriverFun(formattedDate);
+                            }
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                _selectedDay == null
+                                    ? "Select Date"
+                                    : "${DateFormat('yyyy-MM-dd').format(
+                                    _selectedDay!)}",
+                                style: const TextStyle(
+                                    fontSize: 16), // styling optional
+                              ),
+                              Text(
+                                "Select Date",
+                                style: const TextStyle(fontSize: 14,
+                                    color: Colors.grey), // styling optional
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Obx(() {
+                        return Get
+                            .find<AuthController>()
+                            .dailyEarningsMd
+                            .value
+                            .status == true ?
+                        Container(
+                          color: TColor.lightWhite,
+                          child: Container(
+                            color: Colors.white,
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: double.maxFinite,
+                                  height: 12,
+                                  color: TColor.lightWhite,
+                                ),
+                                const SizedBox(
+                                  height: 40,
+                                ),
+                                Text(
+                                  DateTime.now().stringFormat(
+                                      format: "EEE, dd MMM yy"),
+                                  style: TextStyle(
+                                      color: TColor.secondaryText,
+                                      fontSize: 16),
+                                ),
+                                const SizedBox(
+                                  height: 8,
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "₹",
+                                      style: TextStyle(
+                                          color: TColor.primary,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800),
+                                    ),
+                                    Text(
+                                      Get
+                                          .find<AuthController>()
+                                          .dailyEarningsMd
+                                          .value
+                                          .totalEarnings
+                                          .toString(),
+                                      style: TextStyle(
+                                          color: TColor.primaryText,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w800),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    const SizedBox(
+                                      height: 30,
+                                    ),
+                                    Container(
+                                      width: double.maxFinite,
+                                      height: 0.5,
+                                      color: TColor.lightGray,
+                                    ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: TitleSubtitleCell(
+                                            title:
+                                            Get
+                                                .find<AuthController>()
+                                                .dailyEarningsMd
+                                                .value
+                                                .totalTrips
+                                                .toString(),
+                                            subtitle: "Trips",
+                                          ),
+                                        ),
+                                        Container(
+                                          height: 80,
+                                          width: 0.5,
+                                          color: TColor.lightGray,
+                                        ),
+                                        Expanded(
+                                          child: TitleSubtitleCell(
+                                            title: Get
+                                                .find<AuthController>()
+                                                .dailyEarningsMd
+                                                .value
+                                                .totalHours
+                                                .toString(),
+                                            subtitle: "Total Hours",
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      width: double.maxFinite,
+                                      height: 60,
+                                      color: TColor.lightWhite,
+                                      padding:
+                                      const EdgeInsets.symmetric(
+                                          horizontal: 20),
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "TRIPS",
+                                        style: TextStyle(
+                                            color: TColor.primaryText,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w800),
+                                      ),
+                                    ),
+                                    Obx(() {
+                                      return Get
+                                          .find<AuthController>()
+                                          .refreshInt > 0 ?
+                                      ListView.separated(
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        shrinkWrap: true,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 10),
+                                        itemBuilder: (context, index) {
+                                          var sObj = Get
+                                              .find<AuthController>()
+                                              .getBookingsBydateAndDriverModelList[index];
+
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 10),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment
+                                                  .center,
+                                              mainAxisAlignment: MainAxisAlignment
+                                                  .spaceBetween,
+                                              children: [
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment
+                                                      .start,
+                                                  mainAxisAlignment: MainAxisAlignment
+                                                      .start,
+                                                  children: [
+                                                    Text(
+                                                      'Booking Time',
+                                                      style: TextStyle(
+                                                          color: TColor
+                                                              .primaryText,
+                                                          fontSize: 13),
+                                                    ),
+                                                    Text(
+                                                      sObj.bookingDate != null
+                                                          ? sObj.bookingDate!
+                                                          .dataFormatttt(
+                                                          format: "hh:mm a")
+                                                          : "--",
+                                                      style: TextStyle(
+                                                          color: TColor
+                                                              .primaryText,
+                                                          fontSize: 15,
+                                                          fontWeight: FontWeight
+                                                              .w600),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                const SizedBox(
+                                                  width: 8,
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment
+                                                      .start,
+                                                  children: [
+                                                    Text(
+                                                      '₹${sObj.totalAmount
+                                                          .toString()}',
+                                                      maxLines: 1,
+                                                      style: TextStyle(
+                                                          color: TColor
+                                                              .primaryText,
+                                                          fontSize: 16),
+                                                    ),
+                                                    Text(
+                                                      "Paid by ${ sObj
+                                                          .paymentType == 'cash'
+                                                          ? "cash"
+                                                          : "online" }",
+                                                      style: TextStyle(
+                                                          color: TColor
+                                                              .secondaryText,
+                                                          fontSize: 15),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                        separatorBuilder: (context, index) =>
+                                        const Divider(
+                                          indent: 0,
+                                        ),
+                                        itemCount: Get
+                                            .find<AuthController>()
+                                            .getBookingsBydateAndDriverModelList
+                                            .length,
+                                      ) :
+                                      SizedBox.shrink();
+                                    }),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ) : SizedBox();
+                      }),
+                    ],
                   ),
                 ),
                 Container(
                   color: TColor.lightWhite,
                   child: SingleChildScrollView(
-                    child: Container(
-                      color: Colors.white,
-                      child: Column(
-                        children: [
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 30,
+                        ),
+                        Obx(() {
+                          return Get
+                              .find<AuthController>()
+                              .weeklyEarn
+                              .value
+                              .status == true ?
                           Container(
-                            width: double.maxFinite,
-                            height: 12,
-                            color: TColor.lightWhite,
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          Text(
-                            DateTime.now()
-                                .stringFormat(format: "EEE, dd MMM yy"),
-                            style: TextStyle(
-                                color: TColor.secondaryText, fontSize: 16),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "\$",
-                                style: TextStyle(
-                                    color: TColor.primary,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800),
-                              ),
-                              Text(
-                                weekTotal.toStringAsFixed(2),
-                                style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w800),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          SizedBox(
-                            height: context.width * 0.5,
-                            child: BarChart(
-                              BarChartData(
-                                barTouchData: BarTouchData(
-                                  touchTooltipData: BarTouchTooltipData(
-                                    getTooltipColor: (BarChartGroupData group) => Colors.grey,
-                                    // tooltipBgColor: Colors.grey,
-                                    tooltipHorizontalAlignment:
-                                        FLHorizontalAlignment.right,
-                                    tooltipMargin: 10,
-                                    getTooltipItem:
-                                        (group, groupIndex, rod, rodIndex) {
-                                      var obj =
-                                          weeklyChartArr[group.x] as Map? ?? {};
-
-                                      var weekDay = obj["date"]
-                                          .toString()
-                                          .stringFormatToOtherFormat(
-                                              newFormat: "EEEE");
-
-                                      return BarTooltipItem(
-                                        '$weekDay\n\$${ ( double.tryParse( obj["total_amt"].toString()) ?? 0.0 ).toStringAsFixed(2) }',
-                                        const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 16),
-                                      );
-                                    },
-                                  ),
-                                  touchCallback: (event, barTouchResponse) {
-                                    setState(() {
-                                      if (!event.isInterestedForInteractions ||
-                                          barTouchResponse == null ||
-                                          barTouchResponse.spot == null) {
-                                        touchedIndex = -1;
-                                        return;
-                                      }
-
-                                      touchedIndex = barTouchResponse
-                                          .spot!.touchedBarGroupIndex;
-                                    });
-                                  },
-                                ),
-                                titlesData: FlTitlesData(
-                                  show: true,
-                                  rightTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  topTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  bottomTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                        showTitles: true,
-                                        getTitlesWidget: getTitles,
-                                        reservedSize: 38),
-                                  ),
-                                  leftTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                ),
-                                borderData: FlBorderData(
-                                  show: false,
-                                ),
-                                barGroups: showingGroups(),
-                                gridData: const FlGridData(show: false),
-                              ),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                    color: Colors.grey
+                                )
                             ),
-                          ),
-                          Column(
-                            children: [
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              Container(
-                                width: double.maxFinite,
-                                height: 0.5,
-                                color: TColor.lightGray,
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TitleSubtitleCell(
-                                      title:
-                                          (weekObj["tips_count"] as int? ?? 0)
-                                              .toString(),
-                                      subtitle: "Trips",
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 80,
-                                    width: 0.5,
-                                    color: TColor.lightGray,
-                                  ),
-                                  Expanded(
-                                    child: TitleSubtitleCell(
-                                      title:
-                                          "\$${weekOnlineTotal.toStringAsFixed(2)}",
-                                      subtitle: "Online Trip",
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 80,
-                                    width: 0.5,
-                                    color: TColor.lightGray,
-                                  ),
-                                  Expanded(
-                                    child: TitleSubtitleCell(
-                                      title:
-                                          "\$${weekCashTotal.toStringAsFixed(2)}",
-                                      subtitle: "Cash Trip",
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Container(
-                                width: double.maxFinite,
-                                height: 60,
-                                color: TColor.lightWhite,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "TRIPS",
+                            padding: EdgeInsets.all(15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('This Week',
                                   style: TextStyle(
-                                      color: TColor.primaryText,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w800),
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16
+                                  ),
                                 ),
-                              ),
-                              ListView.separated(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 10),
-                                  itemBuilder: (context, index) {
-                                    var sObj =
-                                        weeklyChartArr[index] as Map? ?? {};
-
-                                    return WeeklySummaryRow(
-                                      sObj: sObj,
-                                    );
-                                  },
-                                  separatorBuilder: (context, index) =>
-                                      const Divider(
-                                        indent: 40,
-                                      ),
-                                  itemCount: weeklyChartArr.length)
-                            ],
-                          )
-                        ],
-                      ),
+                                Text('${startDate.toString().split(' ')[0]} to ${endDate.toString().split(' ')[0]}',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 13
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text('₹${Get
+                                            .find<AuthController>()
+                                            .weeklyEarn
+                                            .value
+                                            .totalEarnings
+                                            .toString()}',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Earnings',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text(Get
+                                            .find<AuthController>()
+                                            .weeklyEarn
+                                            .value
+                                            .totalHours
+                                            .toString(),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Total Hours',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text(Get
+                                            .find<AuthController>()
+                                            .weeklyEarn
+                                            .value
+                                            .totalTrips
+                                            .toString(),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Trips Taken',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ) :
+                              SizedBox();
+                        }),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        Obx(() {
+                          return Get
+                              .find<AuthController>()
+                              .monthlyEarnModel
+                              .value
+                              .status == true ?
+                          Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                    color: Colors.grey
+                                )
+                            ),
+                            padding: EdgeInsets.all(15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('This Month',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16
+                                  ),
+                                ),
+                                Text('${startOfMonth.toString().split(' ')[0]} to ${endOfMonth.toString().split(' ')[0]}',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 13
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 2,
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text('₹${Get
+                                            .find<AuthController>()
+                                            .monthlyEarnModel
+                                            .value
+                                            .totalEarnings
+                                            .toString()}',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Earnings',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text(Get
+                                            .find<AuthController>()
+                                            .monthlyEarnModel
+                                            .value
+                                            .totalHours
+                                            .toString(),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Total Hours',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text(Get
+                                            .find<AuthController>()
+                                            .monthlyEarnModel
+                                            .value
+                                            .totalTrips
+                                            .toString(),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Trips Taken',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ) :
+                          SizedBox();
+                        }),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        Obx(() {
+                          return Get
+                              .find<AuthController>()
+                              .lifeTimeEarnModel
+                              .value
+                              .status == true ?
+                          Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                    color: Colors.grey
+                                )
+                            ),
+                            padding: EdgeInsets.all(15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Lifetime Statement',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text('₹${Get
+                                            .find<AuthController>()
+                                            .lifeTimeEarnModel
+                                            .value
+                                            .totalEarnings
+                                            .toString()}',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Earnings',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text(Get
+                                            .find<AuthController>()
+                                            .lifeTimeEarnModel
+                                            .value
+                                            .totalHours
+                                            .toString(),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Total Hours',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .center,
+                                      children: [
+                                        Text(Get
+                                            .find<AuthController>()
+                                            .lifeTimeEarnModel
+                                            .value
+                                            .totalTrips
+                                            .toString(),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15
+                                          ),
+                                        ),
+                                        Text('Trips Taken',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ) :
+                          SizedBox();
+                        }),
+                      ],
                     ),
                   ),
                 ),
@@ -458,7 +816,8 @@ class _SummaryViewState extends State<SummaryView>
         ));
   }
 
-  List<BarChartGroupData> showingGroups() => weeklyChartArr.map((e) {
+  List<BarChartGroupData> showingGroups() =>
+      weeklyChartArr.map((e) {
         var i = weeklyChartArr.indexOf(e);
         return makeGroupData(i,
             double.tryParse(e["total_amt"].toString()) ?? 0.0, TColor.primary,
@@ -467,8 +826,8 @@ class _SummaryViewState extends State<SummaryView>
 
   BarChartGroupData makeGroupData(int x, double y, Color barColor,
       {bool isTouched = false,
-      double width = 40,
-      List<int> showTooltips = const []}) {
+        double width = 40,
+        List<int> showTooltips = const []}) {
     return BarChartGroupData(x: x, barRods: [
       BarChartRodData(
           toY: isTouched ? y + 1 : y,
@@ -489,8 +848,11 @@ class _SummaryViewState extends State<SummaryView>
   void apiList() {
     Globs.showHUD();
     ServiceCall.post(
-      {},
-      SVKey.svDriverSummary,
+      {
+        "driver_id": Get.find<AuthController>().getUserID(),
+        "date": DateTime.now().stringFormat(format: "YYYY-MM-DD"),
+      },
+      AppContants.getDailyEarningsURL,
       isTokenApi: true,
       withSuccess: (responseObj) async {
         Globs.hideHUD();
@@ -517,5 +879,16 @@ class _SummaryViewState extends State<SummaryView>
         debugPrint(err.toString());
       },
     );
+  }
+}
+extension StringExtension on String {
+  String dataFormatttt({String format = "hh:mm a"}) {
+    try {
+      final dateTime =
+      DateFormat("yyyy-MM-dd HH:mm:ss").parse(this, true);
+      return DateFormat(format).format(dateTime);
+    } catch (e) {
+      return this;
+    }
   }
 }

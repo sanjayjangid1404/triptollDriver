@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,12 +33,32 @@ class _MobileNumberViewState extends State<MobileNumberView> {
   TextEditingController passwordMobile = TextEditingController();
   late CountryCode countryCode;
   bool _obscureText = true;
+  Future<void> getDeviceId() async {
+    final deviceInfoPlugin = DeviceInfoPlugin();
 
+    try {
+      if (Platform.isAndroid) {
+        var androidInfo = await deviceInfoPlugin.androidInfo;
+        setState(() {
+          Get.find<AuthController>().deviceId = androidInfo.id;
+        });
+      } else if (Platform.isIOS) {
+        var iosInfo = await deviceInfoPlugin.iosInfo;
+        setState(() {
+          Get.find<AuthController>().deviceId = iosInfo.identifierForVendor ?? "Unknown";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        Get.find<AuthController>().deviceId = "Failed to get device ID: $e";
+      });
+    }
+  }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    getDeviceId();
     countryCode = countryCodePicker.countryCodes
         .firstWhere((element) => element.name == "India");
   }
@@ -224,7 +247,10 @@ class _MobileNumberViewState extends State<MobileNumberView> {
                     mdShowAlert("Fail", "Enter password", () {});
                   }
                   else {
-                    authController.loginFunction(txtMobile.text, passwordMobile.text);
+                    authController.loginFunction(txtMobile.text, passwordMobile.text,authController.deviceId);
+                    Future.delayed(Duration(seconds: 5),() {
+                      authController.checkDriverDevice(authController.deviceId);
+                    },);
 
                   }
 

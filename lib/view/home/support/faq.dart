@@ -34,7 +34,10 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
       curve: Curves.easeInOut,
     );
     _animationController.forward();
-
+    authController.checkTicket({
+      "driver_id":authController.getUserID().toString(),
+      "user_type":"driver"
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() {});
     });
@@ -113,7 +116,14 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
                 ),
                 SizedBox(height: 32),
                 // Submit Button
-                _buildSubmitButton(),
+                authController.checkTicketLimitModel.hasExceededLimit == false ?
+                _buildSubmitButton()
+                    : const Text(
+                  'You have used two tickets, which are currently awaiting approval from the Triptoll team.',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400,
+                      color: Colors.black),
+                  textAlign: TextAlign.center,
+                ),
                 SizedBox(height: 40),
               ],
             ),
@@ -220,7 +230,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
           });
           }
           else {
-            showCustomSnackBar("select faq");
+            showCustomSnackBar("Please select any option");
           }
         },
         style: ElevatedButton.styleFrom(

@@ -540,13 +540,14 @@ void overlayMain() {
           },
           child: Center(
             child: Container(
-              height: 60,
-              width: 60,
+              height: 80,
+              width: 80,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
               ),
-              child: Image.asset("assets/img/logo.png", height: 20,
+              padding: EdgeInsets.all(7),
+              child: Image.asset("assets/img/flot.jpg", height: 20,
                 width: 20,),
             ),
           ),

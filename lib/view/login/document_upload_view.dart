@@ -426,7 +426,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 // License
 
                  authController.isUploading ? Center(child: CircularProgressIndicator(color: TColor.primary,),):
-                RoundButton(
+                 authController.isKyc() ? SizedBox.shrink()  : RoundButton(
                   onPressed: () {
 
                     if(widget.isEdit){

@@ -18,9 +18,9 @@ class AuthRepo{
         ApiController.REGISTER_URI, signUpBody.toJson());
   }*/
 
-  Future<Response> login({String? phone,String? password,String? token}) async {
+  Future<Response> login({String? phone,String? password,String? token,String? deviceToken}) async {
     return await apiClient.postData(
-        AppContants.loginUrl,{"contact_number":phone!,"password":password!,"user_type":"driver","token":token});
+        AppContants.loginUrl,{"contact_number":phone!,"password":password!,"user_type":"driver","token":token,"device_token" : deviceToken});
   }
 
   Future<Response> incomeDriver({String? userID}) async {
@@ -48,6 +48,15 @@ class AuthRepo{
           "lat":lat,
           "user_id":userID,
           "long":long,
+    });
+  }
+  Future<Response> addWalletPayment({String? customerID,String? amount,String? trnId}) async {
+    return await apiClient.postData(
+        AppContants.addCustomerWalletURL,{
+      "customer_id":customerID,
+      "amount":amount,
+      "payment_type":"wallet recharge",
+      "trn_id":trnId,
     });
   }
 
@@ -88,6 +97,11 @@ class AuthRepo{
 
     return await apiClient.postMultipartData(
         AppContants.ticketRezURL,body,[]);
+  }
+  Future<Response> checkTicketLimits(body) async {
+
+    return await apiClient.postMultipartData(
+        AppContants.checkTicketLimit,body,[]);
   }
 
   Future<Response> getCity() async {
@@ -240,6 +254,92 @@ class AuthRepo{
         AppContants.checkDriverBooking,{
 
           "driver_id":userID,
+
+
+    });
+  }
+
+  Future<Response> startLoading({String? bookingId,String? userID}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.orderLoadingURL,{
+
+          "booking_id":bookingId,
+          "driver_id":userID,
+
+
+    });
+  }
+
+  Future<Response> startUnLoading({String? bookingId,String? userID}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.orderUnloadingURL,{
+
+          "booking_id":bookingId,
+          "driver_id":userID,
+
+
+    });
+  }
+  Future<Response> checkDriverDevice({String? deviceToken,String? userID}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.checkDriverDeviceURL,{
+
+          "driver_id":userID,
+          "device_token":deviceToken,
+
+
+    });
+  }
+
+  Future<Response> getDailyEarnings({String? date,String? userID}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.getDailyEarningsURL,{
+
+          "driver_id":userID,
+          "date":date,
+
+
+    });
+  }
+  Future<Response> getLifetimeEarningsUrl({String? userID}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.getLifetimeEarningsUrl,{
+          "driver_id":userID,
+
+
+    });
+  }
+  Future<Response> getInactiveBalanceUrl({String? userID}) async {
+    print("call");
+    return await apiClient.getData(
+        '${AppContants.getInactiveBalanceUrl}$userID');
+  }
+
+  Future<Response> getBookingsBydateAndDriver({String? date,String? userID}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.getBookingsBydateAndDriverURL,{
+
+          "driver_id":userID,
+          "date":date,
+
+
+    });
+  }
+
+  Future<Response> getDateRangeEarnings({String? startDate,String? userID, String? endDate}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.getDateRangeEarningsUrl,{
+
+          "driver_id":userID,
+          "start_date": startDate,
+          "end_date": endDate,
 
 
     });

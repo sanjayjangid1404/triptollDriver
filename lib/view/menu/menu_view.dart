@@ -108,9 +108,7 @@ class _MenuViewState extends State<MenuView> {
                               title: "Payment",
                               icon: "assets/img/earnings.png",
                               onPressed: () {
-                                context.push(
-                                  const PaymentList(),
-                                );
+                                context.push(const SummaryView());
                               }),
                           InkWell(
                             onTap: () {},
@@ -275,12 +273,12 @@ class _MenuViewState extends State<MenuView> {
                         onPressed: () {
                           context.push(const ChangePasswordView());
                         }),
-                    // MenuRow(
-                    //     title: "Summary",
-                    //     icon: "assets/img/summary.png",
-                    //     onPressed: () {
-                    //       context.push(const SummaryView());
-                    //     }),
+                    MenuRow(
+                        title: "Earnings",
+                        icon: "assets/img/summary.png",
+                        onPressed: () {
+                          context.push(const SummaryView());
+                        }),
 
                     Container(
                       width: double.infinity,

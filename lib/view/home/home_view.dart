@@ -646,6 +646,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
                     InkWell(
                       onTap: (){
+                        setState(() {});
+                        referralCode = authController.getUserPhone()!;
                         _shareReferral();
                       },
                       child: Container(
@@ -1273,7 +1275,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                         print('dsdskdsds${ authController.isLoadingTime.toString()}');
                         authController.maxTime = prefs.getString(AppContants.maxTimeVar)!;
                         authController.loadingCharges = prefs.getString(AppContants.loadingCharges)!;
-                        Navigator.pop(context); // Close the bottom sheet
+                        authController.checkDriverBooking(context);
+                        Navigator.pop(context);
                         Get.find<AuthController>(). accpetBooking(
 
                             orderID: bookingResponse.id,
@@ -1749,11 +1752,16 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
 
   double _dragStartX = 0.0;
   bool _isDragging = false;
-
+  void _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    Get.find<AuthController>().isLoadingTime = prefs.getBool(AppContants.isLoadingTime) ?? false;
+    print('dsdskdsds ${Get.find<AuthController>().isLoadingTime}');
+  }
   @override
   void initState() {
     super.initState();
     loadStoredData().then((_) {
+      _loadPrefs();
       setState(() {
         widget.authController.time = _formatDuration();
       });

@@ -394,7 +394,8 @@ class _SignUpViewState extends State<SignUpView> {
                         contentPadding: EdgeInsets.symmetric(vertical: 12),
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
-                        hintText: "123456",
+                        hintText: "Enter Otp Here",
+                          hintStyle: TextStyle(color: Colors.grey)  ,
                           suffixIcon:otpVerify ? SizedBox(): InkWell(
                             onTap: (){
 
