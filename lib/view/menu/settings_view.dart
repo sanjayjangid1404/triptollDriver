@@ -13,6 +13,7 @@ import 'package:taxi_driver/view/menu/my_vehicle_view.dart';
 import 'package:taxi_driver/view/page/refund.dart';
 import 'package:taxi_driver/view/page/terms_and_condition.dart';
 
+import '../home/faq_list_screen.dart';
 import '../page/privacy.dart';
 import '../page/shipping.dart';
 
@@ -99,6 +100,11 @@ class _SettingsViewState extends State<SettingsView> {
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => Shipping(),));
                   }),
+              SettingRowIcon(
+                icon: Icon(Icons.info_outline,color: Colors.grey,),
+                title: '  FAQ',
+                onPressed: () => Get.to(FrequentlyAskedQuestionsScreen()),
+              ),
 
             ],
           ),

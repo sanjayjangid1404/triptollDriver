@@ -45,6 +45,7 @@ import '../model/city_response.dart';
 import '../model/daily_earnings_md.dart';
 import '../model/device_logout_model.dart';
 import '../model/faq_driver_response.dart';
+import '../model/faq_model.dart';
 import '../model/getBookingsBydateAndDriver_model.dart';
 import '../model/inactive_wallet_model.dart';
 import '../model/life_time_earn_model.dart';
@@ -157,8 +158,32 @@ class AuthController extends GetxController implements GetxService {
       return hours.toStringAsFixed(2); // hours ko 2 decimal tak string me
     }
   }
+  List<FaqModel?> faqLIstResponse = [];
+  Future<void>getFaqListFunction() async {
+
+    update();
+    Response response = await authRepo.getFaqList();
 
 
+
+    faqLIstResponse = [];
+    if(response.statusCode==200 || response.statusCode ==400)
+    {
+
+
+      for(int i=0; i<response.body.length; i++){
+        faqLIstResponse.add( FaqModel.fromJson(response.body[i]));
+      }
+
+      update();
+    }
+    else {
+
+      ApiChecker.checkApi(response);
+
+    }
+    update();
+  }
   void checkAndStartBookingNotification(BuildContext context) {
     startBookingNotificationPolling(context);
 

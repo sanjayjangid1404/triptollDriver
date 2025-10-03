@@ -43,6 +43,7 @@ class AppContants
   static String driverBasicInfoURL = "Driver/createDriver";
   static String driverFAQURl = "Home/getFaq/driver";
   static String ticketRezURL = "Driver/ticketRezByDriver";
+  static String driverFAQHelpURl = "Home/getFaqHelp/driver";
   static String checkTicketLimit = "Driver/checkTicketLimit";
   static String getCityURL = "home/getCity";
   static String updateDriverBankDetailURL = "Driver/updateDriverBankDetail";
@@ -88,7 +89,7 @@ class AppContants
   static String categoryVehicleURL = "home/getVehicleByCategoryId/";
   static String verifyOtpURl = "verify-otp";
   static String myComplaintURl = "get-my-complaints";
-  static String addCustomerWalletURL = "Customer/addCustomerWallet";
+  static String addDriverWalletURL = "Driver/addDriverWallet";
   static String getMyReferral = "get-my-referral-code";
   static String userMembership = "user-membership-details";
   static String userProfileURL = "get-latest-user-profile";

@@ -40,7 +40,9 @@ class AuthRepo{
       "user_type":"driver",
     },[]);
   }
-
+  Future<Response> getFaqList() async {
+    return await apiClient.getData(AppContants.driverFAQHelpURl);
+  }
   Future<Response> updateDriverLocation({String? userID,String? lat,String? long}) async {
     print("call");
     return await apiClient.postData(
@@ -52,8 +54,8 @@ class AuthRepo{
   }
   Future<Response> addWalletPayment({String? customerID,String? amount,String? trnId}) async {
     return await apiClient.postData(
-        AppContants.addCustomerWalletURL,{
-      "customer_id":customerID,
+        AppContants.addDriverWalletURL,{
+      "driver_id":customerID,
       "amount":amount,
       "payment_type":"wallet recharge",
       "trn_id":trnId,
