@@ -33,10 +33,10 @@ class _EditProfileViewState extends State<EditProfileView> {
         .firstWhere((element) => element.name == "India");
 
     if(authController.driverInResponse!=null){
-      txtFirstName.text = authController.driverInResponse!.firstName??"";
-      txtLastName.text = authController.driverInResponse!.lastName??"";
-      txtMobile.text = authController.driverInResponse!.contactNumber??"";
-      txtEmail.text = authController.driverInResponse!.email??"";
+      txtFirstName.text = authController.driverInResponse!.driverDetails!.firstName??"";
+      txtLastName.text = authController.driverInResponse!.driverDetails!.lastName??"";
+      txtMobile.text = authController.driverInResponse!.driverDetails!.contactNumber??"";
+      txtEmail.text = authController.driverInResponse!.driverDetails!.email??"";
 
       setState(() {
 

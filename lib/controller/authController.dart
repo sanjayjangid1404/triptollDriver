@@ -1630,6 +1630,50 @@ class AuthController extends GetxController implements GetxService {
 
   DriverInResponse? driverInResponse = DriverInResponse();
 
+  // Future<void> driverInfo(BuildContext context) async {
+  //   isLoading = true;
+  //
+  //   update();
+  //   print(getUserDeviceID());
+  //   driverInResponse = null;
+  //
+  //
+  //   Response response = await authRepo.driverInfo(getUserID().toString());
+  //
+  //   //  LoginResponse? loginResponse;
+  //
+  //   if (response.statusCode == 200 || response.statusCode == 400) {
+  //     driverInResponse = DriverInResponse.fromJson(response.body);
+  //
+  //     if (driverInResponse != null) {
+  //       if (driverInResponse!.paymentStatus.toString() == "paid") {
+  //         authRepo.saveUserPayment(true);
+  //       }
+  //       else {
+  //         authRepo.saveUserPayment(false);
+  //       }
+  //
+  //       if (driverInResponse!.kyc.toString() == "complete") {
+  //         authRepo.saveUserKyc(true);
+  //       }
+  //       else {
+  //         authRepo.saveUserKyc(false);
+  //       }
+  //     }
+  //
+  //     checkDriverBooking(context);
+  //
+  //
+  //     update();
+  //   }
+  //   else {
+  //     ApiChecker.checkApi(response);
+  //   }
+  //
+  //   isLoading = false;
+  //   update();
+  // }
+
   Future<void> driverInfo(BuildContext context) async {
     isLoading = true;
 
@@ -1638,7 +1682,7 @@ class AuthController extends GetxController implements GetxService {
     driverInResponse = null;
 
 
-    Response response = await authRepo.driverInfo(getUserID().toString());
+    Response response = await authRepo.getDriverDetail(customerID: getUserID().toString());
 
     //  LoginResponse? loginResponse;
 
@@ -1646,14 +1690,14 @@ class AuthController extends GetxController implements GetxService {
       driverInResponse = DriverInResponse.fromJson(response.body);
 
       if (driverInResponse != null) {
-        if (driverInResponse!.paymentStatus.toString() == "paid") {
+        if (driverInResponse!.driverDetails!.paymentStatus.toString() == "paid") {
           authRepo.saveUserPayment(true);
         }
         else {
           authRepo.saveUserPayment(false);
         }
 
-        if (driverInResponse!.kyc.toString() == "complete") {
+        if (driverInResponse!.driverDetails!.kyc.toString() == "complete") {
           authRepo.saveUserKyc(true);
         }
         else {
@@ -1673,8 +1717,6 @@ class AuthController extends GetxController implements GetxService {
     isLoading = false;
     update();
   }
-
-
   bool getAllBookingLoading = false;
 
   List<BookingListResponse>bookingListResponse = [];
@@ -1739,7 +1781,8 @@ class AuthController extends GetxController implements GetxService {
   PaymentHistoryModel? paymentHistoryModel = PaymentHistoryModel();
 
   Future<void> getBookingDetails(
-      {String? bookingID, String? driverLat, String? driverLng}) async {
+      {String? bookingID, String? driverLat, String? driverLng}) async
+  {
     isBookingDetails = true;
 
     update();
@@ -1774,7 +1817,6 @@ class AuthController extends GetxController implements GetxService {
     isBookingDetails = false;
     update();
   }
-
 
   Future<void> updateImage(var image) async
   {

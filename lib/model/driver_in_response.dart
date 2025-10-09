@@ -1,161 +1,180 @@
-/// id : "2376"
-/// uniq_id : "8CA5DX"
-/// owner_id : null
-/// category_id : "114"
-/// weight : null
-/// vehicle_id : null
-/// referral_code : null
-/// executive_code : null
-/// referral_price : null
-/// username : "9251488296"
-/// password : "e10adc3949ba59abbe56e057f20f883e"
-/// model : "2019"
-/// rc_no : ""
-/// vehicle_number : "RJ14AH83726"
-/// vehicle_type : "Petrol"
-/// first_name : "Virendra"
-/// last_name : "Rathore"
-/// email : "shubham.virendra@gmail.com"
-/// countryCode : null
-/// contact_number : "9251488296"
-/// otp : null
-/// is_verified : "0"
-/// gender : ""
-/// profile_photo : null
-/// address : ""
-/// lat : "26.8892733"
-/// long : "75.9116733"
-/// description : ""
-/// city_id : "62"
-/// bank_name : "Axis Bank"
-/// account_no : "60382736268462"
-/// ifsc_code : "UTIB00892"
-/// upi_id : "viren@axis"
-/// trn_id : "pay_R5Vl3AOd2zyujk"
-/// commission : null
-/// status : "1"
-/// wallet_amount : "16"
-/// registration_fees : "16"
-/// category_fees : null
-/// payment_status : "paid"
-/// adhar_no : "471854573826"
-/// pan_no : "DJGPR9351D"
-/// license_no : "RJ02 20230001249"
-/// insurance : "2230003123P109063397"
-/// kyc : "pending"
-/// running_order : "no"
-/// add_date : "2025-08-14 15:23:21"
-/// update_date : "2025-08-15 11:58:14"
-/// login_status : "offline"
-/// online_time : null
-/// login_hours : null
-/// last_login_on : "2025-08-15 11:41:11"
-/// read_status : "unread"
-/// user_status : "login"
-/// device_token : "dPtkMvrfQ8mWE3sRSZMiMi:APA91bHmOeFCl54LgzenKJKxecnfVJzCLpauiMfIxr0fl4Bq4J4uvBXvcrfnh9P0fndzsLRzVRuRp1aJ9IKEr6kv4LPMkv5nFgQH3C2mv_38O0Nj4jIp8J8"
-/// category_name : "Two wheelers"
-/// file_name : null
-/// weight_name : null
-/// weight_type : null
-/// vehicle_name : null
-/// adhar_front_img : "689dde9d75a79-WhatsApp_Image_2025-08-12_at_14_11_08.jpeg"
-/// adhar_back_img : null
-/// vehicle_img : null
-/// driver_vehicle_img : null
-/// pan_card_img : "689dde9d7788f-WhatsApp_Image_2025-08-08_at_12_19_31_(1).jpeg"
-/// insurance_img : "689dde9d7de49-Webp_net-resizeimage-1.jpg"
-/// rc_front_img : "689dc7d58afec-Screenshot_2025-08-14_133714.png"
-/// rc_back_img : "689dc7d5a0cf1-WhatsApp_Image_2025-08-14_at_13_05_43.jpeg"
-/// license_front_img : "689dcbe84620c-WhatsApp_Image_2025-08-08_at_12_19_31_(3).jpeg"
-/// license_back_img : "689dcbe85ec3c-WhatsApp_Image_2025-08-05_at_15_19_22_(1).jpeg"
-/// certificate_img : null
-/// vehicle_certificate_img : null
-/// insurance_img_ext : "jpg"
-/// vehicle_certificate_ext : ""
-/// ratings : "0"
-/// review : "0"
-/// total_rating : null
+/// status : true
+/// driver_details : {"id":"338","uniq_id":"BkEWc","owner_id":null,"category_id":"112","weight":null,"vehicle_id":null,"referred_by":null,"executive_code":null,"referral_price":null,"username":"9266809133","password":"4297f44b13955235245b2497399d7a93","model":"2023","rc_no":"gagahash","vehicle_number":"hr11n6565","vehicle_type":"Diesel","first_name":"Mohan","last_name":"K","email":"msduhan111@gmail.com","countryCode":null,"contact_number":"9266809133","otp":null,"is_verified":"0","gender":"male","profile_photo":null,"address":"","lat":"26.83713640000000","long":"75.83379690000000","description":"","city_id":"62","bank_name":"sbi","account_no":"121345494","ifsc_code":"fafagag","upi_id":"8319365289@YBL","trn_id":null,"order_id":null,"commission":"1","status":"1","wallet_amount":"1646.26","registration_fees":"21","category_fees":"21","payment_status":"paid","adhar_no":"1234567879","pan_no":"svhahaaha","license_no":"gshagsga","insurance":"5453434","kyc":"complete","running_order":"no","add_date":"2024-10-11 08:19:25","update_date":"2025-09-24 12:50:20","login_status":"offline","online_time":"2025-08-14 12:21:00","login_hours":"","last_login_on":"2025-10-08 16:51:15","read_status":"read","user_status":"login","device_token":"dCPIR_TlSvu_rhoIe2b8Ju:APA91bE2x5h6zF45_-mWxCBGI5tktMDNG1k-GJp63lefMbV0Jct0vxX8SWtsVQ7vQfO5ZzOgFNGX0Dz8fsnbPSltIItAixkLJIt4sFcIKrhIDUyP46IBbOQ","fcm_token":"cDlkJTMUShStEJqnY5YxOT:APA91bFWVt0ymy6MbOBog-6xX85Pq8zSzWHeKxSQ-X8JMBm8i6Guf9GNzy0eeb8WDLafaywF0emVIn4DTKqgVJRVLSpsebX2eDdmumw5Yow9-T-rZEOABe4","weight_value":"750","weight_type":"kg","category_name":"Tata Ace"}
 
 class DriverInResponse {
   DriverInResponse({
-      String? id, 
-      String? uniqId, 
-      dynamic ownerId, 
-      String? categoryId, 
-      String? file_name,
-      dynamic weight,
-      dynamic vehicleId, 
-      dynamic referralCode, 
-      dynamic executiveCode, 
-      dynamic referralPrice, 
-      String? username, 
-      String? password, 
-      String? model, 
-      String? rcNo, 
-      String? vehicleNumber, 
-      String? vehicleType, 
-      String? firstName, 
-      String? lastName, 
-      String? email, 
-      dynamic countryCode, 
-      String? contactNumber, 
-      dynamic otp, 
-      String? isVerified, 
-      String? gender, 
-      dynamic profilePhoto, 
-      String? address, 
-      String? lat, 
-      String? long, 
-      String? description, 
-      String? cityId, 
-      String? bankName, 
-      String? accountNo, 
-      String? ifscCode, 
-      String? upiId, 
-      String? trnId, 
-      dynamic commission, 
-      String? status, 
-      String? walletAmount, 
-      String? registrationFees, 
-      dynamic categoryFees, 
-      String? paymentStatus, 
-      String? adharNo, 
-      String? panNo, 
-      String? licenseNo, 
-      String? insurance, 
-      String? kyc, 
-      String? runningOrder, 
-      String? addDate, 
-      String? updateDate, 
-      String? loginStatus, 
-      dynamic onlineTime, 
-      dynamic loginHours, 
-      String? lastLoginOn, 
-      String? readStatus, 
-      String? userStatus, 
-      String? deviceToken, 
-      String? categoryName, 
-      dynamic fileName, 
-      dynamic weightName, 
-      dynamic weightType, 
-      dynamic vehicleName, 
-      String? adharFrontImg, 
-      dynamic adharBackImg, 
-      dynamic vehicleImg, 
-      dynamic driverVehicleImg, 
-      String? panCardImg, 
-      String? insuranceImg, 
-      String? rcFrontImg, 
-      String? rcBackImg, 
-      String? licenseFrontImg, 
-      String? licenseBackImg, 
-      dynamic certificateImg, 
-      dynamic vehicleCertificateImg, 
-      String? insuranceImgExt, 
-      String? vehicleCertificateExt, 
-      String? ratings, 
-      String? review, 
-      dynamic totalRating,}){
+      bool? status, 
+      DriverDetails? driverDetails,}){
+    _status = status;
+    _driverDetails = driverDetails;
+}
+
+  DriverInResponse.fromJson(dynamic json) {
+    _status = json['status'];
+    _driverDetails = json['driver_details'] != null ? DriverDetails.fromJson(json['driver_details']) : null;
+  }
+  bool? _status;
+  DriverDetails? _driverDetails;
+DriverInResponse copyWith({  bool? status,
+  DriverDetails? driverDetails,
+}) => DriverInResponse(  status: status ?? _status,
+  driverDetails: driverDetails ?? _driverDetails,
+);
+  bool? get status => _status;
+  DriverDetails? get driverDetails => _driverDetails;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['status'] = _status;
+    if (_driverDetails != null) {
+      map['driver_details'] = _driverDetails?.toJson();
+    }
+    return map;
+  }
+
+}
+
+/// id : "338"
+/// uniq_id : "BkEWc"
+/// owner_id : null
+/// category_id : "112"
+/// weight : null
+/// vehicle_id : null
+/// referred_by : null
+/// executive_code : null
+/// referral_price : null
+/// username : "9266809133"
+/// password : "4297f44b13955235245b2497399d7a93"
+/// model : "2023"
+/// rc_no : "gagahash"
+/// vehicle_number : "hr11n6565"
+/// vehicle_type : "Diesel"
+/// first_name : "Mohan"
+/// last_name : "K"
+/// email : "msduhan111@gmail.com"
+/// countryCode : null
+/// contact_number : "9266809133"
+/// otp : null
+/// is_verified : "0"
+/// gender : "male"
+/// profile_photo : null
+/// address : ""
+/// lat : "26.83713640000000"
+/// long : "75.83379690000000"
+/// description : ""
+/// city_id : "62"
+/// bank_name : "sbi"
+/// account_no : "121345494"
+/// ifsc_code : "fafagag"
+/// upi_id : "8319365289@YBL"
+/// trn_id : null
+/// order_id : null
+/// commission : "1"
+/// status : "1"
+/// wallet_amount : "1646.26"
+/// registration_fees : "21"
+/// category_fees : "21"
+/// payment_status : "paid"
+/// adhar_no : "1234567879"
+/// pan_no : "svhahaaha"
+/// license_no : "gshagsga"
+/// insurance : "5453434"
+/// kyc : "complete"
+/// running_order : "no"
+/// add_date : "2024-10-11 08:19:25"
+/// update_date : "2025-09-24 12:50:20"
+/// login_status : "offline"
+/// online_time : "2025-08-14 12:21:00"
+/// login_hours : ""
+/// last_login_on : "2025-10-08 16:51:15"
+/// read_status : "read"
+/// user_status : "login"
+/// device_token : "dCPIR_TlSvu_rhoIe2b8Ju:APA91bE2x5h6zF45_-mWxCBGI5tktMDNG1k-GJp63lefMbV0Jct0vxX8SWtsVQ7vQfO5ZzOgFNGX0Dz8fsnbPSltIItAixkLJIt4sFcIKrhIDUyP46IBbOQ"
+/// fcm_token : "cDlkJTMUShStEJqnY5YxOT:APA91bFWVt0ymy6MbOBog-6xX85Pq8zSzWHeKxSQ-X8JMBm8i6Guf9GNzy0eeb8WDLafaywF0emVIn4DTKqgVJRVLSpsebX2eDdmumw5Yow9-T-rZEOABe4"
+/// weight_value : "750"
+/// weight_type : "kg"
+/// category_name : "Tata Ace"
+
+class DriverDetails {
+  DriverDetails({
+    String? id,
+    String? uniqId,
+    dynamic ownerId,
+    String? categoryId,
+    String? file_name,
+    dynamic weight,
+    dynamic vehicleId,
+    dynamic referralCode,
+    dynamic executiveCode,
+    dynamic referralPrice,
+    String? username,
+    String? password,
+    String? model,
+    String? rcNo,
+    String? vehicleNumber,
+    String? vehicleType,
+    String? firstName,
+    String? lastName,
+    String? email,
+    dynamic countryCode,
+    String? contactNumber,
+    dynamic otp,
+    String? isVerified,
+    String? gender,
+    dynamic profilePhoto,
+    String? address,
+    String? lat,
+    String? long,
+    String? description,
+    String? cityId,
+    String? bankName,
+    String? accountNo,
+    String? ifscCode,
+    String? upiId,
+    String? trnId,
+    dynamic commission,
+    String? status,
+    String? walletAmount,
+    String? registrationFees,
+    dynamic categoryFees,
+    String? paymentStatus,
+    String? adharNo,
+    String? panNo,
+    String? licenseNo,
+    String? insurance,
+    String? kyc,
+    String? runningOrder,
+    String? addDate,
+    String? updateDate,
+    String? loginStatus,
+    dynamic onlineTime,
+    dynamic loginHours,
+    String? lastLoginOn,
+    String? readStatus,
+    String? userStatus,
+    String? deviceToken,
+    String? categoryName,
+    dynamic fileName,
+    dynamic weightName,
+    dynamic weightType,
+    dynamic vehicleName,
+    String? adharFrontImg,
+    dynamic adharBackImg,
+    dynamic vehicleImg,
+    dynamic driverVehicleImg,
+    String? panCardImg,
+    String? insuranceImg,
+    String? rcFrontImg,
+    String? rcBackImg,
+    String? licenseFrontImg,
+    String? licenseBackImg,
+    dynamic certificateImg,
+    dynamic vehicleCertificateImg,
+    String? insuranceImgExt,
+    String? vehicleCertificateExt,
+    String? ratings,
+    String? review,
+    dynamic totalRating}){
     _id = id;
     _uniqId = uniqId;
     _ownerId = ownerId;
@@ -234,9 +253,9 @@ class DriverInResponse {
     _ratings = ratings;
     _review = review;
     _totalRating = totalRating;
-}
+  }
 
-  DriverInResponse.fromJson(dynamic json) {
+  DriverDetails.fromJson(dynamic json) {
     _id = json['id'];
     _uniqId = json['uniq_id'];
     _ownerId = json['owner_id'];
@@ -316,7 +335,7 @@ class DriverInResponse {
     _review = json['review'];
     _totalRating = json['total_rating'];
   }
-  dynamic _id;
+  String? _id;
   String? _uniqId;
   dynamic _ownerId;
   String? _categoryId;
@@ -394,163 +413,164 @@ class DriverInResponse {
   String? _ratings;
   String? _review;
   dynamic _totalRating;
-DriverInResponse copyWith({  String? id,
-  String? uniqId,
-  dynamic ownerId,
-  String? categoryId,
-  String? file_name,
-  dynamic weight,
-  dynamic vehicleId,
-  dynamic referralCode,
-  dynamic executiveCode,
-  dynamic referralPrice,
-  String? username,
-  String? password,
-  String? model,
-  String? rcNo,
-  String? vehicleNumber,
-  String? vehicleType,
-  String? firstName,
-  String? lastName,
-  String? email,
-  dynamic countryCode,
-  String? contactNumber,
-  dynamic otp,
-  String? isVerified,
-  String? gender,
-  dynamic profilePhoto,
-  String? address,
-  String? lat,
-  String? long,
-  String? description,
-  String? cityId,
-  String? bankName,
-  String? accountNo,
-  String? ifscCode,
-  String? upiId,
-  String? trnId,
-  dynamic commission,
-  String? status,
-  String? walletAmount,
-  String? registrationFees,
-  dynamic categoryFees,
-  String? paymentStatus,
-  String? adharNo,
-  String? panNo,
-  String? licenseNo,
-  String? insurance,
-  String? kyc,
-  String? runningOrder,
-  String? addDate,
-  String? updateDate,
-  String? loginStatus,
-  dynamic onlineTime,
-  dynamic loginHours,
-  String? lastLoginOn,
-  String? readStatus,
-  String? userStatus,
-  String? deviceToken,
-  String? categoryName,
-  dynamic fileName,
-  dynamic weightName,
-  dynamic weightType,
-  dynamic vehicleName,
-  String? adharFrontImg,
-  dynamic adharBackImg,
-  dynamic vehicleImg,
-  dynamic driverVehicleImg,
-  String? panCardImg,
-  String? insuranceImg,
-  String? rcFrontImg,
-  String? rcBackImg,
-  String? licenseFrontImg,
-  String? licenseBackImg,
-  dynamic certificateImg,
-  dynamic vehicleCertificateImg,
-  String? insuranceImgExt,
-  String? vehicleCertificateExt,
-  String? ratings,
-  String? review,
-  dynamic totalRating,
-}) => DriverInResponse(  id: id ?? _id,
-  uniqId: uniqId ?? _uniqId,
-  ownerId: ownerId ?? _ownerId,
-  categoryId: categoryId ?? _categoryId,
-  file_name: file_name ?? _file_name,
-  weight: weight ?? _weight,
-  vehicleId: vehicleId ?? _vehicleId,
-  referralCode: referralCode ?? _referralCode,
-  executiveCode: executiveCode ?? _executiveCode,
-  referralPrice: referralPrice ?? _referralPrice,
-  username: username ?? _username,
-  password: password ?? _password,
-  model: model ?? _model,
-  rcNo: rcNo ?? _rcNo,
-  vehicleNumber: vehicleNumber ?? _vehicleNumber,
-  vehicleType: vehicleType ?? _vehicleType,
-  firstName: firstName ?? _firstName,
-  lastName: lastName ?? _lastName,
-  email: email ?? _email,
-  countryCode: countryCode ?? _countryCode,
-  contactNumber: contactNumber ?? _contactNumber,
-  otp: otp ?? _otp,
-  isVerified: isVerified ?? _isVerified,
-  gender: gender ?? _gender,
-  profilePhoto: profilePhoto ?? _profilePhoto,
-  address: address ?? _address,
-  lat: lat ?? _lat,
-  long: long ?? _long,
-  description: description ?? _description,
-  cityId: cityId ?? _cityId,
-  bankName: bankName ?? _bankName,
-  accountNo: accountNo ?? _accountNo,
-  ifscCode: ifscCode ?? _ifscCode,
-  upiId: upiId ?? _upiId,
-  trnId: trnId ?? _trnId,
-  commission: commission ?? _commission,
-  status: status ?? _status,
-  walletAmount: walletAmount ?? _walletAmount,
-  registrationFees: registrationFees ?? _registrationFees,
-  categoryFees: categoryFees ?? _categoryFees,
-  paymentStatus: paymentStatus ?? _paymentStatus,
-  adharNo: adharNo ?? _adharNo,
-  panNo: panNo ?? _panNo,
-  licenseNo: licenseNo ?? _licenseNo,
-  insurance: insurance ?? _insurance,
-  kyc: kyc ?? _kyc,
-  runningOrder: runningOrder ?? _runningOrder,
-  addDate: addDate ?? _addDate,
-  updateDate: updateDate ?? _updateDate,
-  loginStatus: loginStatus ?? _loginStatus,
-  onlineTime: onlineTime ?? _onlineTime,
-  loginHours: loginHours ?? _loginHours,
-  lastLoginOn: lastLoginOn ?? _lastLoginOn,
-  readStatus: readStatus ?? _readStatus,
-  userStatus: userStatus ?? _userStatus,
-  deviceToken: deviceToken ?? _deviceToken,
-  categoryName: categoryName ?? _categoryName,
-  fileName: fileName ?? _fileName,
-  weightName: weightName ?? _weightName,
-  weightType: weightType ?? _weightType,
-  vehicleName: vehicleName ?? _vehicleName,
-  adharFrontImg: adharFrontImg ?? _adharFrontImg,
-  adharBackImg: adharBackImg ?? _adharBackImg,
-  vehicleImg: vehicleImg ?? _vehicleImg,
-  driverVehicleImg: driverVehicleImg ?? _driverVehicleImg,
-  panCardImg: panCardImg ?? _panCardImg,
-  insuranceImg: insuranceImg ?? _insuranceImg,
-  rcFrontImg: rcFrontImg ?? _rcFrontImg,
-  rcBackImg: rcBackImg ?? _rcBackImg,
-  licenseFrontImg: licenseFrontImg ?? _licenseFrontImg,
-  licenseBackImg: licenseBackImg ?? _licenseBackImg,
-  certificateImg: certificateImg ?? _certificateImg,
-  vehicleCertificateImg: vehicleCertificateImg ?? _vehicleCertificateImg,
-  insuranceImgExt: insuranceImgExt ?? _insuranceImgExt,
-  vehicleCertificateExt: vehicleCertificateExt ?? _vehicleCertificateExt,
-  ratings: ratings ?? _ratings,
-  review: review ?? _review,
-  totalRating: totalRating ?? _totalRating,
-);
+  DriverDetails copyWith({  String? id,
+    String? uniqId,
+    dynamic ownerId,
+    String? categoryId,
+    String? file_name,
+    dynamic weight,
+    dynamic vehicleId,
+    dynamic referralCode,
+    dynamic executiveCode,
+    dynamic referralPrice,
+    String? username,
+    String? password,
+    String? model,
+    String? rcNo,
+    String? vehicleNumber,
+    String? vehicleType,
+    String? firstName,
+    String? lastName,
+    String? email,
+    dynamic countryCode,
+    String? contactNumber,
+    dynamic otp,
+    String? isVerified,
+    String? gender,
+    dynamic profilePhoto,
+    String? address,
+    String? lat,
+    String? long,
+    String? description,
+    String? cityId,
+    String? bankName,
+    String? accountNo,
+    String? ifscCode,
+    String? upiId,
+    String? trnId,
+    dynamic commission,
+    String? status,
+    String? walletAmount,
+    String? registrationFees,
+    dynamic categoryFees,
+    String? paymentStatus,
+    String? adharNo,
+    String? panNo,
+    String? licenseNo,
+    String? insurance,
+    String? kyc,
+    String? runningOrder,
+    String? addDate,
+    String? updateDate,
+    String? loginStatus,
+    dynamic onlineTime,
+    dynamic loginHours,
+    String? lastLoginOn,
+    String? readStatus,
+    String? userStatus,
+    String? deviceToken,
+    String? categoryName,
+    dynamic fileName,
+    dynamic weightName,
+    dynamic weightType,
+    dynamic vehicleName,
+    String? adharFrontImg,
+    dynamic adharBackImg,
+    dynamic vehicleImg,
+    dynamic driverVehicleImg,
+    String? panCardImg,
+    String? insuranceImg,
+    String? rcFrontImg,
+    String? rcBackImg,
+    String? licenseFrontImg,
+    String? licenseBackImg,
+    dynamic certificateImg,
+    dynamic vehicleCertificateImg,
+    String? insuranceImgExt,
+    String? vehicleCertificateExt,
+    String? ratings,
+    String? review,
+    dynamic totalRating,
+  }) => DriverDetails(
+    id: id ?? _id,
+    uniqId: uniqId ?? _uniqId,
+    ownerId: ownerId ?? _ownerId,
+    categoryId: categoryId ?? _categoryId,
+    file_name: file_name ?? _file_name,
+    weight: weight ?? _weight,
+    vehicleId: vehicleId ?? _vehicleId,
+    referralCode: referralCode ?? _referralCode,
+    executiveCode: executiveCode ?? _executiveCode,
+    referralPrice: referralPrice ?? _referralPrice,
+    username: username ?? _username,
+    password: password ?? _password,
+    model: model ?? _model,
+    rcNo: rcNo ?? _rcNo,
+    vehicleNumber: vehicleNumber ?? _vehicleNumber,
+    vehicleType: vehicleType ?? _vehicleType,
+    firstName: firstName ?? _firstName,
+    lastName: lastName ?? _lastName,
+    email: email ?? _email,
+    countryCode: countryCode ?? _countryCode,
+    contactNumber: contactNumber ?? _contactNumber,
+    otp: otp ?? _otp,
+    isVerified: isVerified ?? _isVerified,
+    gender: gender ?? _gender,
+    profilePhoto: profilePhoto ?? _profilePhoto,
+    address: address ?? _address,
+    lat: lat ?? _lat,
+    long: long ?? _long,
+    description: description ?? _description,
+    cityId: cityId ?? _cityId,
+    bankName: bankName ?? _bankName,
+    accountNo: accountNo ?? _accountNo,
+    ifscCode: ifscCode ?? _ifscCode,
+    upiId: upiId ?? _upiId,
+    trnId: trnId ?? _trnId,
+    commission: commission ?? _commission,
+    status: status ?? _status,
+    walletAmount: walletAmount ?? _walletAmount,
+    registrationFees: registrationFees ?? _registrationFees,
+    categoryFees: categoryFees ?? _categoryFees,
+    paymentStatus: paymentStatus ?? _paymentStatus,
+    adharNo: adharNo ?? _adharNo,
+    panNo: panNo ?? _panNo,
+    licenseNo: licenseNo ?? _licenseNo,
+    insurance: insurance ?? _insurance,
+    kyc: kyc ?? _kyc,
+    runningOrder: runningOrder ?? _runningOrder,
+    addDate: addDate ?? _addDate,
+    updateDate: updateDate ?? _updateDate,
+    loginStatus: loginStatus ?? _loginStatus,
+    onlineTime: onlineTime ?? _onlineTime,
+    loginHours: loginHours ?? _loginHours,
+    lastLoginOn: lastLoginOn ?? _lastLoginOn,
+    readStatus: readStatus ?? _readStatus,
+    userStatus: userStatus ?? _userStatus,
+    deviceToken: deviceToken ?? _deviceToken,
+    categoryName: categoryName ?? _categoryName,
+    fileName: fileName ?? _fileName,
+    weightName: weightName ?? _weightName,
+    weightType: weightType ?? _weightType,
+    vehicleName: vehicleName ?? _vehicleName,
+    adharFrontImg: adharFrontImg ?? _adharFrontImg,
+    adharBackImg: adharBackImg ?? _adharBackImg,
+    vehicleImg: vehicleImg ?? _vehicleImg,
+    driverVehicleImg: driverVehicleImg ?? _driverVehicleImg,
+    panCardImg: panCardImg ?? _panCardImg,
+    insuranceImg: insuranceImg ?? _insuranceImg,
+    rcFrontImg: rcFrontImg ?? _rcFrontImg,
+    rcBackImg: rcBackImg ?? _rcBackImg,
+    licenseFrontImg: licenseFrontImg ?? _licenseFrontImg,
+    licenseBackImg: licenseBackImg ?? _licenseBackImg,
+    certificateImg: certificateImg ?? _certificateImg,
+    vehicleCertificateImg: vehicleCertificateImg ?? _vehicleCertificateImg,
+    insuranceImgExt: insuranceImgExt ?? _insuranceImgExt,
+    vehicleCertificateExt: vehicleCertificateExt ?? _vehicleCertificateExt,
+    ratings: ratings ?? _ratings,
+    review: review ?? _review,
+    totalRating: totalRating ?? _totalRating,
+  );
   String? get id => _id;
   String? get uniqId => _uniqId;
   dynamic get ownerId => _ownerId;

@@ -103,8 +103,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
         if (response.statusCode == 200) {
           final json = jsonDecode(response.body);
-          if (json["status"] == true && json["bookings"] != null) {
-            return BookingNotificationResponse.fromJson(json["bookings"][0]);
+          if (json["status"] == true && json["data"] != null) {
+            return BookingNotificationResponse.fromJson(json["data"][0]);
           }
         }
       } catch (e) {
@@ -493,9 +493,9 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               ),
                             ),
                             Text(
-                              authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() == "online" ? "You're online" : "You're offline",
+                              authController.driverInResponse!=null && authController.driverInResponse!.driverDetails != null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ? "You're online" : "You're offline",
                               style: TextStyle(
-                                  color:authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() == "online" ?  TColor.primary:TColor.red,
+                                  color:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ?  TColor.primary:TColor.red,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800),
                             ),
@@ -529,7 +529,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               ),
                               Expanded(
                                 child: IconTitleSubtitleButton(
-                                    title: "${authController.driverInResponse!=null ? double.parse(authController.driverInResponse!.totalRating??"0").toStringAsFixed(2):"0"}",
+                                    title: "${authController.driverInResponse!=null ? double.parse(authController.driverInResponse!.driverDetails!.totalRating ??"0").toStringAsFixed(2):"0"}",
                                     subtitle: "Rating",
                                     icon: "assets/img/rate.png",
                                     onPressed: () {}),
@@ -610,8 +610,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
-                                      child:authController.driverInResponse!=null && authController.driverInResponse!.file_name!=null && authController.driverInResponse!.file_name!.isNotEmpty ? 
-                                      Image.network("${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.file_name!}", width: 40,
+                                      child:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.file_name!=null && authController.driverInResponse!.driverDetails!.file_name!.isNotEmpty ?
+                                      Image.network("${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}", width: 40,
                                         height: 40,fit: BoxFit.cover,):
                                       Image.asset(
                                         "assets/img/u1.png",
@@ -1768,7 +1768,7 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
     });
 
     _isOnline =
-        widget.authController.driverInResponse?.loginStatus.toString() ==
+        widget.authController.driverInResponse?.driverDetails!.loginStatus.toString() ==
             "online";
     _animationController = AnimationController(
       vsync: this,

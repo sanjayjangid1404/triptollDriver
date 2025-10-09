@@ -1,10 +1,5 @@
-
-
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
 import '../api/api_client.dart';
 import '../common/appContants.dart';
 
@@ -397,7 +392,12 @@ class AuthRepo{
     return await apiClient.getData(
         "${AppContants.driverDetailsURL}?booking_id=$bookingID");
   }
-
+  Future<Response> getDriverDetail({String? customerID}) async {
+    return await apiClient.postData(
+        AppContants.driverDetailURL,{
+      "driver_id":customerID,
+    });
+  }
   Future<Response> getCategorySub(String id) async {
     return await apiClient.getData(
         AppContants.categoryVehicleURL+id);

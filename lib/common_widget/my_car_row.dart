@@ -28,11 +28,11 @@ class MyCarRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${ authController.driverInResponse!.categoryName?? ""} - ${authController.driverInResponse!.vehicleType ?? ""} ",
+                      "${ authController.driverInResponse!.driverDetails!.categoryName?? ""} - ${authController.driverInResponse!.driverDetails!.vehicleType ?? ""} ",
                       style: TextStyle(color: TColor.primaryText, fontSize: 16),
                     ),
                     Text(
-                      " ${authController.driverInResponse!.vehicleNumber ?? ""}",
+                      " ${authController.driverInResponse!.driverDetails!.vehicleNumber ?? ""}",
                       style: TextStyle(color: TColor.secondaryText, fontSize: 15),
                     ),
                   ],
@@ -42,7 +42,7 @@ class MyCarRow extends StatelessWidget {
                 width: 8,
               ),
 
-              if( "${authController.driverInResponse!.runningOrder}"  == "1" )
+              if( "${authController.driverInResponse!.driverDetails!.runningOrder}"  == "1" )
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Icon(
@@ -52,9 +52,9 @@ class MyCarRow extends StatelessWidget {
                 ),
               ),
 
-              if (authController.driverInResponse!.vehicleImg != "")
+              if (authController.driverInResponse!.driverDetails!.vehicleImg != "")
                 CachedNetworkImage(
-                  imageUrl: AppContants.imageURL + (authController.driverInResponse?.vehicleImg ?? ""),
+                  imageUrl: AppContants.imageURL + (authController.driverInResponse!.driverDetails!.vehicleImg ?? ""),
                   width: 50,
                   height: 50,
                   fit: BoxFit.cover,

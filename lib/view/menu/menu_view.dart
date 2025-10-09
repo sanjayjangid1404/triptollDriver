@@ -120,8 +120,8 @@ class _MenuViewState extends State<MenuView> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(50),
-                                      child:authController.driverInResponse!=null && authController.driverInResponse!.file_name!=null && authController.driverInResponse!.file_name!.isNotEmpty ?
-                                      Image.network("${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.file_name!}", width: 100,
+                                      child:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.file_name!=null && authController.driverInResponse!.driverDetails!.file_name!.isNotEmpty ?
+                                      Image.network("${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}", width: 100,
                                         height: 100,fit: BoxFit.cover,): Image.asset(
                                         "assets/img/u1.png",
                                         width: 100,
@@ -148,7 +148,7 @@ class _MenuViewState extends State<MenuView> {
                                             width: 4,
                                           ),
                                            Text(
-                                             authController.driverInResponse!=null && authController.driverInResponse!.ratings!=null && authController.driverInResponse!.ratings!.isNotEmpty ?"${authController.driverInResponse!.ratings!}":"",
+                                             authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.ratings!=null && authController.driverInResponse!.driverDetails!.ratings!.isNotEmpty ?"${authController.driverInResponse!.driverDetails!.ratings!}":"",
                                               style: TextStyle(
                                                 color: TColor.primaryText,
                                                 fontSize: 13,
@@ -167,7 +167,7 @@ class _MenuViewState extends State<MenuView> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
-                                      authController.driverInResponse!.firstName??"${authController.driverInResponse!.lastName??""}",
+                                      authController.driverInResponse!.driverDetails!.firstName??"${authController.driverInResponse!.driverDetails!.lastName??""}",
                                       style: TextStyle(
                                         color: TColor.primaryTextW,
                                         fontSize: 16,
@@ -175,7 +175,7 @@ class _MenuViewState extends State<MenuView> {
                                     ),
 
                                     Text(
-                                      authController.driverInResponse!.categoryName??"",
+                                      authController.driverInResponse!.driverDetails!.categoryName??"",
                                       style: TextStyle(
                                         color: TColor.primaryTextW,
                                         fontSize: 16,

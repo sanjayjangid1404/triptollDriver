@@ -80,6 +80,7 @@ class AppContants
   static String getAllVehicle = "home/getAllCategory";
   static String getAllBookingURL = "Booking/getAllBooking";
   static String getBookingDetails = "Booking/getBookingDetail";
+  static String driverDetailURL = "Driver/getDriverDetail";
   static String driverDetailsURL = "Driver/getDriverDetails";
   static String getPaymentHistoryUrl = "Driver/getPaymentHistory";
   static String getMissedOrdersUrl = "Driver/getMissedOrders";

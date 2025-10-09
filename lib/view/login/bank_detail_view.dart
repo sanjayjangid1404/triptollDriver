@@ -36,10 +36,10 @@ class _BankDetailViewState extends State<BankDetailView> {
     AuthController authController = Get.find<AuthController>();
 
     if(widget.isEdit && authController.driverInResponse!=null){
-      txtBankName.text = authController.driverInResponse!.bankName??"";
-      txtAccountNumber.text = authController.driverInResponse!.accountNo??"";
-      txtUPICode.text = authController.driverInResponse!.upiId??"";
-      txtSwiftCode.text = authController.driverInResponse!.ifscCode??"";
+      txtBankName.text = authController.driverInResponse!.driverDetails!.bankName??"";
+      txtAccountNumber.text = authController.driverInResponse!.driverDetails!.accountNo??"";
+      txtUPICode.text = authController.driverInResponse!.driverDetails!.upiId??"";
+      txtSwiftCode.text = authController.driverInResponse!.driverDetails!.ifscCode??"";
 
       setState(() {
 

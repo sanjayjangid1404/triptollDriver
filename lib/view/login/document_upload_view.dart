@@ -68,16 +68,16 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
     AuthController authController = Get.find<AuthController>();
 
     if(widget.isEdit && authController.driverInResponse!=null){
-      aadhaarCt.text = authController.driverInResponse!.adharNo ??"";
-      licenseCt.text = authController.driverInResponse!.licenseNo ??"";
-      insuranceCt.text = authController.driverInResponse!.insurance ??"";
-      panCt.text = authController.driverInResponse!.panNo ??"";
-      panImage = AppContants.imageURL+"uploaded_files/id_proof_img/"+( authController.driverInResponse!.panCardImg ??"");
-      adharfront = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.adharFrontImg ??"");
-      adharback = AppContants.imageURL+"uploaded_files/id_proof_back_img/"+(authController.driverInResponse!.adharBackImg ??"");
-      lienceback = AppContants.imageURL+"uploaded_files/id_proof_back_img/"+(authController.driverInResponse!.licenseBackImg ??"");
-      liencefornt = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.licenseFrontImg ??"");
-      insurancefront = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.insuranceImg ??"");
+      aadhaarCt.text = authController.driverInResponse!.driverDetails!.adharNo ??"";
+      licenseCt.text = authController.driverInResponse!.driverDetails!.licenseNo ??"";
+      insuranceCt.text = authController.driverInResponse!.driverDetails!.insurance ??"";
+      panCt.text = authController.driverInResponse!.driverDetails!.panNo ??"";
+      panImage = AppContants.imageURL+"uploaded_files/id_proof_img/"+( authController.driverInResponse!.driverDetails!.panCardImg ??"");
+      adharfront = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.driverDetails!.adharFrontImg ??"");
+      adharback = AppContants.imageURL+"uploaded_files/id_proof_back_img/"+(authController.driverInResponse!.driverDetails!.adharBackImg ??"");
+      lienceback = AppContants.imageURL+"uploaded_files/id_proof_back_img/"+(authController.driverInResponse!.driverDetails!.licenseBackImg ??"");
+      liencefornt = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.driverDetails!.licenseFrontImg ??"");
+      insurancefront = AppContants.imageURL+"uploaded_files/id_proof_img/"+(authController.driverInResponse!.driverDetails!.insuranceImg ??"");
 
       setState(() {
 

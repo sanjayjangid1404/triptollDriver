@@ -98,7 +98,7 @@ class _MyProfileViewState extends State<MyProfileView> {
                                     height: 50,
                                   ),
                                   Text(
-                                      authController.driverInResponse!.firstName??"${authController.driverInResponse!.lastName??""}",
+                                      authController.driverInResponse!.driverDetails!.firstName??"${authController.driverInResponse!.driverDetails!.lastName??""}",
                                     style: TextStyle(
                                       color: TColor.primaryText,
                                       fontSize: 25,
@@ -117,8 +117,8 @@ class _MyProfileViewState extends State<MyProfileView> {
                                     children: [
                                        Expanded(
                                         child: TitleSubtitleCell(
-                                            title: "${authController.driverInResponse!.categoryName??""}",
-                                            subtitle:"${authController.driverInResponse!.vehicleType??""}"),
+                                            title: "${authController.driverInResponse!.driverDetails!.categoryName??""}",
+                                            subtitle:"${authController.driverInResponse!.driverDetails!.vehicleType??""}"),
                                       ),
                                       Container(
                                         height: 60,
@@ -127,7 +127,7 @@ class _MyProfileViewState extends State<MyProfileView> {
                                       ),
                                        Expanded(
                                         child: TitleSubtitleCell(
-                                            title: "${authController.driverInResponse!.weightName??"0"}", subtitle: "${authController.driverInResponse!.weightType??"KG"}"),
+                                            title: "${authController.driverInResponse!.driverDetails!.weightName??"0"}", subtitle: "${authController.driverInResponse!.driverDetails!.weightType??"KG"}"),
                                       )
                                     ],
                                   )
@@ -203,13 +203,13 @@ class _MyProfileViewState extends State<MyProfileView> {
                 child: Column(
                   children: [
                     IconTitleRow(
-                        icon: "assets/img/phone.png", title: "${authController.driverInResponse!.contactNumber??""}", onPressed: () {}),
+                        icon: "assets/img/phone.png", title: "${authController.driverInResponse!.driverDetails!.contactNumber??""}", onPressed: () {}),
                     IconTitleRow(
-                        icon: "assets/img/email.png", title: "${authController.driverInResponse!.email??""}", onPressed: () {}),
+                        icon: "assets/img/email.png", title: "${authController.driverInResponse!.driverDetails!.email??""}", onPressed: () {}),
                     // IconTitleRow(
                     //     icon: "assets/img/language.png", title: "English and Spanish", onPressed: () {}),
                     IconTitleRow(
-                        icon: "assets/img/home.png", title: "${authController.driverInResponse!.address??""}", onPressed: () {}),
+                        icon: "assets/img/home.png", title: "${authController.driverInResponse!.driverDetails!.address??""}", onPressed: () {}),
                   ],
                 ),
               )

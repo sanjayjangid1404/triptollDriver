@@ -104,16 +104,16 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
       Get.find<AuthController>().getAllVehicleData();
 
       if(Get.find<AuthController>().driverInResponse!=null){
-        vehicleModelCt.text = Get.find<AuthController>().driverInResponse!.vehicleType??"";
-        vehicleNumberCt.text = Get.find<AuthController>().driverInResponse!.vehicleNumber??"";
-        rcNumberCt.text = Get.find<AuthController>().driverInResponse!.rcNo??"";
-        editCategoryName = Get.find<AuthController>().driverInResponse!.categoryName??"";
-        editfuelType = Get.find<AuthController>().driverInResponse!.vehicleType??"";
-        editCategoryID = Get.find<AuthController>().driverInResponse!.categoryId??"";
-        editRegistrationFees = Get.find<AuthController>().driverInResponse!.registrationFees??"0";
-        selectedFuel = Get.find<AuthController>().driverInResponse!.vehicleType?? 'Petrol';
-        rcforntImage = AppContants.imageURL+"/uploaded_files/id_proof_img/"+(Get.find<AuthController>().driverInResponse!.rcFrontImg??"");
-        rcBackImage = AppContants.imageURL+"/uploaded_files/id_proof_back_img/"+(Get.find<AuthController>().driverInResponse!.rcBackImg??"");
+        vehicleModelCt.text = Get.find<AuthController>().driverInResponse!.driverDetails!.vehicleType??"";
+        vehicleNumberCt.text = Get.find<AuthController>().driverInResponse!.driverDetails!.vehicleNumber??"";
+        rcNumberCt.text = Get.find<AuthController>().driverInResponse!.driverDetails!.rcNo??"";
+        editCategoryName = Get.find<AuthController>().driverInResponse!.driverDetails!.categoryName??"";
+        editfuelType = Get.find<AuthController>().driverInResponse!.driverDetails!.vehicleType??"";
+        editCategoryID = Get.find<AuthController>().driverInResponse!.driverDetails!.categoryId??"";
+        editRegistrationFees = Get.find<AuthController>().driverInResponse!.driverDetails!.registrationFees??"0";
+        selectedFuel = Get.find<AuthController>().driverInResponse!.driverDetails!.vehicleType?? 'Petrol';
+        rcforntImage = AppContants.imageURL+"/uploaded_files/id_proof_img/"+(Get.find<AuthController>().driverInResponse!.driverDetails!.rcFrontImg??"");
+        rcBackImage = AppContants.imageURL+"/uploaded_files/id_proof_back_img/"+(Get.find<AuthController>().driverInResponse!.driverDetails!.rcBackImg??"");
 
       }
       setState(() {
