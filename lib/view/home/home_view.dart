@@ -85,14 +85,14 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
 
 
-  Stream<BookingNotificationResponse?> bookingStream() {
+  Stream<Data?> bookingStream() {
     return Stream.periodic(const Duration(seconds: 5)).asyncMap((_) async {
       try {
         print({
           "driver_id":Get.find<AuthController>().getUserID()
         });
         final response = await http.post(
-          Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
+          Uri.parse("https://dev.triptoll.in/api/Booking/findNewBookings"),
           body: jsonEncode({
             "driver_id":Get.find<AuthController>().getUserID()
           })
@@ -104,7 +104,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
         if (response.statusCode == 200) {
           final json = jsonDecode(response.body);
           if (json["status"] == true && json["data"] != null) {
-            return BookingNotificationResponse.fromJson(json["data"][0]);
+            return Data.fromJson(json["data"][0]);
           }
         }
       } catch (e) {
@@ -820,7 +820,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               ),
 
               authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?
-              StreamBuilder<BookingNotificationResponse?>(
+              StreamBuilder<Data?>(
                 stream: bookingStream(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data != null && !isSheetOpen) {
@@ -921,10 +921,10 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     return map;
   }
 
-  Future<void> showRideDetailsSheet(BookingNotificationResponse notificationResponse) async{
+  Future<void> showRideDetailsSheet(Data notificationResponse) async{
     final prefs = await SharedPreferences.getInstance();
     List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
-    final currentId = notificationResponse.id.toString();
+    final currentId = notificationResponse.bookingId.toString();
     return !savedIds.contains(currentId) ?
     showModalBottomSheet(
       context: context,
@@ -1015,7 +1015,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     ) : null;
   }
 
-  Future<void> showRideDetailsFakeSheet(BookingNotificationResponse notificationResponse) async{
+  Future<void> showRideDetailsFakeSheet(Data notificationResponse) async{
     return  showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -1053,11 +1053,10 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       child:   InkWell(
                         onTap: () {
                           stopRingtone();
-                          saveFakeId(notificationResponse.id.toString(),notificationResponse.isFake);
+                          saveFakeId(notificationResponse.orderId.toString(),notificationResponse.isFake);
                           Navigator.pop(context);
                         },
                         child: Container(
-
                           margin: const EdgeInsets.only(left: 20),
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
@@ -1108,7 +1107,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     // Share using device's share dialog
     await Share.share(shareText);
   }
-  Widget _buildRideDetailsContent(BookingNotificationResponse bookingResponse) {
+  Widget _buildRideDetailsContent(Data bookingResponse) {
     return Column(
       children: [
         // Drag handle indicator
@@ -1132,7 +1131,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 children: [
                   Expanded(
                     child: Text(
-                      "${AppContants.rupessSystem} ${bookingResponse.totalAmount ?? ""}",
+                      "${AppContants.rupessSystem} ${bookingResponse.amount ?? ""}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: TColor.secondaryText,
@@ -1151,40 +1150,26 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   //   ),
                   // ),
                   Expanded(
-                    child: FutureBuilder<double>(
-                      future: calculateDistance(
-                        double.parse(bookingResponse.pickupLat ?? "0"),
-                        double.parse(bookingResponse.pickupLong ?? "0"),
-                        double.parse(bookingResponse.dropLat ?? "0"),
-                        double.parse(bookingResponse.dropLong ?? "0"),
-                      ),
+                    child: FutureBuilder<Map<String, dynamic>>(
+                      future: calculateDropDistancesForBooking(bookingResponse),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Text(
-                            "Calculating...",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: TColor.secondaryText,
-                              fontSize: 18,
-                            ),
-                          );
+                          return Text("Calculating...",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
                         } else if (snapshot.hasError) {
-                          return Text(
-                            "Error: ${snapshot.error}",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: TColor.secondaryText,
-                              fontSize: 18,
-                            ),
-                          );
+                          return Text("Error: ${snapshot.error}",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
                         } else {
+                          final data = snapshot.data!;
+                          final km = data['total_distance_km'];
+                          final duration = data['total_duration'];
+
                           return Text(
-                            "${snapshot.data!.toStringAsFixed(2)} KM",
+                            "${km.toStringAsFixed(2)} KM • $duration",
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: TColor.secondaryText,
-                              fontSize: 18,
-                            ),
+                            style: TextStyle(color: TColor.secondaryText, fontSize: 18),
                           );
                         }
                       },
@@ -1207,7 +1192,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                     const SizedBox(width: 15),
                     Expanded(
                       child: Text(
-                        "${bookingResponse.pickupAddress ?? ""}",
+                        "${bookingResponse.pickup!.address ?? ""}",
                         style: TextStyle(
                           color: TColor.primaryText,
                           fontSize: 15,
@@ -1217,27 +1202,36 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   ],
                 ),
               ),
-              Padding(
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(color: TColor.primary),
-                    ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Text(
-                        "${bookingResponse.dropAddress ?? ""}",
-                        style: TextStyle(
-                          color: TColor.primaryText,
-                          fontSize: 15,
+                itemCount: bookingResponse.dropoffs?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final drop = bookingResponse.dropoffs![index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(color: TColor.primary),
                         ),
-                      ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Text(
+                            drop.address ?? "",
+                            style: TextStyle(
+                              color: TColor.primaryText,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
               const SizedBox(height: 15),
               Row(
@@ -1248,7 +1242,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       // Navigator.pop(context); // Close the bottom sheet
                      Get.find<AuthController>().bookingStatusChange(
                           status: "cancel",
-                          amount: bookingResponse.totalAmount,
+                          amount: bookingResponse.amount,
                           orderID: bookingResponse.orderId,
                           cus_id:bookingResponse.cusId,
                           value: 0
@@ -1268,24 +1262,23 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: bookingResponse.isFake == 0 || bookingResponse.isFake == '0' ?
+                      onTap: bookingResponse.isFake == false || bookingResponse.isFake == false ?
                           () async {
                         final prefs = await SharedPreferences.getInstance();
                         authController.isLoadingTime = prefs.getBool(AppContants.isLoadingTime)!;
-                        print('dsdskdsds${ authController.isLoadingTime.toString()}');
+                        print('dsdskdsds${authController.isLoadingTime.toString()}');
                         authController.maxTime = prefs.getString(AppContants.maxTimeVar)!;
                         authController.loadingCharges = prefs.getString(AppContants.loadingCharges)!;
                         authController.checkDriverBooking(context);
                         Navigator.pop(context);
-                        Get.find<AuthController>(). accpetBooking(
-
-                            orderID: bookingResponse.id,
+                        Get.find<AuthController>().accpetBooking(
+                            orderID: bookingResponse.bookingId,
                             cus_id:bookingResponse.cusId,
                             value: 0
                         );
                       } : (){
                         Get.back();
-                        saveFakeId(bookingResponse.id.toString(),bookingResponse.isFake);
+                        saveFakeId(bookingResponse.bookingId.toString(),bookingResponse.isFake);
                         showRideDetailsFakeSheet(bookingResponse);
                       },
                       child: Container(
@@ -1362,8 +1355,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   //
   //   return distance;
   // }
-  Future<double> calculateDistance(
-      double lat1, double lon1, double lat2, double lon2) async {
+
+  Future<Map<String, dynamic>> calculateDropDistancesForBooking(dynamic booking) async {
     const apiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk";
 
     final url = Uri.parse("https://routes.googleapis.com/directions/v2:computeRoutes");
@@ -1371,39 +1364,88 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     final headers = {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey,
-      "X-Goog-FieldMask":
-      "routes.distanceMeters,routes.duration"
+      "X-Goog-FieldMask": "routes.distanceMeters,routes.duration"
     };
 
-    final body = jsonEncode({
-      "origin": {
-        "location": {
-          "latLng": {"latitude": lat1, "longitude": lon1}
-        }
-      },
-      "destination": {
-        "location": {
-          "latLng": {"latitude": lat2, "longitude": lon2}
-        }
-      },
-      "travelMode": "DRIVE"
-    });
+    final pickup = booking.pickup;
+    final dropoffs = booking.dropoffs;
 
-    final response = await http.post(url, headers: headers, body: body);
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      if (data["routes"] != null && data["routes"].isNotEmpty) {
-        int meters = data["routes"][0]["distanceMeters"];
-        return meters / 1000.0; // ✅ KM
-      } else {
-        throw Exception("No route found");
-      }
-    } else {
-      throw Exception("Failed to fetch data: ${response.statusCode} - ${response.body}");
+    if (dropoffs == null || dropoffs.isEmpty) {
+      return {
+        "total_distance_km": 0.0,
+        "total_duration": "0m",
+        "drops": []
+      };
     }
+
+    double currentLat = double.parse(pickup.lat);
+    double currentLng = double.parse(pickup.lng);
+
+    double totalDistance = 0;
+    int totalSeconds = 0;
+    List<Map<String, dynamic>> drops = [];
+
+    for (int i = 0; i < dropoffs.length; i++) {
+      final drop = dropoffs[i];
+
+      final body = jsonEncode({
+        "origin": {
+          "location": {"latLng": {"latitude": currentLat, "longitude": currentLng}}
+        },
+        "destination": {
+          "location": {
+            "latLng": {
+              "latitude": double.parse(drop.lat),
+              "longitude": double.parse(drop.lng)
+            }
+          }
+        },
+        "travelMode": "DRIVE"
+      });
+
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data["routes"] != null && data["routes"].isNotEmpty) {
+          final route = data["routes"][0];
+          final distance = (route["distanceMeters"] ?? 0) as int;
+          final durationRaw = (route["duration"] ?? "0s") as String;
+
+          int seconds = int.tryParse(durationRaw.replaceAll("s", "")) ?? 0;
+          totalSeconds += seconds;
+          totalDistance += distance / 1000.0; // convert to KM
+
+          int hours = seconds ~/ 3600;
+          int minutes = (seconds % 3600) ~/ 60;
+          String durationText = hours > 0 ? "${hours}h ${minutes}m" : "${minutes}m";
+
+          drops.add({
+            "drop_address": drop.address,
+            "sequence": drop.sequence,
+            "distance_km": (distance / 1000.0).toStringAsFixed(2),
+            "duration_text": durationText,
+          });
+
+          currentLat = double.parse(drop.lat);
+          currentLng = double.parse(drop.lng);
+        }
+      }
+    }
+
+    int totalHours = totalSeconds ~/ 3600;
+    int totalMinutes = (totalSeconds % 3600) ~/ 60;
+    String totalDuration =
+    totalHours > 0 ? "${totalHours}h ${totalMinutes}m" : "${totalMinutes}m";
+
+    return {
+      "total_distance_km": totalDistance,
+      "total_duration": totalDuration,
+      "drops": drops,
+    };
   }
+
 
 
   double _toRadians(double degree) {
@@ -1469,7 +1511,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 children: [
                   Expanded(
                     child: Text(
-                      "${AppContants.rupessSystem} ${bookingResponse.totalAmount ?? ""}",
+                      "${AppContants.rupessSystem} ${bookingResponse.amount ?? ""}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: TColor.secondaryText,
@@ -1488,40 +1530,26 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   //   ),
                   // ),
                   Expanded(
-                    child: FutureBuilder<double>(
-                      future: calculateDistance(
-                        double.parse(bookingResponse.pickupLat ?? "0"),
-                        double.parse(bookingResponse.pickupLong ?? "0"),
-                        double.parse(bookingResponse.dropLat ?? "0"),
-                        double.parse(bookingResponse.dropLong ?? "0"),
-                      ),
+                    child: FutureBuilder<Map<String, dynamic>>(
+                      future: calculateDropDistancesForBooking(bookingResponse),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Text(
-                            "Calculating...",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: TColor.secondaryText,
-                              fontSize: 18,
-                            ),
-                          );
+                          return Text("Calculating...",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
                         } else if (snapshot.hasError) {
-                          return Text(
-                            "Error: ${snapshot.error}",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: TColor.secondaryText,
-                              fontSize: 18,
-                            ),
-                          );
+                          return Text("Error: ${snapshot.error}",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
                         } else {
+                          final data = snapshot.data!;
+                          final km = data['total_distance_km'];
+                          final duration = data['total_duration'];
+
                           return Text(
-                            "${snapshot.data!.toStringAsFixed(2)} KM",
+                            "${km.toStringAsFixed(2)} KM • $duration",
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: TColor.secondaryText,
-                              fontSize: 18,
-                            ),
+                            style: TextStyle(color: TColor.secondaryText, fontSize: 18),
                           );
                         }
                       },
@@ -1567,7 +1595,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   const SizedBox(width: 15),
                   Expanded(
                     child: Text(
-                      "${bookingResponse.pickupAddress ?? ""}",
+                      "${bookingResponse.pickup!.address ?? ""}",
                       style: TextStyle(
                         color: TColor.primaryText,
                         fontSize: 15,
@@ -1589,7 +1617,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                     const SizedBox(width: 15),
                     Expanded(
                       child: Text(
-                        "${bookingResponse.dropAddress ?? ""}",
+                        "${bookingResponse.dropoffs![0].address ?? ""}",
                         style: TextStyle(
                           color: TColor.primaryText,
                           fontSize: 15,
@@ -1607,7 +1635,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       Navigator.pop(context); // Close the bottom sheet
                       authController.bookingStatusChange(
                         status: "cancel",
-                        amount: bookingResponse.totalAmount,
+                        amount: bookingResponse.amount,
                         orderID: bookingResponse.orderId,
                         cus_id:bookingResponse.cusId,
                       );
@@ -1634,7 +1662,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                         }
                         authController.bookingStatusChange(
                           status: "accept",
-                          amount: bookingResponse.totalAmount,
+                          amount: bookingResponse.amount,
                           orderID: bookingResponse.orderId,
                           cus_id:bookingResponse.cusId,
                         );

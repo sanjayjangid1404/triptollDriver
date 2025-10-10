@@ -171,7 +171,7 @@ class AuthRepo{
         AppContants.getMissedOrdersUrl,body,[]);
   }
 
-  Future<Response> orderPicked({String? userID,String? bookingId,String? loadingTime,String? loadingCharges}) async {
+  Future<Response> orderPicked({String? userID,String? locationID,String? bookingId,String? loadingTime,String? loadingCharges}) async {
     print("call");
     return await apiClient.postData(
         AppContants.orderPickedURL,{
@@ -179,6 +179,7 @@ class AuthRepo{
           "driver_id":userID!,
           "loading_duration":loadingTime!,
           "loading_charge":loadingCharges!,
+          "location_id":locationID!,
           "total_amount": '0',
 
     });
@@ -256,25 +257,27 @@ class AuthRepo{
     });
   }
 
-  Future<Response> startLoading({String? bookingId,String? userID}) async {
+  Future<Response> startLoading({String? bookingId,String? userID,String? locationID}) async {
     print("call");
     return await apiClient.postData(
         AppContants.orderLoadingURL,{
 
           "booking_id":bookingId,
           "driver_id":userID,
+          "location_id":locationID,
 
 
     });
   }
 
-  Future<Response> startUnLoading({String? bookingId,String? userID}) async {
+  Future<Response> startUnLoading({String? bookingId,String? userID,String? locationID}) async {
     print("call");
     return await apiClient.postData(
         AppContants.orderUnloadingURL,{
 
           "booking_id":bookingId,
           "driver_id":userID,
+          "location_id":locationID,
 
 
     });

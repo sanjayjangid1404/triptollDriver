@@ -1335,7 +1335,7 @@ class AuthController extends GetxController implements GetxService {
   }
 
   Future<void> orderPicked(
-      {String? cus_id, String? orderID, String? amount, int? value}) async {
+      {String? cus_id, String? orderID, String? amount, int? value,String? locationID}) async {
     isLoading = true;
     Globs.showHUD();
 
@@ -1347,7 +1347,9 @@ class AuthController extends GetxController implements GetxService {
         userID: getUserID(),
         bookingId: orderID,
         loadingCharges: chargesLoading.toString(),
-        loadingTime: realLoadingTime.toString()
+        loadingTime: realLoadingTime.toString(),
+         locationID: locationID
+
     );
 
     //  LoginResponse? loginResponse;
@@ -1487,7 +1489,7 @@ class AuthController extends GetxController implements GetxService {
     Globs.hideHUD();
     update();
   }
-  Future<void> startLoadingApi(String id, BuildContext context, String orderID,) async
+  Future<void> startLoadingApi(String id, BuildContext context, String orderID,String locationID) async
   {
     isLoading = true;
     Globs.showHUD();
@@ -1496,7 +1498,7 @@ class AuthController extends GetxController implements GetxService {
     print(getUserDeviceID());
 
 
-    Response response = await authRepo.startLoading(bookingId: orderID,userID: id);
+    Response response = await authRepo.startLoading(bookingId: orderID,userID: id,locationID: locationID);
 
     //  LoginResponse? loginResponse;
 
@@ -1512,7 +1514,7 @@ class AuthController extends GetxController implements GetxService {
     Globs.hideHUD();
     update();
   }
-  Future<void> startUnLoadingApi(String id, BuildContext context, String orderID,) async
+  Future<void> startUnLoadingApi(String id, BuildContext context, String orderID,String locationID) async
   {
     isLoading = true;
     Globs.showHUD();
@@ -1521,7 +1523,7 @@ class AuthController extends GetxController implements GetxService {
     print(getUserDeviceID());
 
 
-    Response response = await authRepo.startUnLoading(bookingId: orderID,userID: id);
+    Response response = await authRepo.startUnLoading(bookingId: orderID,userID: id,locationID: locationID);
 
     //  LoginResponse? loginResponse;
 
@@ -2026,8 +2028,7 @@ class AuthController extends GetxController implements GetxService {
                 children: [
                   Expanded(
                     child: Text(
-                      "${AppContants.rupessSystem} ${bookingResponse
-                          .totalAmount ?? ""}",
+                      "${AppContants.rupessSystem} ${bookingResponse.data![0].amount ?? ""}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: TColor.secondaryText,
@@ -2037,29 +2038,26 @@ class AuthController extends GetxController implements GetxService {
                   ),
                   Expanded(
                     child: FutureBuilder<Map<String, dynamic>>(
-                      future: calculateDistance(
-                        double.parse(bookingResponse.pickupLat ?? "0"),
-                        double.parse(bookingResponse.pickupLong ?? "0"),
-                        double.parse(bookingResponse.dropLat ?? "0"),
-                        double.parse(bookingResponse.dropLong ?? "0"),
-                      ),
+                      future: calculateDropDistancesForBooking(bookingResponse.data![0]),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Text("Calculating...", textAlign: TextAlign
-                              .center, style: TextStyle(
-                              color: TColor.secondaryText, fontSize: 18));
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Text("Calculating...",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
                         } else if (snapshot.hasError) {
                           return Text("Error: ${snapshot.error}",
-                              textAlign: TextAlign.center, style: TextStyle(
-                                  color: TColor.secondaryText, fontSize: 18));
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
                         } else {
-                          final chosen = snapshot.data!['chosen'];
-                          final km = (chosen['distanceValue'] as int) / 1000.0;
-                          final duration = chosen['durationText'];
-                          return Text("${km.toStringAsFixed(2)} KM • $duration",
-                              textAlign: TextAlign.center, style: TextStyle(
-                                  color: TColor.secondaryText, fontSize: 18));
+                          final data = snapshot.data!;
+                          final km = data['total_distance_km'];
+                          final duration = data['total_duration'];
+
+                          return Text(
+                            "${km.toStringAsFixed(2)} KM • $duration",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: TColor.secondaryText, fontSize: 18),
+                          );
                         }
                       },
                     ),
@@ -2084,7 +2082,7 @@ class AuthController extends GetxController implements GetxService {
                     const SizedBox(width: 15),
                     Expanded(
                       child: Text(
-                        "${bookingResponse.pickupAddress ?? ""}",
+                        "${bookingResponse.data![0].pickup!.address ?? ""}",
                         style: TextStyle(
                           color: TColor.primaryText,
                           fontSize: 15,
@@ -2107,7 +2105,7 @@ class AuthController extends GetxController implements GetxService {
                     const SizedBox(width: 15),
                     Expanded(
                       child: Text(
-                        "${bookingResponse.dropAddress ?? ""}",
+                        "${bookingResponse.data![0].dropoffs![0].address ?? ""}",
                         style: TextStyle(
                           color: TColor.primaryText,
                           fontSize: 15,
@@ -2126,9 +2124,9 @@ class AuthController extends GetxController implements GetxService {
                       // Navigator.pop(context); // Close the bottom sheet
                       bookingStatusChange(
                           status: "cancel",
-                          amount: bookingResponse.totalAmount,
-                          orderID: bookingResponse.orderId,
-                          cus_id: bookingResponse.cusId,
+                          amount: bookingResponse.data![0].amount,
+                          orderID: bookingResponse.data![0].orderId,
+                          cus_id: bookingResponse.data![0].cusId,
                           value: 0
                       );
                     },
@@ -2149,8 +2147,8 @@ class AuthController extends GetxController implements GetxService {
                       onTap: () async {
                         Navigator.pop(context);
                         accpetBooking(
-                            orderID: bookingResponse.id,
-                            cus_id: bookingResponse.cusId,
+                            orderID: bookingResponse.data![0].orderId,
+                            cus_id: bookingResponse.data![0].cusId,
                             value: 0
                         );
                       },
@@ -2252,15 +2250,14 @@ class AuthController extends GetxController implements GetxService {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${bookingResponse.senderName}',
+                              '${bookingResponse.pickup!.name.toString()}',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             InkWell(
                               onTap: () {
                                 AppContants.makePhoneCall(
-                                    bookingResponse.senderContactNumber
-                                        .toString());
+                                    bookingResponse.pickup!.contactNumber.toString());
                               },
                               child: Row(
                                 children: [
@@ -2268,7 +2265,7 @@ class AuthController extends GetxController implements GetxService {
                                       size: 16),
                                   const SizedBox(width: 5),
                                   Text(
-                                      '${bookingResponse.senderContactNumber}'),
+                                      '${bookingResponse.pickup!.contactNumber.toString()}'),
                                 ],
                               ),
                             ),
@@ -2300,8 +2297,7 @@ class AuthController extends GetxController implements GetxService {
                   children: [
                     Expanded(
                       child: Text(
-                        "${AppContants.rupessSystem} ${bookingResponse
-                            .totalAmount ?? ""}",
+                        "${AppContants.rupessSystem} ${bookingResponse.amount ?? ""}",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: TColor.secondaryText,
@@ -2311,31 +2307,26 @@ class AuthController extends GetxController implements GetxService {
                     ),
                     Expanded(
                       child: FutureBuilder<Map<String, dynamic>>(
-                        future: calculateDistance(
-                          double.parse(bookingResponse.pickupLat ?? "0"),
-                          double.parse(bookingResponse.pickupLong ?? "0"),
-                          double.parse(bookingResponse.dropLat ?? "0"),
-                          double.parse(bookingResponse.dropLong ?? "0"),
-                        ),
+                        future: calculateDropDistancesForBooking(bookingResponse),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Text("Calculating...", textAlign: TextAlign
-                                .center, style: TextStyle(
-                                color: TColor.secondaryText, fontSize: 18));
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Text("Calculating...",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: TColor.secondaryText, fontSize: 18));
                           } else if (snapshot.hasError) {
                             return Text("Error: ${snapshot.error}",
-                                textAlign: TextAlign.center, style: TextStyle(
-                                    color: TColor.secondaryText, fontSize: 18));
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: TColor.secondaryText, fontSize: 18));
                           } else {
-                            final chosen = snapshot.data!['chosen'];
-                            final km = (chosen['distanceValue'] as int) /
-                                1000.0;
-                            final duration = chosen['durationText'];
+                            final data = snapshot.data!;
+                            final km = data['total_distance_km'];
+                            final duration = data['total_duration'];
+
                             return Text(
-                                "${km.toStringAsFixed(2)} KM • $duration",
-                                textAlign: TextAlign.center, style: TextStyle(
-                                color: TColor.secondaryText, fontSize: 18));
+                              "${km.toStringAsFixed(2)} KM • $duration",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: TColor.secondaryText, fontSize: 18),
+                            );
                           }
                         },
                       ),
@@ -2380,7 +2371,7 @@ class AuthController extends GetxController implements GetxService {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "${bookingResponse.pickupAddress ?? ""}",
+                            "${bookingResponse.pickup!.address ?? ""}",
                             style: TextStyle(
                               color: TColor.primaryText,
                               fontSize: 15,
@@ -2389,17 +2380,14 @@ class AuthController extends GetxController implements GetxService {
                           InkWell(
                             onTap: () {
                               AppContants.makePhoneCall(
-                                  bookingResponse.senderContactNumber
-                                      .toString());
+                                  bookingResponse.pickup!.contactNumber.toString());
                             },
                             child: Row(
                               children: [
                                 Icon(Icons.call_outlined, color: Colors.blue,
                                     size: 16),
                                 const SizedBox(width: 5),
-                                Text('${bookingResponse
-                                    .senderContactNumber} , ${bookingResponse
-                                    .receiverName}'),
+                                Text('${bookingResponse.pickup!.contactNumber.toString()} , ${bookingResponse.pickup!.name.toString()}'),
                               ],
                             ),
                           ),
@@ -2422,7 +2410,7 @@ class AuthController extends GetxController implements GetxService {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "${bookingResponse.dropAddress ?? ""}",
+                            "${bookingResponse.dropoffs![0].address ?? ""}",
                             style: TextStyle(
                               color: TColor.primaryText,
                               fontSize: 15,
@@ -2431,17 +2419,14 @@ class AuthController extends GetxController implements GetxService {
                           InkWell(
                             onTap: () {
                               AppContants.makePhoneCall(
-                                  bookingResponse.receiverContactNumber
-                                      .toString());
+                                  bookingResponse.dropoffs![0].contactNumber.toString());
                             },
                             child: Row(
                               children: [
                                 Icon(Icons.call_outlined, color: Colors.blue,
                                     size: 16),
                                 const SizedBox(width: 5),
-                                Text('${bookingResponse
-                                    .receiverContactNumber} , ${bookingResponse
-                                    .receiverName}'),
+                                Text('${ bookingResponse.dropoffs![0].contactNumber} , ${ bookingResponse.dropoffs![0].name}'),
                               ],
                             ),
                           ),
@@ -2470,7 +2455,7 @@ class AuthController extends GetxController implements GetxService {
                       loadingStart.value = false;
                       unloadingStart.value = false;
                       showCompletePayment.value = false;
-                      orderPayment(bookingResponse.id.toString(),
+                      orderPayment(bookingResponse.orderId.toString(),
                           bookingResponse.driverId.toString(),
                           generate8DigitKey().toString());
                     },
@@ -2514,13 +2499,13 @@ class AuthController extends GetxController implements GetxService {
                         if (bookingResponse.orderStatus.toString()
                             .toLowerCase() == "picked") {
                           openGoogleMap(double.parse(
-                              bookingResponse.dropLat.toString()), double.parse(
-                              bookingResponse.dropLong.toString()));
+                              bookingResponse.dropoffs![0].lat.toString()), double.parse(
+                              bookingResponse.dropoffs![0].lng.toString()));
                         }
                         else {
                           openGoogleMap(double.parse(
-                              bookingResponse.pickupLat.toString()), double
-                              .parse(bookingResponse.pickupLong.toString()));
+                              bookingResponse.pickup!.lat.toString()), double
+                              .parse(bookingResponse.pickup!.lng.toString()));
                         }
                       },
                       child: Container(
@@ -2560,19 +2545,19 @@ class AuthController extends GetxController implements GetxService {
                         // final status = bookingResponse.orderStatus.toString().toLowerCase();
 
                         if ( bookingResponse.orderStatus.toString().toLowerCase() == "accpeted") {
-                          startLoadingApi(getUserID().toString(), context, bookingResponse.id.toString());
+                          startLoadingApi(getUserID().toString(), context, bookingResponse.bookingId.toString(),bookingResponse.pickup!.locationId.toString());
                           // checkDriverBooking(context);
                         }
                         else if (bookingResponse.orderStatus.toString().toLowerCase() == "loading") {
-                          orderPicked(orderID: bookingResponse.id.toString());
+                          orderPicked(orderID: bookingResponse.bookingId.toString(),locationID: bookingResponse.pickup!.locationId.toString());
                           // checkDriverBooking(context);
                         }
                         else if (bookingResponse.orderStatus.toString().toLowerCase() == "unloading") {
-                          orderDelivered(orderID: bookingResponse.id.toString());
+                          orderDelivered(orderID: bookingResponse.bookingId.toString());
                           // checkDriverBooking(context);
                         }
                         else if(bookingResponse.orderStatus.toString().toLowerCase() == "picked" ){
-                          startUnLoadingApi(getUserID().toString(), context, bookingResponse.id.toString());
+                          startUnLoadingApi(getUserID().toString(), context, bookingResponse.bookingId.toString(),bookingResponse.dropoffs![0].locationId.toString());
                           // checkDriverBooking(context);
                           print('unloading');
                         }
@@ -2643,18 +2628,18 @@ class AuthController extends GetxController implements GetxService {
                         Navigator.pop(context);
                         if(bookingResponse.orderStatus.toString().toLowerCase() == "picked" ){
 
-                          orderDelivered(orderID:bookingResponse.id.toString());
+                          orderDelivered(orderID:bookingResponse.bookingId.toString());
 
-                          //  startTrip(bookingResponse.id.toString(), "no",context,bookingResponse.cusId.toString(),bookingResponse.orderId.toString(),bookingResponse.amount.toString());
+                          //  startTrip(bookingResponse.id.toString(), "no",context,bookingResponse.cusId.toString(),bookingResponse.bookingId.toString(),bookingResponse.amount.toString());
 
 
                         }
                         else if (bookingResponse.orderStatus.toString().toLowerCase() == "accpeted"){
-                          orderPicked(orderID:bookingResponse.id.toString());
-                          // startTrip(bookingResponse.id.toString(), "yes",context,bookingResponse.cusId.toString(),bookingResponse.orderId.toString(),bookingResponse.amount.toString());
+                          orderPicked(orderID:bookingResponse.bookingId.toString());
+                          // startTrip(bookingResponse.id.toString(), "yes",context,bookingResponse.cusId.toString(),bookingResponse.bookingId.toString(),bookingResponse.amount.toString());
                         }
                         else if(bookingResponse.orderStatus.toString().toLowerCase() == "loading"){
-                          orderPicked(orderID: bookingResponse.id.toString());
+                          orderPicked(orderID: bookingResponse.bookingId.toString());
                         }
 
                       },
@@ -2781,12 +2766,11 @@ class AuthController extends GetxController implements GetxService {
   //
   //   return distance;
   // }
-  Future<Map<String, dynamic>> calculateDistance(double lat1, double lon1,
-      double lat2, double lon2) async {
+
+  Future<Map<String, dynamic>> calculateDropDistancesForBooking(dynamic booking) async {
     const apiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk";
 
-    final url =
-    Uri.parse("https://routes.googleapis.com/directions/v2:computeRoutes");
+    final url = Uri.parse("https://routes.googleapis.com/directions/v2:computeRoutes");
 
     final headers = {
       "Content-Type": "application/json",
@@ -2794,57 +2778,86 @@ class AuthController extends GetxController implements GetxService {
       "X-Goog-FieldMask": "routes.distanceMeters,routes.duration"
     };
 
-    final body = jsonEncode({
-      "origin": {
-        "location": {
-          "latLng": {"latitude": lat1, "longitude": lon1}
-        }
-      },
-      "destination": {
-        "location": {
-          "latLng": {"latitude": lat2, "longitude": lon2}
-        }
-      },
-      "travelMode": "DRIVE"
-    });
+    final pickup = booking.pickup;
+    final dropoffs = booking.dropoffs;
 
-    print("➡️ Sending request to $url");
-    print("➡️ Headers: $headers");
-    print("➡️ Body: $body");
-
-    final response = await http.post(url, headers: headers, body: body);
-
-    print("⬅️ Status Code: ${response.statusCode}");
-    print("⬅️ Response Body: ${response.body}");
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      if (data["routes"] != null && data["routes"].isNotEmpty) {
-        final route = data["routes"][0];
-        final distance = route["distanceMeters"];
-        final durationRaw = route["duration"]; // e.g. "5234s"
-
-        // convert seconds → readable format
-        int seconds = int.tryParse(durationRaw.replaceAll("s", "")) ?? 0;
-        int hours = seconds ~/ 3600;
-        int minutes = (seconds % 3600) ~/ 60;
-        String durationText =
-        hours > 0 ? "${hours}h ${minutes}m" : "${minutes}m";
-
-        return {
-          "chosen": {
-            "distanceValue": distance,
-            "durationText": durationText,
-          }
-        };
-      } else {
-        throw Exception("No route found in response: $data");
-      }
-    } else {
-      throw Exception("Failed: ${response.statusCode} - ${response.body}");
+    if (dropoffs == null || dropoffs.isEmpty) {
+      return {
+        "total_distance_km": 0.0,
+        "total_duration": "0m",
+        "drops": []
+      };
     }
+
+    double currentLat = double.parse(pickup.lat);
+    double currentLng = double.parse(pickup.lng);
+
+    double totalDistance = 0;
+    int totalSeconds = 0;
+    List<Map<String, dynamic>> drops = [];
+
+    for (int i = 0; i < dropoffs.length; i++) {
+      final drop = dropoffs[i];
+
+      final body = jsonEncode({
+        "origin": {
+          "location": {"latLng": {"latitude": currentLat, "longitude": currentLng}}
+        },
+        "destination": {
+          "location": {
+            "latLng": {
+              "latitude": double.parse(drop.lat),
+              "longitude": double.parse(drop.lng)
+            }
+          }
+        },
+        "travelMode": "DRIVE"
+      });
+
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data["routes"] != null && data["routes"].isNotEmpty) {
+          final route = data["routes"][0];
+          final distance = (route["distanceMeters"] ?? 0) as int;
+          final durationRaw = (route["duration"] ?? "0s") as String;
+
+          int seconds = int.tryParse(durationRaw.replaceAll("s", "")) ?? 0;
+          totalSeconds += seconds;
+          totalDistance += distance / 1000.0; // convert to KM
+
+          int hours = seconds ~/ 3600;
+          int minutes = (seconds % 3600) ~/ 60;
+          String durationText = hours > 0 ? "${hours}h ${minutes}m" : "${minutes}m";
+
+          drops.add({
+            "drop_address": drop.address,
+            "sequence": drop.sequence,
+            "distance_km": (distance / 1000.0).toStringAsFixed(2),
+            "duration_text": durationText,
+          });
+
+          currentLat = double.parse(drop.lat);
+          currentLng = double.parse(drop.lng);
+        }
+      }
+    }
+
+    int totalHours = totalSeconds ~/ 3600;
+    int totalMinutes = (totalSeconds % 3600) ~/ 60;
+    String totalDuration =
+    totalHours > 0 ? "${totalHours}h ${totalMinutes}m" : "${totalMinutes}m";
+
+    return {
+      "total_distance_km": totalDistance,
+      "total_duration": totalDuration,
+      "drops": drops,
+    };
   }
+
+
 
 
   double _toRadians(double degree) {
