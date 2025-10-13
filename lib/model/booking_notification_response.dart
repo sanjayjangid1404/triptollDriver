@@ -39,45 +39,45 @@
 
 class BookingNotificationResponse {
   BookingNotificationResponse({
-    String? id,
-    String? orderId,
-    String? cusId,
+    dynamic id,
+    dynamic orderId,
+    dynamic cusId,
     dynamic driverId,
     dynamic asignedDriver,
-    String? categoryId,
-    String? vehicleId,
-    String? rate,
-    String? amount,
-    String? totalAmount,
-    String? stopCharge,
-    String? bookingDate,
-    String? orderStatus,
-    String? readStatus,
+    dynamic categoryId,
+    dynamic vehicleId,
+    dynamic rate,
+    dynamic amount,
+    dynamic totalAmount,
+    dynamic stopCharge,
+    dynamic bookingDate,
+    dynamic orderStatus,
+    dynamic readStatus,
     dynamic acceptTime,
     dynamic closeTime,
-    String? discount,
-    String? discountPercentage,
-    String? paymentType,
+    dynamic discount,
+    dynamic discountPercentage,
+    dynamic paymentType,
     dynamic trnId,
-    String? pickupLat,
-    String? pickupLong,
-    String? pickupAddress,
-    String? senderName,
-    String? senderContactNumber,
-    String? apartmentType,
-    String? dropLat,
-    String? dropLong,
-    String? dropAddress,
-    String? receiverName,
-    String? receiverContactNumber,
+    dynamic pickupLat,
+    dynamic pickupLong,
+    dynamic pickupAddress,
+    dynamic senderName,
+    dynamic senderContactNumber,
+    dynamic apartmentType,
+    dynamic dropLat,
+    dynamic dropLong,
+    dynamic dropAddress,
+    dynamic receiverName,
+    dynamic receiverContactNumber,
     dynamic reason,
     dynamic additionalComment,
-    String? pickedTime,
-    String? deliveryTime,
+    dynamic pickedTime,
+    dynamic deliveryTime,
     dynamic cancelledTime,
     dynamic isFake,
-    String? startTrip,
-    String? addDate,}){
+    dynamic startTrip,
+    dynamic addDate,}){
     _id = id;
     _isFake = isFake;
     _orderId = orderId;
@@ -160,84 +160,84 @@ class BookingNotificationResponse {
     _startTrip = json['start_trip'];
     _addDate = json['add_date'];
   }
-  String? _id;
-  String? _orderId;
-  String? _cusId;
+  dynamic _id;
+  dynamic _orderId;
+  dynamic _cusId;
   dynamic _driverId;
   dynamic _asignedDriver;
-  String? _categoryId;
-  String? _vehicleId;
-  String? _rate;
-  String? _amount;
-  String? _totalAmount;
-  String? _stopCharge;
-  String? _bookingDate;
-  String? _orderStatus;
-  String? _readStatus;
+  dynamic _categoryId;
+  dynamic _vehicleId;
+  dynamic _rate;
+  dynamic _amount;
+  dynamic _totalAmount;
+  dynamic _stopCharge;
+  dynamic _bookingDate;
+  dynamic _orderStatus;
+  dynamic _readStatus;
   dynamic _acceptTime;
   dynamic _closeTime;
   dynamic _isFake;
-  String? _discount;
-  String? _discountPercentage;
-  String? _paymentType;
+  dynamic _discount;
+  dynamic _discountPercentage;
+  dynamic _paymentType;
   dynamic _trnId;
-  String? _pickupLat;
-  String? _pickupLong;
-  String? _pickupAddress;
-  String? _senderName;
-  String? _senderContactNumber;
-  String? _apartmentType;
-  String? _dropLat;
-  String? _dropLong;
-  String? _dropAddress;
-  String? _receiverName;
-  String? _receiverContactNumber;
+  dynamic _pickupLat;
+  dynamic _pickupLong;
+  dynamic _pickupAddress;
+  dynamic _senderName;
+  dynamic _senderContactNumber;
+  dynamic _apartmentType;
+  dynamic _dropLat;
+  dynamic _dropLong;
+  dynamic _dropAddress;
+  dynamic _receiverName;
+  dynamic _receiverContactNumber;
   dynamic _reason;
   dynamic _additionalComment;
-  String? _pickedTime;
-  String? _deliveryTime;
+  dynamic _pickedTime;
+  dynamic _deliveryTime;
   dynamic _cancelledTime;
-  String? _startTrip;
-  String? _addDate;
-  BookingNotificationResponse copyWith({  String? id,
-    String? orderId,
-    String? cusId,
+  dynamic _startTrip;
+  dynamic _addDate;
+  BookingNotificationResponse copyWith({  dynamic id,
+    dynamic orderId,
+    dynamic cusId,
     dynamic driverId,
     dynamic asignedDriver,
-    String? categoryId,
-    String? vehicleId,
-    String? rate,
-    String? amount,
-    String? totalAmount,
-    String? stopCharge,
-    String? bookingDate,
-    String? orderStatus,
-    String? readStatus,
+    dynamic categoryId,
+    dynamic vehicleId,
+    dynamic rate,
+    dynamic amount,
+    dynamic totalAmount,
+    dynamic stopCharge,
+    dynamic bookingDate,
+    dynamic orderStatus,
+    dynamic readStatus,
     dynamic acceptTime,
     dynamic closeTime,
     dynamic isFake,
-    String? discount,
-    String? discountPercentage,
-    String? paymentType,
+    dynamic discount,
+    dynamic discountPercentage,
+    dynamic paymentType,
     dynamic trnId,
-    String? pickupLat,
-    String? pickupLong,
-    String? pickupAddress,
-    String? senderName,
-    String? senderContactNumber,
-    String? apartmentType,
-    String? dropLat,
-    String? dropLong,
-    String? dropAddress,
-    String? receiverName,
-    String? receiverContactNumber,
+    dynamic pickupLat,
+    dynamic pickupLong,
+    dynamic pickupAddress,
+    dynamic senderName,
+    dynamic senderContactNumber,
+    dynamic apartmentType,
+    dynamic dropLat,
+    dynamic dropLong,
+    dynamic dropAddress,
+    dynamic receiverName,
+    dynamic receiverContactNumber,
     dynamic reason,
     dynamic additionalComment,
-    String? pickedTime,
-    String? deliveryTime,
+    dynamic pickedTime,
+    dynamic deliveryTime,
     dynamic cancelledTime,
-    String? startTrip,
-    String? addDate,
+    dynamic startTrip,
+    dynamic addDate,
   }) => BookingNotificationResponse(  id: id ?? _id,
     orderId: orderId ?? _orderId,
     cusId: cusId ?? _cusId,
@@ -278,45 +278,45 @@ class BookingNotificationResponse {
     startTrip: startTrip ?? _startTrip,
     addDate: addDate ?? _addDate,
   );
-  String? get id => _id;
-  String? get orderId => _orderId;
-  String? get cusId => _cusId;
+  dynamic get id => _id;
+  dynamic get orderId => _orderId;
+  dynamic get cusId => _cusId;
   dynamic get driverId => _driverId;
   dynamic get asignedDriver => _asignedDriver;
-  String? get categoryId => _categoryId;
-  String? get vehicleId => _vehicleId;
-  String? get rate => _rate;
-  String? get amount => _amount;
-  String? get totalAmount => _totalAmount;
-  String? get stopCharge => _stopCharge;
-  String? get bookingDate => _bookingDate;
-  String? get orderStatus => _orderStatus;
-  String? get readStatus => _readStatus;
+  dynamic get categoryId => _categoryId;
+  dynamic get vehicleId => _vehicleId;
+  dynamic get rate => _rate;
+  dynamic get amount => _amount;
+  dynamic get totalAmount => _totalAmount;
+  dynamic get stopCharge => _stopCharge;
+  dynamic get bookingDate => _bookingDate;
+  dynamic get orderStatus => _orderStatus;
+  dynamic get readStatus => _readStatus;
   dynamic get acceptTime => _acceptTime;
   dynamic get closeTime => _closeTime;
   dynamic get isFake => _isFake;
-  String? get discount => _discount;
-  String? get discountPercentage => _discountPercentage;
-  String? get paymentType => _paymentType;
+  dynamic get discount => _discount;
+  dynamic get discountPercentage => _discountPercentage;
+  dynamic get paymentType => _paymentType;
   dynamic get trnId => _trnId;
-  String? get pickupLat => _pickupLat;
-  String? get pickupLong => _pickupLong;
-  String? get pickupAddress => _pickupAddress;
-  String? get senderName => _senderName;
-  String? get senderContactNumber => _senderContactNumber;
-  String? get apartmentType => _apartmentType;
-  String? get dropLat => _dropLat;
-  String? get dropLong => _dropLong;
-  String? get dropAddress => _dropAddress;
-  String? get receiverName => _receiverName;
-  String? get receiverContactNumber => _receiverContactNumber;
+  dynamic get pickupLat => _pickupLat;
+  dynamic get pickupLong => _pickupLong;
+  dynamic get pickupAddress => _pickupAddress;
+  dynamic get senderName => _senderName;
+  dynamic get senderContactNumber => _senderContactNumber;
+  dynamic get apartmentType => _apartmentType;
+  dynamic get dropLat => _dropLat;
+  dynamic get dropLong => _dropLong;
+  dynamic get dropAddress => _dropAddress;
+  dynamic get receiverName => _receiverName;
+  dynamic get receiverContactNumber => _receiverContactNumber;
   dynamic get reason => _reason;
   dynamic get additionalComment => _additionalComment;
-  String? get pickedTime => _pickedTime;
-  String? get deliveryTime => _deliveryTime;
+  dynamic get pickedTime => _pickedTime;
+  dynamic get deliveryTime => _deliveryTime;
   dynamic get cancelledTime => _cancelledTime;
-  String? get startTrip => _startTrip;
-  String? get addDate => _addDate;
+  dynamic get startTrip => _startTrip;
+  dynamic get addDate => _addDate;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

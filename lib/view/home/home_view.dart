@@ -98,13 +98,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           })
         );
 
-        print("respnse=>findNewBookings${response.body}");
+        print("respnse=>findNewBooking5s${response.body}");
 
 
         if (response.statusCode == 200) {
           final json = jsonDecode(response.body);
-          if (json["status"] == true && json["data"] != null) {
-            return BookingNotificationResponse.fromJson(json["data"][0]);
+          if (json["status"] == true && json["bookings"] != null) {
+            return BookingNotificationResponse.fromJson(json["bookings"][0]);
           }
         }
       } catch (e) {
@@ -823,8 +823,10 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               StreamBuilder<BookingNotificationResponse?>(
                 stream: bookingStream(),
                 builder: (context, snapshot) {
+                  print('dfjhjkfdfhgkjfhgkfj ${ snapshot.data.toString()}');
                   if (snapshot.hasData && snapshot.data != null && !isSheetOpen) {
                     printSavedIds();
+                    print('dfjhjkfdfhgkjfhgkfj123');
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       isSheetOpen = true;
                       showRideDetailsSheet(snapshot.data!).then((_) {
