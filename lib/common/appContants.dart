@@ -61,6 +61,7 @@ class AppContants
   static String accpetBookingURL = "Booking/accpetBooking";
   static String orderPickedURL = "Booking/orderPicked";
   static String orderDeliveredURL = "Booking/orderDelivered";
+  static String startJourneyToNextUrl = "Booking/startJourneyToNext";
   static String getBookingsBydateAndDriverURL = "Booking/getBookingsBydateAndDriver";
   static String driverOnlineTImeURL = "Driver/driver_online_time";
   static String getWalletHistoryURL = "Driver/getWalletHistory";

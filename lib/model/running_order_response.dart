@@ -99,7 +99,7 @@ class Orders {
 }
 
   Orders.fromJson(dynamic json) {
-    _bookingId = json['booking_id'];
+    _bookingId = json['id'];
     _orderId = json['order_id'];
     _amount = json['amount'];
     _driverId = json['driver_id'];
@@ -184,7 +184,7 @@ Orders copyWith({  String? bookingId,
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    map['booking_id'] = _bookingId;
+    map['id'] = _bookingId;
     map['order_id'] = _orderId;
     map['amount'] = _amount;
     map['driver_id'] = _driverId;

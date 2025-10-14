@@ -82,6 +82,8 @@ class AuthController extends GetxController implements GetxService {
   bool isLoadingTime = false;
   RxBool loadingStart = false.obs;
   int elapsedSeconds = 0;
+  var currentDropIndex = 0.obs;
+  String bookingId = '';
   int elapsedSecondsUnload = 0;
   double chargesLoading = 0.0;
   double chargesUnLoading = 0.0;
@@ -124,12 +126,41 @@ class AuthController extends GetxController implements GetxService {
   RxDouble lat = 0.0.obs;
   RxDouble lng = 0.0.obs;
   StreamSubscription<Position>? _positionStreamSubscription;
+  Future<void> _loadSavedDropIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    currentDropIndex.value = prefs.getInt('currentDropIndex_$bookingId') ?? 0;
+    print("Loaded saved drop index: ${currentDropIndex.value}");
+  }
 
+  /// 🔹 Save drop index to SharedPreferences
+  Future<void> _saveDropIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('currentDropIndex_$bookingId', currentDropIndex.value);
+  }
+
+  /// 🔹 Increment drop index after successful unload
+  Future<void> nextDrop(int totalDrops) async {
+    if (currentDropIndex.value < totalDrops - 1) {
+      currentDropIndex.value++;
+      await _saveDropIndex();
+    } else {
+      print("✅ All dropoffs completed");
+    }
+  }
+
+  /// 🔹 Clear index after order is delivered
+  Future<void> clearDropIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('currentDropIndex_$bookingId');
+    currentDropIndex.value = 0;
+    print("Drop index cleared for booking $bookingId");
+  }
   @override
   void onInit() {
     super.onInit();
    // if(isLoggedIn()) {
     getDeviceId();
+    _loadSavedDropIndex();
       Stream.periodic(const Duration(seconds: 15)).listen((_) {
         checkDriverDevice(deviceId);
       });
@@ -1371,7 +1402,8 @@ class AuthController extends GetxController implements GetxService {
   }
 
   Future<void> orderDelivered(
-      {String? cus_id, String? orderID, String? amount, int? value}) async {
+      {String? cus_id, String? orderID, String? amount, int? value}) async
+  {
     isLoading = true;
     Globs.showHUD();
 
@@ -1390,6 +1422,34 @@ class AuthController extends GetxController implements GetxService {
     if (response.statusCode == 200 || response.statusCode == 400) {
       hasShownSheet = false;
       authRepo.saveUserBooking("0");
+      startJourneyToNext(  cus_id: getUserID(), orderID: orderID);
+      Get.offAll(HomeView());
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    Globs.hideHUD();
+    update();
+  }
+
+  Future<void> startJourneyToNext(
+      {String? cus_id, String? orderID}) async
+  {
+    Globs.showHUD();
+
+    update();
+    print(getUserDeviceID());
+
+
+    Response response = await authRepo.startJourneyToNextFun(
+        userID: getUserID(), bookingId: orderID,
+    );
+
+    //  LoginResponse? loginResponse;
+
+    if (response.statusCode == 200 || response.statusCode == 400) {
 
       Get.offAll(HomeView());
     }
@@ -2406,31 +2466,39 @@ class AuthController extends GetxController implements GetxService {
                     Icon(Icons.location_on_outlined, color: Colors.red,),
                     const SizedBox(width: 15),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "${bookingResponse.dropoffs![0].address ?? ""}",
-                            style: TextStyle(
-                              color: TColor.primaryText,
-                              fontSize: 15,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              AppContants.makePhoneCall(
-                                  bookingResponse.dropoffs![0].contactNumber.toString());
-                            },
-                            child: Row(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: bookingResponse.dropoffs?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          final dropoff = bookingResponse.dropoffs![index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.call_outlined, color: Colors.blue,
-                                    size: 16),
-                                const SizedBox(width: 5),
-                                Text('${ bookingResponse.dropoffs![0].contactNumber} , ${ bookingResponse.dropoffs![0].name}'),
+                                Text(
+                                  dropoff.address ?? "",
+                                  style: TextStyle(
+                                    color: TColor.primaryText,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    AppContants.makePhoneCall(dropoff.contactNumber.toString());
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.call_outlined, color: Colors.blue, size: 16),
+                                      const SizedBox(width: 5),
+                                      Text('${dropoff.contactNumber} , ${dropoff.name}'),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -2495,12 +2563,29 @@ class AuthController extends GetxController implements GetxService {
                   Expanded(
                     child: InkWell(
                       onTap: () {
-                        //   Navigator.pop(context);
+                        final drops = bookingResponse.dropoffs ?? [];
+                        if (drops.isEmpty) return;
+                        final sortedDrops = List.from(drops)
+                          ..sort((a, b) => int.parse(a.sequence.toString())
+                              .compareTo(int.parse(b.sequence.toString())));
+
+                        final dropIndex = currentDropIndex.value;
+
                         if (bookingResponse.orderStatus.toString()
                             .toLowerCase() == "picked") {
-                          openGoogleMap(double.parse(
-                              bookingResponse.dropoffs![0].lat.toString()), double.parse(
-                              bookingResponse.dropoffs![0].lng.toString()));
+                          if (dropIndex < sortedDrops.length) {
+                            final drop = sortedDrops[dropIndex];
+
+                            openGoogleMap(
+                              double.parse(drop.lat.toString()),
+                              double.parse(drop.lng.toString()),
+                            );
+
+                            print("🗺️ Opening map for sequence ${drop.sequence} "
+                                "| Location ID: ${drop.locationId}");
+                          } else {
+                            print("✅ All drops completed");
+                          }
                         }
                         else {
                           openGoogleMap(double.parse(
@@ -2541,7 +2626,7 @@ class AuthController extends GetxController implements GetxService {
                   isLoadingTime == true ?
                   Expanded(
                     child:  InkWell(
-                      onTap: () {
+                      onTap: () async {
                         // final status = bookingResponse.orderStatus.toString().toLowerCase();
 
                         if ( bookingResponse.orderStatus.toString().toLowerCase() == "accpeted") {
@@ -2554,10 +2639,32 @@ class AuthController extends GetxController implements GetxService {
                         }
                         else if (bookingResponse.orderStatus.toString().toLowerCase() == "unloading") {
                           orderDelivered(orderID: bookingResponse.bookingId.toString());
+                          // await clearDropIndex();
                           // checkDriverBooking(context);
                         }
                         else if(bookingResponse.orderStatus.toString().toLowerCase() == "picked" ){
-                          startUnLoadingApi(getUserID().toString(), context, bookingResponse.bookingId.toString(),bookingResponse.dropoffs![0].locationId.toString());
+                          final drops = bookingResponse.dropoffs ?? [];
+                          if (drops.isEmpty) return;
+                          final sortedDrops = List.from(drops)
+                            ..sort((a, b) => int.parse(a.sequence.toString())
+                                .compareTo(int.parse(b.sequence.toString())));
+                          final dropIndex = currentDropIndex.value;
+
+                          if (dropIndex < sortedDrops.length) {
+                            final drop = sortedDrops[dropIndex];
+
+                            startUnLoadingApi(
+                              getUserID().toString(),
+                              context,
+                              bookingResponse.bookingId.toString(),
+                              drop.locationId.toString(),
+                            );
+
+                            print("📦 Unloading at sequence ${drop.sequence}");
+
+                            await nextDrop(sortedDrops.length);
+                          }
+                          // startUnLoadingApi(getUserID().toString(), context, bookingResponse.bookingId.toString(),bookingResponse.dropoffs![0].locationId.toString());
                           // checkDriverBooking(context);
                           print('unloading');
                         }

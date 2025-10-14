@@ -197,6 +197,14 @@ class AuthRepo{
 
     });
   }
+  Future<Response> startJourneyToNextFun({String? userID,String? bookingId}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.startJourneyToNextUrl,{
+          "booking_id":bookingId!,
+          "driver_id":userID!,
+    });
+  }
 
   Future<Response> driverOnlineTIme({String? userID}) async {
     print("call");

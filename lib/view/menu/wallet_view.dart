@@ -274,7 +274,7 @@ class _WalletViewState extends State<WalletView> {
                             ),
                           ),
                           Text(
-                            totalAmount.toStringAsFixed(2),
+                            authController.walletAmount.toString(),
                             style: TextStyle(
                               color: TColor.primaryText,
                               fontSize: 25,
