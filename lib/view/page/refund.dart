@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_html/flutter_html.dart';
+import 'package:get/get.dart';
 
 class Refund extends StatefulWidget {
   @override
@@ -28,7 +29,7 @@ class _PrivacyPolicyPageState extends State<Refund> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.black),
-        title: Text("Refund Policy",style: TextStyle(color: Colors.black),),
+        title: Text("Refund Policy".tr,style: TextStyle(color: Colors.black),),
 
       ),
       body: htmlContent.isEmpty

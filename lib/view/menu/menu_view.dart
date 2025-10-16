@@ -23,6 +23,7 @@ import '../../common_widget/setting_row.dart';
 import '../home/support/faq.dart';
 import '../login/bank_detail_view.dart';
 import '../login/document_upload_view.dart';
+import '../login/mobile_number_view.dart';
 import '../payment/payment_list.dart';
 import 'change_password_view.dart';
 import 'my_profile_view.dart';
@@ -43,6 +44,11 @@ class _MenuViewState extends State<MenuView> {
     // TODO: implement initState
     super.initState();
 
+  }
+
+  updateLanguage(String gg) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString("app_language", gg);
   }
   @override
   Widget build(BuildContext context) {
@@ -88,7 +94,7 @@ class _MenuViewState extends State<MenuView> {
                                   color: Colors.white,
                                 ),
                                 Text(
-                                  "Help",
+                                  "Help".tr,
                                   style: TextStyle(
                                     color: TColor.primaryTextW,
                                     fontSize: 14,
@@ -286,7 +292,7 @@ class _MenuViewState extends State<MenuView> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                         child: Text(
-                          "Support",
+                          "Earnings".tr,
                           style: TextStyle(
                             color: TColor.primaryText,
                             fontSize: 15,
@@ -294,6 +300,174 @@ class _MenuViewState extends State<MenuView> {
                           ),
                         ),
                       ),
+                    ),
+                    MenuRow(
+                      title: "Language",
+                      onPressed: () {
+                        showModalBottomSheet<void>(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (BuildContext context) {
+                              return Container(
+                                  decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+                                  child: Obx(() {
+                                    return Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                                          child: Container(
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(color: const Color(0xffDCDCDC)),
+                                                  borderRadius: BorderRadius.circular(15)),
+                                              child: RadioListTile(
+                                                title: Text('English'.tr),
+                                                activeColor: const Color(0xff014E70),
+                                                value: "English",
+                                                groupValue: authController.selectedLanguage.value,
+                                                onChanged: (value) {
+                                                  locale = const Locale('en', 'US');
+                                                  authController.selectedLanguage.value = value!;
+                                                  updateLanguage("English");
+                                                  setState(() {});
+                                                },
+                                              )),
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 20, right: 20),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: const Color(0xffDCDCDC)),
+                                              borderRadius: BorderRadius.circular(15),
+                                            ),
+                                            child: RadioListTile(
+                                              title: Text('தமிழ்'.tr),
+                                              activeColor: const Color(0xff014E70),
+                                              value: "தமிழ்",
+                                              groupValue: authController.selectedLanguage.value,
+                                              onChanged: (value) {
+                                                locale = const Locale('ta', 'IN');
+                                                authController.selectedLanguage.value = value!;
+                                                updateLanguage("தமிழ்");
+                                                setState(() {});
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 20, right: 20),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: const Color(0xffDCDCDC)),
+                                              borderRadius: BorderRadius.circular(15),
+                                            ),
+                                            child: RadioListTile(
+                                              title: Text('বাংলা'.tr),
+                                              activeColor: const Color(0xff014E70),
+                                              value: "বাংলা",
+                                              groupValue: authController.selectedLanguage.value,
+                                              onChanged: (value) {
+                                                locale = const Locale('bn', 'BD');
+                                                authController.selectedLanguage.value = value!;
+                                                updateLanguage("বাংলা");
+                                                setState(() {});
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 20, right: 20),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: const Color(0xffDCDCDC)),
+                                              borderRadius: BorderRadius.circular(15),
+                                            ),
+                                            child: RadioListTile(
+                                              title: Text('తెలుగు'.tr),
+                                              activeColor: const Color(0xff014E70),
+                                              value: "తెలుగు",
+                                              groupValue: authController.selectedLanguage.value,
+                                              onChanged: (value) {
+                                                locale = const Locale('te', 'IN');
+                                                authController.selectedLanguage.value = value!;
+                                                updateLanguage("తెలుగు");
+                                                setState(() {});
+                                              },
+                                            ),
+                                          ),
+                                        ),
+
+                                        // const SizedBox(
+                                        //   height: 10,
+                                        // ),
+                                        // Padding(
+                                        //     padding: const EdgeInsets.only(left: 20, right: 20),
+                                        //     child: Container(
+                                        //         decoration: BoxDecoration(
+                                        //             border: Border.all(color: const Color(0xffDCDCDC)),
+                                        //             borderRadius: BorderRadius.circular(15)),
+                                        //         child: RadioListTile(
+                                        //           title: const Text('Several languages'),
+                                        //           activeColor: const Color(0xff014E70),
+                                        //           value: "Several languages",
+                                        //           groupValue: language.value,
+                                        //           onChanged: (value) {
+                                        //             print(selectedLAnguage.value.toString());
+                                        //             setState(() {
+                                        //               language.value = value!;
+                                        //             });
+                                        //           },
+                                        //         ))),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            Get.updateLocale(locale);
+                                            Get.back();
+                                          },
+                                          child: Center(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+                                              child: Container(
+                                                height: 56,
+                                                width: MediaQuery.sizeOf(context).width,
+                                                color: Colors.green,
+                                                child: Center(
+                                                  child: Text(
+                                                    'Apply'.tr,
+                                                    style: TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight: FontWeight.w500,
+                                                        color: Colors.white),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
+                                      ],
+                                    );
+                                  }));
+                            });
+                      },
+                      icon: "assets/img/language.png",
                     ),
                     MenuRow(
                         title: "Setting",

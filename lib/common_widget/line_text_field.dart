@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 
 class LineTextField extends StatelessWidget {
@@ -35,7 +36,7 @@ class LineTextField extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          title,
+          title.tr,
           style: TextStyle(color: TColor.placeholder, fontSize: 14),
         ),
         TextField(

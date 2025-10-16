@@ -43,7 +43,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         ),
         centerTitle: true,
         title: Text(
-          "Change Password",
+          "Change Password".tr,
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 18,
@@ -78,7 +78,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
               //   height: 15,
               // ),
               LineTextField(
-                title: "New Password",
+                title: "New Password".tr,
                 hintText: "******",
                 controller: txtNewPassword,
                 obscureText: showNewPassword,
@@ -98,7 +98,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 height: 15,
               ),
               LineTextField(
-                title: "Confirm Password",
+                title: "Confirm Password".tr,
                 hintText: "******",
                 controller: txtConfirmPassword,
                 obscureText: showConfirmPassword,
@@ -118,7 +118,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 height: 35,
               ),
               RoundButton(
-                  title: "Change",
+                  title: "Change".tr,
                   onPressed: () {
                     actionSubmit();
                   })
@@ -137,12 +137,12 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     //   return;
     // }
     if (txtNewPassword.text.isEmpty) {
-      mdShowAlert("error", "Please enter new password", () {});
+      mdShowAlert("error", "Please enter new password".tr, () {});
       return;
     }
 
     if (txtNewPassword.text != txtConfirmPassword.text) {
-      mdShowAlert("error", "Password not match", () {});
+      mdShowAlert("error", "Password not match".tr, () {});
       return;
     }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common_widget/bank_row.dart';
 import 'package:taxi_driver/common_widget/round_button.dart';
@@ -39,7 +40,7 @@ class _AddMoneyViewState extends State<AddMoneyView> {
         ),
         centerTitle: true,
         title: Text(
-          "Add money to wallet",
+          "Add money to wallet".tr,
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 18,
@@ -65,7 +66,7 @@ class _AddMoneyViewState extends State<AddMoneyView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Available balance",
+                    "Available balance".tr,
                     style: TextStyle(
                       color: TColor.primaryText,
                       fontSize: 16,

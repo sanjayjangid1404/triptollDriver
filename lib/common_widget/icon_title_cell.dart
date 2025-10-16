@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 
 class IconTitleCell extends StatelessWidget {
@@ -26,7 +27,7 @@ class IconTitleCell extends StatelessWidget {
             height: 4,
           ),
           Text(
-            title,
+            title.tr,
             style: TextStyle(
               color: TColor.primaryTextW,
               fontSize: 16,

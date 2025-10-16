@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:get/get.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
@@ -69,7 +70,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
         ),
         centerTitle: true,
         title: Text(
-          "Trip Details",
+          "Trip Details".tr,
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 18,
@@ -87,7 +88,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
               height: 20,
             ),
             label: Text(
-              "Help",
+              "Help".tr,
               style: TextStyle(
                 color: TColor.primary,
                 fontSize: 14,
@@ -255,7 +256,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           child: Text(
-                            "Payment made successfully by ${widget.obj.paymentType}",
+                            "${"Payment made successfully by".tr} ${widget.obj.paymentType}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: TColor.secondaryText,
@@ -283,7 +284,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                                           fontWeight: FontWeight.w800),
                                     ),
                                     Text(
-                                      "Time",
+                                      "Time".tr,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: TColor.secondaryText,
@@ -311,7 +312,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                                         fontWeight: FontWeight.w800),
                                   ),
                                   Text(
-                                    "Distance",
+                                    "Distance".tr,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: TColor.secondaryText,
@@ -330,7 +331,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                           child: Column(
                             children: [
                               TitleSubtitleRow(
-                                title: "Date & Time",
+                                title: "Date & Time".tr,
                                 subtitle: widget.obj.closeTime??""
 
                                 /* (widget.obj.closeTime??"")
@@ -340,7 +341,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                                         format: "dd MMM, yyyy hh:mm a")*/,
                               ),
                               TitleSubtitleRow(
-                                title: "Service Type",
+                                title: "Service Type".tr,
                                 subtitle:
                                     "${AppContants.appName}"as String? ?? "",
                               ),
@@ -356,7 +357,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "You rated \"${widget.obj.senderName as String? ?? ""}\"",
+                              "${"You rated".tr} \"${widget.obj.senderName as String? ?? ""}\"",
                               style: TextStyle(
                                 color: TColor.secondaryText,
                                 fontSize: 15,
@@ -406,7 +407,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 20),
                     child: Text(
-                      "RECEIPT",
+                      "RECEIPT".tr,
                       style: TextStyle(
                         color: TColor.primaryText,
                         fontSize: 15,
@@ -435,7 +436,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                           child: Column(
                             children: [
                               TitleSubtitleRow(
-                                title: "Trip fares",
+                                title: "Trip fares".tr,
                                 subtitle: "${AppContants.rupessSystem}${widget.obj.totalAmount}",
                                 color: TColor.secondaryText,
                               ),
@@ -445,12 +446,12 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                               //   color: TColor.secondaryText,
                               // ),
                               TitleSubtitleRow(
-                                title: "+Tax",
+                                title: "+Tax".tr,
                                 subtitle: "${AppContants.rupessSystem}${0}",
                                 color: TColor.secondaryText,
                               ),
                               TitleSubtitleRow(
-                                title: "+Tolls",
+                                title: "+Tolls".tr,
                                 subtitle: "${AppContants.rupessSystem}${widget.obj.totalAmount}",
                                 color: TColor.secondaryText,
                               ),
@@ -471,7 +472,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: TitleSubtitleRow(
-                            title: "Your payment",
+                            title: "Your payment".tr,
                             subtitle: "${AppContants.rupessSystem}${widget.obj.totalAmount}",
                             color: TColor.primary,
                             weight: FontWeight.w800,
@@ -481,7 +482,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           child: Text(
-                            "This trip was towards your destination you received Guaranteed fare",
+                            "This trip was towards your destination you received Guaranteed fare".tr,
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: TColor.secondaryText,

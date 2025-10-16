@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common_widget/icon_title_row.dart';
 import 'package:taxi_driver/common_widget/title_subtitle_cell.dart';
@@ -190,7 +189,7 @@ class _MyProfileViewState extends State<MyProfileView> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                 child: Text(
-                  "PERSONAL INFO",
+                  "PERSONAL INFO".tr,
                   style: TextStyle(
                       color: TColor.primaryText,
                       fontSize: 15,

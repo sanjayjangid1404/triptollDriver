@@ -87,6 +87,8 @@ dependencies:
   flutter_overlay_window: ^0.5.0
   device_info_plus: ^10.0.0
   quickalert: ^1.1.0
+  firebase_database:
+  cloud_firestore: ^6.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

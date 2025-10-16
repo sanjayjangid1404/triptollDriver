@@ -64,7 +64,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         ),
         centerTitle: true,
         title: Text(
-          "Edit Profile",
+          "Edit Profile".tr,
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 18,
@@ -86,7 +86,7 @@ class _EditProfileViewState extends State<EditProfileView> {
               LineTextField(
 
                 readyOnly: authController.isKyc(),
-                title: "First name",
+                title: "First name".tr,
                 hintText: "Ex: Amit",
                 controller: txtFirstName,
               ),
@@ -95,7 +95,7 @@ class _EditProfileViewState extends State<EditProfileView> {
               ),
               LineTextField(
                 readyOnly: authController.isKyc(),
-                title: "Last name",
+                title: "Last name".tr,
                 hintText: "Ex: Patel",
                 controller: txtLastName,
               ),
@@ -103,7 +103,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                 height: 8,
               ),
               Text(
-                "Mobile Number",
+                "Mobile Number".tr,
                 style: TextStyle(color: TColor.placeholder, fontSize: 14),
               ),
               Row(
@@ -142,11 +142,11 @@ class _EditProfileViewState extends State<EditProfileView> {
                       controller: txtMobile,
                       readOnly: true,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
+                      decoration:  InputDecoration(
                         contentPadding: EdgeInsets.zero,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
-                        hintText: "9876543210",
+                        hintText: "Enter Your Phone Number".tr,
                       ),
                     ),
                   )
@@ -158,7 +158,7 @@ class _EditProfileViewState extends State<EditProfileView> {
               ),
               LineTextField(
                 readyOnly: authController.isKyc(),
-                title: "Email Address",
+                title: "Email Address".tr,
                 hintText: "Ex: 123@gmail.com,",
                 controller: txtEmail,
               ),
@@ -170,7 +170,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                 onPressed: () {
                   
                 },
-                title: "SAVE",
+                title: "SAVE".tr,
               ),
             ],
           ),

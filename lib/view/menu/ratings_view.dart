@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common_widget/rating_row.dart';
 
@@ -53,7 +54,7 @@ class _RatingsViewState extends State<RatingsView> {
         ),
         centerTitle: true,
         title: Text(
-          "Ratings",
+          "Ratings".tr,
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 18,
@@ -118,7 +119,7 @@ class _RatingsViewState extends State<RatingsView> {
                               height: 25,
                             ),
                             Text(
-                              "1415 users",
+                              "1415 ${"users".tr}",
                               style: TextStyle(
                                 color: TColor.secondaryText,
                                 fontSize: 16,
@@ -172,7 +173,7 @@ class _RatingsViewState extends State<RatingsView> {
                                 fontWeight: FontWeight.w800),
                           ),
                           Text(
-                            "Total Trips",
+                            "Total Trips".tr,
                             style: TextStyle(
                               color: TColor.secondaryText,
                               fontSize: 16,

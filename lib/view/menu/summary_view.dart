@@ -94,7 +94,7 @@ class _SummaryViewState extends State<SummaryView>
         ),
         centerTitle: true,
         title: Text(
-          "Summary",
+          "Summary".tr,
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 18,
@@ -117,12 +117,12 @@ class _SummaryViewState extends State<SummaryView>
             const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
             unselectedLabelStyle:
             const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
-            tabs: const [
+            tabs:  [
               Tab(
-                text: "TODAY",
+                text: "TODAY".tr,
               ),
               Tab(
-                text: "STATEMENT",
+                text: "STATEMENT".tr,
               ),
             ],
           ),
@@ -178,14 +178,14 @@ class _SummaryViewState extends State<SummaryView>
                             children: [
                               Text(
                                 _selectedDay == null
-                                    ? "Select Date"
+                                    ? "Select Date".tr
                                     : "${DateFormat('yyyy-MM-dd').format(
                                     _selectedDay!)}",
                                 style: const TextStyle(
                                     fontSize: 16), // styling optional
                               ),
                               Text(
-                                "Select Date",
+                                "Select Date".tr,
                                 style: const TextStyle(fontSize: 14,
                                     color: Colors.grey), // styling optional
                               ),
@@ -271,7 +271,7 @@ class _SummaryViewState extends State<SummaryView>
                                                 .value
                                                 .totalTrips
                                                 .toString(),
-                                            subtitle: "Trips",
+                                            subtitle: "Trips".tr,
                                           ),
                                         ),
                                         Container(
@@ -287,7 +287,7 @@ class _SummaryViewState extends State<SummaryView>
                                                 .value
                                                 .totalHours
                                                 .toString(),
-                                            subtitle: "Total Hours",
+                                            subtitle: "Total Hours".tr,
                                           ),
                                         ),
                                       ],
@@ -301,7 +301,7 @@ class _SummaryViewState extends State<SummaryView>
                                           horizontal: 20),
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        "TRIPS",
+                                        "TRIPS".tr,
                                         style: TextStyle(
                                             color: TColor.primaryText,
                                             fontSize: 15,
@@ -338,7 +338,7 @@ class _SummaryViewState extends State<SummaryView>
                                                       .start,
                                                   children: [
                                                     Text(
-                                                      'Booking Time',
+                                                      'Booking Time'.tr,
                                                       style: TextStyle(
                                                           color: TColor
                                                               .primaryText,
@@ -377,10 +377,7 @@ class _SummaryViewState extends State<SummaryView>
                                                           fontSize: 16),
                                                     ),
                                                     Text(
-                                                      "Paid by ${ sObj
-                                                          .paymentType == 'cash'
-                                                          ? "cash"
-                                                          : "online" }",
+                                                      "${"Paid by".tr} ${ sObj.paymentType == 'cash' ? "cash".tr : "online".tr }",
                                                       style: TextStyle(
                                                           color: TColor
                                                               .secondaryText,
@@ -440,7 +437,7 @@ class _SummaryViewState extends State<SummaryView>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('This Week',
+                                Text('This Week'.tr,
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.w600,
@@ -478,7 +475,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Earnings',
+                                        Text('Earnings'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,
@@ -503,7 +500,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Total Hours',
+                                        Text('Total Hours'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,
@@ -528,7 +525,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Trips Taken',
+                                        Text('Trips Taken'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,
@@ -565,7 +562,7 @@ class _SummaryViewState extends State<SummaryView>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('This Month',
+                                Text('This Month'.tr,
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.w600,
@@ -606,7 +603,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Earnings',
+                                        Text('Earnings'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,
@@ -631,7 +628,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Total Hours',
+                                        Text('Total Hours'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,
@@ -656,7 +653,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Trips Taken',
+                                        Text('Trips Taken'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,
@@ -693,7 +690,7 @@ class _SummaryViewState extends State<SummaryView>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Lifetime Statement',
+                                Text('Lifetime Statement'.tr,
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.w600,
@@ -724,7 +721,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Earnings',
+                                        Text('Earnings'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,
@@ -749,7 +746,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Total Hours',
+                                        Text('Total Hours'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,
@@ -774,7 +771,7 @@ class _SummaryViewState extends State<SummaryView>
                                               fontSize: 15
                                           ),
                                         ),
-                                        Text('Trips Taken',
+                                        Text('Trips Taken'.tr,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontWeight: FontWeight.w500,

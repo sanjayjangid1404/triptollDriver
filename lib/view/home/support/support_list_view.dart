@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
 import 'package:taxi_driver/common/globs.dart';
@@ -81,7 +82,7 @@ class _SupportListViewState extends State<SupportListView> {
         ),
         centerTitle: true,
         title: Text(
-          "Supports",
+          "Supports".tr,
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 18,

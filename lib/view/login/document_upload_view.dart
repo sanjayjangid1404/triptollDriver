@@ -116,7 +116,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                   const SizedBox(height: 20),
                   ListTile(
                     leading: const Icon(Icons.camera_alt, color: Colors.blue),
-                    title: const Text("Take Photo from Camera"),
+                    title:  Text("Take Photo from Camera".tr),
                     onTap: () async {
                       Navigator.pop(ctx);
                       final XFile? image = await _picker.pickImage(source: ImageSource.camera);
@@ -134,7 +134,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.photo, color: Colors.green),
-                    title: const Text("Choose from Gallery"),
+                    title:  Text("Choose from Gallery".tr),
                     onTap: () async {
                       Navigator.pop(ctx);
                       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -158,7 +158,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image: ${e.toString()}')),
+        SnackBar(content: Text('${"Failed to pick image:".tr} ${e.toString()}')),
       );
     }
   }
@@ -231,15 +231,15 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
 
-        Text('Upload $label', style: TextStyle(fontWeight: FontWeight.bold)),
+        Text('${"Upload".tr} $label', style: TextStyle(fontWeight: FontWeight.bold)),
         SizedBox(height: 8),
         Row(
           children: [
             _buildImageBox(
               file,
               imageURL,
-              docType.contains('front') ? 'Front Side' :
-              docType.contains('back') ? 'Back Side' : 'Document',
+              docType.contains('front') ? 'Front Side'.tr :
+              docType.contains('back') ? 'Back Side'.tr : 'Document'.tr,
                   () => _pickDocumentImage(docType),
             ),
           ],
@@ -270,7 +270,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
           children: [
             const Icon(Icons.upload_file, color: Colors.grey, size: 30),
             const SizedBox(height: 5),
-            Text(label, style: const TextStyle(color: Colors.grey)),
+            Text(label.tr, style: const TextStyle(color: Colors.grey)),
           ],
         ),
       ),
@@ -299,7 +299,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
           ),
           centerTitle: true,
           title: Text(
-            widget.title,
+            widget.title.tr,
             style: TextStyle(
                 color: TColor.primaryText,
                 fontSize: 25,
@@ -320,7 +320,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                   count: 12,
                   keyboardType: TextInputType.number,
                   readyOnly: authController.isKyc(),
-                  title: "Aadhaar Number",
+                  title: "Aadhaar Number".tr,
                   hintText: "Ex: ",
                   controller: aadhaarCt,
                 ),
@@ -331,7 +331,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                   children: [
                     _buildDocumentField(
                       imageURL: adharfront??"",
-                      label: 'Aadhar Card ',
+                      label: 'Aadhar Card '.tr,
                       docType: 'aadhar_front',
                       file: _kycDocs.aadharFront,
 
@@ -348,7 +348,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                 LineTextField(
                   count: 10,
                   readyOnly: authController.isKyc(),
-                  title: "Pan Number",
+                  title: "Pan Number".tr,
                   hintText: "Ex: ",
                   textCapitalization: TextCapitalization.characters,
                   controller: panCt,
@@ -362,14 +362,14 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                   imageURL: panImage??"",
 
 
-                  label: 'Pan Number',
+                  label: 'Pan Number'.tr,
                   docType: 'psu',
                   file: _kycDocs.psuImage,
 
                 ),
                 LineTextField(
                   readyOnly: authController.isKyc(),
-                  title: "License Number",
+                  title: "License Number".tr,
                   textCapitalization: TextCapitalization.characters,
                   hintText: "Ex: ",
                   controller: licenseCt,
@@ -383,7 +383,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                   children: [
                     _buildDocumentField(
                       imageURL: liencefornt??"",
-                      label: 'License Number',
+                      label: 'License Number'.tr,
                       docType: 'license_front',
                       file: _kycDocs.licenseFront,
 
@@ -399,7 +399,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
 
                 LineTextField(
                   readyOnly: authController.isKyc(),
-                  title: "Insurance Number",
+                  title: "Insurance Number".tr,
                   textCapitalization: TextCapitalization.characters,
                   hintText: "Ex: ",
                   controller: insuranceCt,
@@ -411,7 +411,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
 
                 _buildDocumentField(
                   imageURL: insurancefront??"",
-                  label: 'Insurance Number',
+                  label: 'Insurance Number'.tr,
                   docType: 'insurance',
                   file: _kycDocs.insuranceImage,
 
@@ -431,10 +431,10 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
 
                     if(widget.isEdit){
                       if(aadhaarCt.text.isEmpty){
-                        showCustomSnackBar("Enter Aadhaar Number");
+                        showCustomSnackBar("Enter Aadhaar Number".tr);
                       }
                       else if(licenseCt.text.isEmpty){
-                        showCustomSnackBar("Enter License Number");
+                        showCustomSnackBar("Enter License Number".tr);
                       }
                       else {
                         var body = {
@@ -459,24 +459,24 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
 
 
                     if(aadhaarCt.text.isEmpty){
-                      showCustomSnackBar("Enter Aadhaar Number");
+                      showCustomSnackBar("Enter Aadhaar Number".tr);
                     }
                     else if(licenseCt.text.isEmpty){
-                      showCustomSnackBar("Enter License Number");
+                      showCustomSnackBar("Enter License Number".tr);
                     }
                     else if(_kycDocs.aadharFront==null){
-                      showCustomSnackBar("Upload Aadhaar Front Image");
+                      showCustomSnackBar("Upload Aadhaar Front Image".tr);
                     }
                     else if(_kycDocs.aadharBack==null){
-                      showCustomSnackBar("Upload Aadhaar Back Image");
+                      showCustomSnackBar("Upload Aadhaar Back Image".tr);
                     }
 
                     else if(_kycDocs.licenseFront==null){
-                      showCustomSnackBar("Upload License Front Image");
+                      showCustomSnackBar("Upload License Front Image".tr);
                     }
 
                     else if(_kycDocs.licenseBack==null){
-                      showCustomSnackBar("Upload License Back Image");
+                      showCustomSnackBar("Upload License Back Image".tr);
                     }
 
 
@@ -498,7 +498,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                     }
                     }
                   },
-                  title: "NEXT",
+                  title: "NEXT".tr,
                 ),
 
                 SizedBox(height: 50,)

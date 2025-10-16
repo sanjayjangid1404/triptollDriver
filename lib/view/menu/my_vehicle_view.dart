@@ -2,15 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
-import 'package:taxi_driver/common/common_extension.dart';
-import 'package:taxi_driver/common/globs.dart';
-import 'package:taxi_driver/common/service_call.dart';
 import 'package:taxi_driver/common_widget/my_car_row.dart';
 import 'package:taxi_driver/common_widget/round_button.dart';
 import 'package:taxi_driver/controller/authController.dart';
-import 'package:taxi_driver/view/login/add_vehicle_view.dart';
 import 'package:taxi_driver/view/login/vehicle_document_view.dart';
-import 'package:taxi_driver/view/menu/my_car_details_view.dart';
 
 class MyVehicleView extends StatefulWidget {
   const MyVehicleView({super.key});
@@ -49,7 +44,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
           ),
           centerTitle: true,
           title: Text(
-            "My Vehicle",
+            "My Vehicle".tr,
             style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -83,7 +78,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
                             icon: Icons.directions_car,
-                            label: 'Set',
+                            label: 'Set'.tr,
                           ),
                           SlidableAction(
                             // An action can be bigger than the others.
@@ -94,7 +89,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                             icon: Icons.delete,
-                            label: 'Delete',
+                            label: 'Delete'.tr,
                           ),
                         ],
                       ),
@@ -115,7 +110,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
               child: RoundButton(
-                  title: "UPDATE VEHICLE",
+                  title: "UPDATE VEHICLE".tr,
                   onPressed: () async {
                     await context.push( VehicleDocumentUploadView(id: authController.getUserID()??"",isEdit: true,));
 

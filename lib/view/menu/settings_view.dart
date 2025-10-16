@@ -3,16 +3,8 @@ import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common_widget/setting_row.dart';
 import 'package:taxi_driver/controller/authController.dart';
-import 'package:taxi_driver/view/home/support/support_list_view.dart';
-import 'package:taxi_driver/view/login/bank_detail_view.dart';
-import 'package:taxi_driver/view/login/document_upload_view.dart';
-import 'package:taxi_driver/view/menu/change_password_view.dart';
-import 'package:taxi_driver/view/menu/contact_us_view.dart';
-import 'package:taxi_driver/view/menu/my_profile_view.dart';
-import 'package:taxi_driver/view/menu/my_vehicle_view.dart';
 import 'package:taxi_driver/view/page/refund.dart';
 import 'package:taxi_driver/view/page/terms_and_condition.dart';
-
 import '../home/faq_list_screen.dart';
 import '../page/privacy.dart';
 import '../page/shipping.dart';
@@ -45,7 +37,7 @@ class _SettingsViewState extends State<SettingsView> {
           ),
           centerTitle: true,
           title: Text(
-            "Settings",
+            "Settings".tr,
             style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -66,7 +58,7 @@ class _SettingsViewState extends State<SettingsView> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Text(
-                  "HELP",
+                  "HELP".tr,
                   style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 15,
@@ -75,34 +67,34 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               ),
               SettingRow(
-                  title: "Terms & Conditions",
+                  title: "Terms & Conditions".tr,
                   icon: "assets/img/sm_document.png",
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => TermsAndCondition(),));
                   }),
               SettingRow(
-                  title: "Privacy Policies",
+                  title: "Privacy Policies".tr,
                   icon: "assets/img/sm_document.png",
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => PrivacyPolicyPage(),));
                   }),
 
               SettingRow(
-                  title: "Refund Policy",
+                  title: "Refund Policy".tr,
                   icon: "assets/img/sm_profile.png",
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => Refund(),));
                   }),
 
               SettingRow(
-                  title: "Shipping Policy",
+                  title: "Shipping Policy".tr,
                   icon: "assets/img/sm_profile.png",
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => Shipping(),));
                   }),
               SettingRowIcon(
                 icon: Icon(Icons.info_outline,color: Colors.grey,),
-                title: '  FAQ',
+                title: '  FAQ'.tr,
                 onPressed: () => Get.to(FrequentlyAskedQuestionsScreen()),
               ),
 

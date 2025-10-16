@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 
 class MenuRow extends StatelessWidget {
@@ -34,7 +35,7 @@ class MenuRow extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                title,
+                title.tr,
                 style: TextStyle(
                   color: TColor.primaryText,
                   fontSize: 18,

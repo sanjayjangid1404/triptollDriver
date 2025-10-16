@@ -42,7 +42,7 @@ class _WalletViewState extends State<WalletView> {
     QuickAlert.show(
         context: context,
         type: QuickAlertType.error,
-        text: 'Transaction Fail',
+        text: 'Transaction Fail'.tr,
         onConfirmBtnTap: (){
           Navigator.pushAndRemoveUntil(
             context,
@@ -55,7 +55,7 @@ class _WalletViewState extends State<WalletView> {
 
   void _handleExternalWallet(ExternalWalletResponse response) {
     // External wallet logic
-    Get.snackbar('External Wallet', '${response.walletName}');
+    Get.snackbar('External Wallet'.tr, '${response.walletName}');
   }
   void _openRazorpayPayment(String id,amount) {
 
@@ -228,7 +228,7 @@ class _WalletViewState extends State<WalletView> {
           ),
           centerTitle: true,
           title: Text(
-            "Wallet",
+            "Wallet".tr,
             style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -255,7 +255,7 @@ class _WalletViewState extends State<WalletView> {
                   Column(
                     children: [
                       Text(
-                        "Available balance",
+                        "Available balance".tr,
                         style: TextStyle(
                           color: TColor.secondaryText,
                           fontSize: 16,
@@ -288,7 +288,7 @@ class _WalletViewState extends State<WalletView> {
                   Column(
                     children: [
                       Text(
-                        "Inactive balance",
+                        "Inactive balance".tr,
                         style: TextStyle(
                           color: Colors.grey,
                           fontSize: 16,
@@ -382,7 +382,7 @@ class _WalletViewState extends State<WalletView> {
                         _showPaymentPopup(context);
                       },
                       child: Text(
-                        "Wallet Recharge",
+                        "Wallet Recharge".tr,
                         style: TextStyle(
                           color: Colors.green,
                           fontSize: 14,
@@ -403,7 +403,7 @@ class _WalletViewState extends State<WalletView> {
                 color: TColor.lightWhite,
                 width: double.maxFinite,
                 child: Text(
-                  "History",
+                  "History".tr,
                   style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 15,
@@ -455,7 +455,7 @@ class _WalletViewState extends State<WalletView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Enter Amount',
+                    'Enter Amount'.tr,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -464,7 +464,7 @@ class _WalletViewState extends State<WalletView> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '(Min amount ₹100)',
+                    '(Min amount ₹100)'.tr,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.redAccent,
@@ -474,16 +474,16 @@ class _WalletViewState extends State<WalletView> {
                   TextFormField(
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter an amount';
+                        return 'Please enter an amount'.tr;
                       }
 
                       double? amount = double.tryParse(value);
                       if (amount == null) {
-                        return 'Invalid amount';
+                        return 'Invalid amount'.tr;
                       }
 
                       if (amount < 100) {
-                        return 'Minimum amount is ₹100';
+                        return 'Minimum amount is ₹100'.tr;
                       }
 
                       return null;
@@ -520,7 +520,7 @@ class _WalletViewState extends State<WalletView> {
                           String amountText = _amountController.text.trim();
                           if (amountText.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Please enter an amount')),
+                              SnackBar(content: Text('Please enter an amount'.tr)),
                             );
                             return;
                           }
@@ -529,7 +529,7 @@ class _WalletViewState extends State<WalletView> {
                           if (amount == null || amount < 100) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(
-                                  'Amount must be at least ₹100')),
+                                  'Amount must be at least ₹100'.tr)),
                             );
                             return;
                           }
@@ -540,7 +540,7 @@ class _WalletViewState extends State<WalletView> {
                         }
                       },
                       child: Text(
-                        'Pay Now',
+                        'Pay Now'.tr,
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),

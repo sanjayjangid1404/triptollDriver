@@ -33,6 +33,8 @@ import '../../controller/authController.dart';
 import '../../main.dart';
 import '../../model/booking_notification_response.dart';
 import '../login/document_upload_view.dart';
+import 'driver_my_rides_view.dart';
+import 'notification_screen.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -83,7 +85,28 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     }
   }
 
+  checkLanguage() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String? lang = sharedPreferences.getString("app_language");
 
+    if (lang == null || lang == "English") {
+      Get.updateLocale(const Locale('en', 'US'));
+      authController.selectedLanguage.value = "English";
+    } else if (lang == "தமிழ்" || lang == "Tamil") {
+      Get.updateLocale(const Locale('ta', 'IN'));
+      authController.selectedLanguage.value = 'தமிழ்';
+    } else if (lang == "తెలుగు" || lang == "Telugu") {
+      Get.updateLocale(const Locale('te', 'IN'));
+      authController.selectedLanguage.value = 'తెలుగు';
+    } else if (lang == "বাংলা" || lang == "Bengali") {
+      Get.updateLocale(const Locale('bn', 'IN'));
+      authController.selectedLanguage.value = 'বাংলা';
+    } else {
+      // Default fallback
+      Get.updateLocale(const Locale('en', 'US'));
+      authController.selectedLanguage.value = "English";
+    }
+  }
 
   Stream<Data?> bookingStream() {
     return Stream.periodic(const Duration(seconds: 5)).asyncMap((_) async {
@@ -125,7 +148,16 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
 
-
+      checkLanguage();
+      Get.snackbar(
+        "Missed orders".tr,
+        "Click here to check your missed orders.".tr,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.blue,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(10),
+        duration: const Duration(seconds: 10),
+      );
       controller = AnimationController(vsync: this);
       // configureBackgroundGeolocation();
       Get.find<AuthController>().incomeDriver();
@@ -235,20 +267,20 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
   void _handlePaymentError(PaymentFailureResponse response) {
     // Payment failure logic
-      Get.snackbar('Error', 'Payment Fail');
+      Get.snackbar('Error'.tr, 'Payment Fail'.tr);
 
   }void _handlePaymentError2(PaymentFailureResponse response) {
     // Payment failure logic
-      Get.snackbar('Error', 'Payment Fail');
+      Get.snackbar('Error'.tr, 'Payment Fail'.tr);
 
   }
   AuthController authController  = Get.find<AuthController>();
   void _handleExternalWallet(ExternalWalletResponse response) {
     // External wallet logic
-    Get.snackbar('External Wallet', '${response.walletName}');
+    Get.snackbar('External Wallet'.tr, '${response.walletName}');
   }void _handleExternalWallet2(ExternalWalletResponse response) {
     // External wallet logic
-    Get.snackbar('External Wallet', '${response.walletName}');
+    Get.snackbar('External Wallet'.tr, '${response.walletName}');
   }
 
   String generateOrderId() {
@@ -493,7 +525,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               ),
                             ),
                             Text(
-                              authController.driverInResponse!=null && authController.driverInResponse!.driverDetails != null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ? "You're online" : "You're offline",
+                              authController.driverInResponse!=null && authController.driverInResponse!.driverDetails != null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ? "You're online".tr : "You're offline".tr,
                               style: TextStyle(
                                   color:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ?  TColor.primary:TColor.red,
                                   fontSize: 18,
@@ -563,9 +595,25 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const SizedBox(
-                            width: 60,
+                          InkWell(
+                            onTap: (){
+                              context.push(const NotificationScreen());
+                            },
+                            child: Container(
+                              width: 45,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.green)
+                              ),
+                              padding: EdgeInsets.all(6),
+                              child: Icon(Icons.notifications_active),
+                            ),
                           ),
+                          // const SizedBox(
+                          //   width: 60,
+                          // ),
                           Container(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 8, horizontal: 25),
@@ -697,20 +745,20 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
               authController.isPayment() ? authController.isKyc() ?(int.parse(authController.walletAmount.toString())>= -99)?   SizedBox():
               AlertDialog(
-                title: Text('Pay Wallet Amount'),
+                title: Text('Pay Wallet Amount'.tr),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Wallet Fee: ${AppContants.rupessSystem} ${authController.walletAmount}'),
+                    Text('${"Wallet Fee:".tr} ${AppContants.rupessSystem} ${authController.walletAmount}'),
                     SizedBox(height: 10),
-                    Text('Please proceed to payment to complete your Wallet fee.'),
+                    Text('Please proceed to payment to complete your Wallet fee.'.tr),
                   ],
                 ),
                 actions: <Widget>[
 
                   ElevatedButton(
-                    child: Text('Pay Now'),
+                    child: Text('Pay Now'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green, // Background color
                     ),
@@ -728,20 +776,20 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   children: [
                     Icon(Icons.warning, color: Colors.orange),
                     SizedBox(width: 10),
-                    Text('KYC Pending'),
+                    Text('KYC Pending'.tr),
                   ],
                 ),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Triptoll में आपका स्वागत है! ऑर्डर प्राप्त करने के लिए कृपया अपनी KYC डॉक्यूमेंट्स अपलोड करें। KYC पूरी होने के बाद ही आप ऑर्डर ले पाएंगे।'),
+                    Text('Triptoll में आपका स्वागत है! ऑर्डर प्राप्त करने के लिए कृपया अपनी KYC डॉक्यूमेंट्स अपलोड करें। KYC पूरी होने के बाद ही आप ऑर्डर ले पाएंगे।'.tr),
                     SizedBox(height: 8),
                     RichText(
                       text: TextSpan(
                         style: DefaultTextStyle.of(context).style,
                         children: [
-                          TextSpan(text: 'किसी भी सहायता के लिए हमसे संपर्क करें: '),
+                          TextSpan(text: 'किसी भी सहायता के लिए हमसे संपर्क करें: '.tr),
                           TextSpan(
                             text: '📞 8818003344',
                             style: TextStyle(
@@ -778,7 +826,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),color: TColor.primary
                         ),
-                        child: Text("Complete Now",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
+                        child: Text("Complete Now".tr,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
                       ),
                     )
 
@@ -790,20 +838,20 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 ),
               ):
               AlertDialog(
-                title: Text('Pay Registration Fee'),
+                title: Text('Pay Registration Fee'.tr),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Registration Fee: ${AppContants.rupessSystem} ${authController.getRegistrationFee()}'),
+                    Text('${"Registration Fee:".tr} ${AppContants.rupessSystem} ${authController.getRegistrationFee()}'),
                     SizedBox(height: 10),
-                    Text('Please proceed to payment to complete your registration.'),
+                    Text('Please proceed to payment to complete your registration.'.tr),
                   ],
                 ),
                 actions: <Widget>[
 
                   ElevatedButton(
-                    child: Text('Pay Now'),
+                    child: Text('Pay Now'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green, // Background color
                     ),
@@ -1068,13 +1116,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                         ),
                       ),
                     ).paddingSymmetric(horizontal: 20),
-                    Text('Order already taken.',
+                    Text('Order already taken.'.tr,
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
                           color: Colors.red
                       ),),
-                    Text('Click fast next time',
+                    Text('Click fast next time'.tr,
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -1239,14 +1287,14 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   InkWell(
                     onTap: () {
                       stopRingtone();
-                      // Navigator.pop(context); // Close the bottom sheet
-                     Get.find<AuthController>().bookingStatusChange(
-                          status: "cancel",
-                          amount: bookingResponse.amount,
-                          orderID: bookingResponse.orderId,
-                          cus_id:bookingResponse.cusId,
-                          value: 0
-                      );
+                      Navigator.pop(context);
+                     // Get.find<AuthController>().bookingStatusChange(
+                     //      status: "cancel",
+                     //      amount: bookingResponse.amount,
+                     //      orderID: bookingResponse.orderId,
+                     //      cus_id:bookingResponse.cusId,
+                     //      value: 0
+                     //  );
                     },
                     child: Container(
 
@@ -1296,7 +1344,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "TAP TO ACCEPT",
+                                  "TAP TO ACCEPT".tr,
                                   style: TextStyle(
                                     color: TColor.primaryTextW,
                                     fontSize: 14,
@@ -1314,7 +1362,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               ),
                               alignment: Alignment.center,
                               child: Text(
-                                "15",
+                                "Click".tr,
                                 style: TextStyle(
                                   color: TColor.primaryTextW,
                                   fontSize: 14,
@@ -1981,7 +2029,7 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
                 // Label
                 Center(
                   child: Text(
-                    "Swipe To ${_isOnline ? "Offline" : "Online"}",
+                    "${"Swipe To".tr} ${_isOnline ? "Offline".tr : "Online".tr}",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -2012,7 +2060,7 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
                         child: Center(
                           child: Text(
                             // _formatDuration(),
-                            _isOnline ? "ON" : "OFF",
+                            _isOnline ? "ON".tr : "OFF".tr,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _isOnline ? TColor.primary : TColor.red,

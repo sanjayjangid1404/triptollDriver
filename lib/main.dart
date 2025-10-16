@@ -38,6 +38,7 @@ import 'package:taxi_driver/cubit/login_cubit.dart';
 import 'package:taxi_driver/view/login/splash_view.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'common/route_helper.dart';
+import 'language/local_string.dart';
 
 
 class OverlayHelper {
@@ -503,6 +504,8 @@ class _MyApp extends State<MyApp>  with WidgetsBindingObserver{
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Taxi Driver',
+      translations: LocaleString(),
+      locale: const Locale('en','US'),
       navigatorKey: Get.key,
       getPages: RouteHelper.routes,
       debugShowCheckedModeBanner: false,

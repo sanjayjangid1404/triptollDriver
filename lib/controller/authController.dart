@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -29,10 +29,7 @@ import 'package:taxi_driver/view/login/bank_detail_view.dart';
 import 'package:taxi_driver/view/login/mobile_number_view.dart';
 import 'package:taxi_driver/view/login/vehicle_document_view.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-
 import '../api/api_checker.dart';
-
 import '../api/api_client.dart';
 import '../common/appContants.dart';
 import '../common/custom_snackbar.dart';
@@ -63,26 +60,23 @@ import '../view/home/support/faq.dart';
 import '../view/home/tip_request_view.dart';
 import '../view/home/unloading_timer.dart';
 import '../view/login/document_upload_view.dart';
-
 import 'package:http/http.dart' as http;
 
 class AuthController extends GetxController implements GetxService {
 
 
+
   DateTime? onlineStartTime;
   Duration totalOnlineDuration = Duration.zero;
   String time = '0 h 0 m';
-
-
   AuthRepo authRepo;
-
   AuthController({required this.authRepo});
-
   bool isLoading = false;
   bool isLoadingTime = false;
   RxBool loadingStart = false.obs;
   int elapsedSeconds = 0;
   var currentDropIndex = 0.obs;
+  RxBool isLastDropCompleted = false.obs;
   String bookingId = '';
   int elapsedSecondsUnload = 0;
   double chargesLoading = 0.0;
@@ -102,7 +96,6 @@ class AuthController extends GetxController implements GetxService {
   String walletAmount = "0";
   CategoryTypeResponse? categoryTypeResponse = CategoryTypeResponse();
   SubCategoryVehicle? subCategoryVehicle = SubCategoryVehicle();
-
   VehicleData? vehicleData = VehicleData();
   int? getIndex;
   List<String>banners = [
@@ -116,13 +109,9 @@ class AuthController extends GetxController implements GetxService {
   String newBookingID = "";
   Timer? _locationUpdateTimer;
   String _email = '';
-
   String get verificationCode => _verificationCode;
-
   String get email => _email;
-
   File? get image => _image;
-
   RxDouble lat = 0.0.obs;
   RxDouble lng = 0.0.obs;
   StreamSubscription<Position>? _positionStreamSubscription;
@@ -312,7 +301,7 @@ class AuthController extends GetxController implements GetxService {
       QuickAlert.show(
           context: context,
           type: QuickAlertType.success,
-          text: 'Transaction Completed Successfully!',
+          text: 'Transaction Completed Successfully!'.tr,
           onConfirmBtnTap: (){
             Get.offAll(HomeView());
           }
@@ -376,6 +365,7 @@ class AuthController extends GetxController implements GetxService {
     }
   }
 
+  RxString selectedLanguage = "English".obs;
   Future<void> loginFunction(String email, String password,deviceToken) async {
     isLoading = true;
 
@@ -1117,7 +1107,7 @@ class AuthController extends GetxController implements GetxService {
     //  LoginResponse? loginResponse;
 
     if (response.statusCode == 200 || response.statusCode == 400) {
-      showCustomSnackBar("Account Created please Login", isError: false);
+      showCustomSnackBar("Account Created please Login".tr, isError: false);
 
       if (isEdit) {
         Get.back();
@@ -1145,7 +1135,7 @@ class AuthController extends GetxController implements GetxService {
     //  LoginResponse? loginResponse;
 
     if (response.statusCode == 200 || response.statusCode == 400) {
-      showCustomSnackBar("Ticket raise successfully", isError: false);
+      showCustomSnackBar("Ticket raise successfully".tr, isError: false);
 
       Get.back();
     }
@@ -2227,7 +2217,7 @@ class AuthController extends GetxController implements GetxService {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "TAP TO ACCEPT",
+                                  "TAP TO ACCEPT".tr,
                                   style: TextStyle(
                                     color: TColor.primaryTextW,
                                     fontSize: 14,
@@ -2468,20 +2458,31 @@ class AuthController extends GetxController implements GetxService {
                     Expanded(
                       child: ListView.builder(
                         shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
                         itemCount: bookingResponse.dropoffs?.length ?? 0,
                         itemBuilder: (context, index) {
                           final dropoff = bookingResponse.dropoffs![index];
+
+                           // bool isCompleted = index < currentDropIndex.value ||
+                           //    (isLastDropCompleted.value && index == currentDropIndex.value);
+
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  dropoff.address ?? "",
-                                  style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 15,
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        dropoff.address ?? "",
+                                        style: TextStyle(
+                                          color: TColor.primaryText,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 InkWell(
                                   onTap: () {
@@ -2512,7 +2513,7 @@ class AuthController extends GetxController implements GetxService {
 
               Column(
                 children: [
-                  Text("Collect Payment", style: TextStyle(fontSize: 16,
+                  Text("Collect Payment".tr, style: TextStyle(fontSize: 16,
                       color: TColor.primary,
                       fontWeight: FontWeight.bold),),
                   SizedBox(height: 10,),
@@ -2520,6 +2521,7 @@ class AuthController extends GetxController implements GetxService {
                   InkWell(
                     onTap: () {
                       //   Navigator.pop(context);
+                      currentDropIndex.value = 0;
                       loadingStart.value = false;
                       unloadingStart.value = false;
                       showCompletePayment.value = false;
@@ -2543,7 +2545,7 @@ class AuthController extends GetxController implements GetxService {
                         children: [
 
                           Text(
-                            "Cash Collect",
+                            "Cash Collect".tr,
                             style: TextStyle(
                               color: TColor.primaryTextW,
                               fontSize: 14,
@@ -2562,17 +2564,16 @@ class AuthController extends GetxController implements GetxService {
                 children: [
                   Expanded(
                     child: InkWell(
-                      onTap: () {
-                        final drops = bookingResponse.dropoffs ?? [];
-                        if (drops.isEmpty) return;
-                        final sortedDrops = List.from(drops)
-                          ..sort((a, b) => int.parse(a.sequence.toString())
-                              .compareTo(int.parse(b.sequence.toString())));
-
-                        final dropIndex = currentDropIndex.value;
-
+                      onTap: () async {
                         if (bookingResponse.orderStatus.toString()
                             .toLowerCase() == "picked") {
+                          final drops = bookingResponse.dropoffs ?? [];
+                          if (drops.isEmpty) return;
+                          final sortedDrops = List.from(drops)
+                            ..sort((a, b) => int.parse(a.sequence.toString())
+                                .compareTo(int.parse(b.sequence.toString())));
+
+                          final dropIndex = currentDropIndex.value;
                           if (dropIndex < sortedDrops.length) {
                             final drop = sortedDrops[dropIndex];
 
@@ -2580,7 +2581,12 @@ class AuthController extends GetxController implements GetxService {
                               double.parse(drop.lat.toString()),
                               double.parse(drop.lng.toString()),
                             );
-
+                            final firestore = FirebaseFirestore.instance;
+                            await firestore.collection('location_id_direction').add({
+                              'bookingId': bookingResponse.bookingId.toString(),
+                              'locationId': drop.locationId.toString(),
+                              'timestamp': DateTime.now(),
+                            });
                             print("🗺️ Opening map for sequence ${drop.sequence} "
                                 "| Location ID: ${drop.locationId}");
                           } else {
@@ -2608,7 +2614,7 @@ class AuthController extends GetxController implements GetxService {
                               Icons.directions_outlined, color: Colors.white,),
                             SizedBox(width: 10,),
                             Text(
-                              "Direction",
+                              "Direction".tr,
                               style: TextStyle(
                                 color: TColor.primaryTextW,
                                 fontSize: 14,
@@ -2623,7 +2629,7 @@ class AuthController extends GetxController implements GetxService {
                   SizedBox(
                     width: 10,
                   ),
-                  isLoadingTime == true ?
+                  // isLoadingTime == false ?
                   Expanded(
                     child:  InkWell(
                       onTap: () async {
@@ -2642,32 +2648,48 @@ class AuthController extends GetxController implements GetxService {
                           // await clearDropIndex();
                           // checkDriverBooking(context);
                         }
-                        else if(bookingResponse.orderStatus.toString().toLowerCase() == "picked" ){
+                        else if (bookingResponse.orderStatus.toString().toLowerCase() == "picked") {
+                          print('🚚 Order Picked — Starting unloading logic');
+
                           final drops = bookingResponse.dropoffs ?? [];
-                          if (drops.isEmpty) return;
+
+                          if (drops.isEmpty) {
+                            print('⚠️ No dropoff found.');
+                            return;
+                          }
+
+                          // Sort drops by sequence (if not already sorted)
                           final sortedDrops = List.from(drops)
                             ..sort((a, b) => int.parse(a.sequence.toString())
                                 .compareTo(int.parse(b.sequence.toString())));
-                          final dropIndex = currentDropIndex.value;
 
-                          if (dropIndex < sortedDrops.length) {
-                            final drop = sortedDrops[dropIndex];
+                          int dropIndex = currentDropIndex.value;
 
-                            startUnLoadingApi(
-                              getUserID().toString(),
-                              context,
-                              bookingResponse.bookingId.toString(),
-                              drop.locationId.toString(),
-                            );
-
-                            print("📦 Unloading at sequence ${drop.sequence}");
-
-                            await nextDrop(sortedDrops.length);
+                          // 🧠 Safety: If dropIndex is out of range, reset it to 0
+                          if (dropIndex >= sortedDrops.length) {
+                            dropIndex = 0;
+                            currentDropIndex.value = 0;
                           }
-                          // startUnLoadingApi(getUserID().toString(), context, bookingResponse.bookingId.toString(),bookingResponse.dropoffs![0].locationId.toString());
-                          // checkDriverBooking(context);
-                          print('unloading');
+
+                          final drop = sortedDrops[dropIndex];
+
+                          // ✅ Call unloading API
+                          await startUnLoadingApi(
+                            getUserID().toString(),
+                            context,
+                            bookingResponse.bookingId.toString(),
+                            drop.locationId.toString(),
+                          );
+                          final firestore = FirebaseFirestore.instance;
+                          await firestore.collection('location_id_unloading').add({
+                            'bookingId': bookingResponse.bookingId.toString(),
+                            'locationId': drop.locationId.toString(),
+                            'timestamp': DateTime.now(),
+                          });
+                          print("📦 Unloading completed for sequence ${drop.sequence}");
+                          await nextDrop(sortedDrops.length);
                         }
+
                       },
                       child: Container(
                         height: 40,
@@ -2677,7 +2699,8 @@ class AuthController extends GetxController implements GetxService {
                           color: TColor.primary,
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        child: isLoadingTime == true ?
+                        child:
+                        // isLoadingTime == true ?
                         Stack(
                           alignment: Alignment.centerRight,
                           children: [
@@ -2686,13 +2709,13 @@ class AuthController extends GetxController implements GetxService {
                               children: [
                                 Text(
                                   bookingResponse.orderStatus.toString().toLowerCase() == "accpeted" ?
-                                  "Start Loading"
+                                  "Start Loading".tr
                                       :  bookingResponse.orderStatus.toString().toLowerCase() == "loading" ?
-                                  "Start Trip" :
+                                  "Start Trip".tr :
                                   bookingResponse.orderStatus.toString().toLowerCase() == "picked"
-                                      ? "Unloading" :
+                                      ? "Unloading".tr :
                                   bookingResponse.orderStatus.toString().toLowerCase() == "unloading" ?
-                                  "Completed"
+                                  "Completed".tr
                                       : "Unknown error",
                                   style: TextStyle(
                                     color: TColor.primaryTextW,
@@ -2703,84 +2726,86 @@ class AuthController extends GetxController implements GetxService {
                               ],
                             )
                           ],
-                        )   :
-                        Stack(
-                          alignment: Alignment.centerRight,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  bookingResponse.orderStatus.toString()
-                                      .contains("picked")
-                                      ? "Completed"
-                                      : "Start Trip",
-                                  style: TextStyle(
-                                    color: TColor.primaryTextW,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                        )
+                        //     :
+                        // Stack(
+                        //   alignment: Alignment.centerRight,
+                        //   children: [
+                        //     Row(
+                        //       mainAxisAlignment: MainAxisAlignment.center,
+                        //       children: [
+                        //         Text(
+                        //           bookingResponse.orderStatus.toString()
+                        //               .contains("picked")
+                        //               ? "Completed"
+                        //               : "Start Trip",
+                        //           style: TextStyle(
+                        //             color: TColor.primaryTextW,
+                        //             fontSize: 14,
+                        //             fontWeight: FontWeight.w700,
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ],
+                        // ),
                       ),
                     )
-                  ) :
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-
-                        Navigator.pop(context);
-                        if(bookingResponse.orderStatus.toString().toLowerCase() == "picked" ){
-
-                          orderDelivered(orderID:bookingResponse.bookingId.toString());
-
-                          //  startTrip(bookingResponse.id.toString(), "no",context,bookingResponse.cusId.toString(),bookingResponse.bookingId.toString(),bookingResponse.amount.toString());
-
-
-                        }
-                        else if (bookingResponse.orderStatus.toString().toLowerCase() == "accpeted"){
-                          orderPicked(orderID:bookingResponse.bookingId.toString());
-                          // startTrip(bookingResponse.id.toString(), "yes",context,bookingResponse.cusId.toString(),bookingResponse.bookingId.toString(),bookingResponse.amount.toString());
-                        }
-                        else if(bookingResponse.orderStatus.toString().toLowerCase() == "loading"){
-                          orderPicked(orderID: bookingResponse.bookingId.toString());
-                        }
-
-                      },
-                      child: Container(
-                        width: 100,
-                        height: 40,
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: TColor.primary,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Stack(
-                          alignment: Alignment.centerRight,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  bookingResponse.orderStatus.toString().contains("picked")  ? "Completed":"Start Trip",
-                                  style: TextStyle(
-                                    color: TColor.primaryTextW,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  )
+                      // :
+                  // Expanded(
+                  //   child: InkWell(
+                  //     onTap: () {
+                  //
+                  //       Navigator.pop(context);
+                  //       if(bookingResponse.orderStatus.toString().toLowerCase() == "picked" ){
+                  //
+                  //         orderDelivered(orderID:bookingResponse.bookingId.toString());
+                  //
+                  //         //  startTrip(bookingResponse.id.toString(), "no",context,bookingResponse.cusId.toString(),bookingResponse.bookingId.toString(),bookingResponse.amount.toString());
+                  //
+                  //
+                  //       }
+                  //       else if (bookingResponse.orderStatus.toString().toLowerCase() == "accpeted"){
+                  //         orderPicked(orderID:bookingResponse.bookingId.toString());
+                  //         // startTrip(bookingResponse.id.toString(), "yes",context,bookingResponse.cusId.toString(),bookingResponse.bookingId.toString(),bookingResponse.amount.toString());
+                  //       }
+                  //       else if(bookingResponse.orderStatus.toString().toLowerCase() == "loading"){
+                  //         orderPicked(orderID: bookingResponse.bookingId.toString());
+                  //       }
+                  //
+                  //     },
+                  //     child: Container(
+                  //       width: 100,
+                  //       height: 40,
+                  //       margin: const EdgeInsets.symmetric(horizontal: 20),
+                  //       padding: const EdgeInsets.all(6),
+                  //       decoration: BoxDecoration(
+                  //         color: TColor.primary,
+                  //         borderRadius: BorderRadius.circular(30),
+                  //       ),
+                  //       child: Stack(
+                  //         alignment: Alignment.centerRight,
+                  //         children: [
+                  //           Row(
+                  //             mainAxisAlignment: MainAxisAlignment.center,
+                  //             children: [
+                  //               Text(
+                  //                 bookingResponse.orderStatus.toString().contains("picked")  ? "Completed".tr:"Start Trip".tr,
+                  //                 style: TextStyle(
+                  //                   color: TColor.primaryTextW,
+                  //                   fontSize: 14,
+                  //                   fontWeight: FontWeight.w700,
+                  //                 ),
+                  //               ),
+                  //             ],
+                  //           ),
+                  //
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: 35),

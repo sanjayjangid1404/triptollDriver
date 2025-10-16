@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../common/color_extension.dart';
 
@@ -18,7 +19,7 @@ class TitleSubtitleRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              title,
+              title.tr,
               style: TextStyle(
                 color: color ?? TColor.primaryText,
                 fontSize: 15,

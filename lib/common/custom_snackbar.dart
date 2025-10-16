@@ -8,7 +8,7 @@ void showCustomSnackBar(String? message, {bool isError = true, bool getXSnackBar
     if(getXSnackBar) {
       Get.showSnackbar(GetSnackBar(
         backgroundColor: isError ? Colors.red : Colors.green,
-        message: message,
+        message: message.tr,
         maxWidth: 500,
         duration: const Duration(seconds: 3),
         snackStyle: SnackStyle.FLOATING,
@@ -28,7 +28,7 @@ void showCustomSnackBar(String? message, {bool isError = true, bool getXSnackBar
         backgroundColor: isError ? Colors.red : Colors.green,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        content: Text(message, style: TextStyle(color: Colors.white,fontSize: 14)),
+        content: Text(message.tr, style: TextStyle(color: Colors.white,fontSize: 14)),
       ));
     }
   }

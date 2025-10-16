@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../common/color_extension.dart';
 
@@ -37,7 +38,7 @@ class IconTitleSubtitleButton extends StatelessWidget {
                 fontWeight: FontWeight.w800),
           ),
           Text(
-            subtitle,
+            subtitle.tr,
             style: TextStyle(
               color: TColor.secondaryText,
               fontSize: 16,

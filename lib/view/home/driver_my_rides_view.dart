@@ -64,7 +64,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
             ),
             centerTitle: true,
             title: Text(
-              "My Rides",
+              "My Rides".tr,
               style: TextStyle(
                   color: TColor.primaryText,
                   fontSize: 18,
@@ -81,13 +81,13 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                         fontWeight: FontWeight.w800),
                   ))
             ],
-            bottom: const TabBar(
+            bottom:  TabBar(
               indicatorColor: Colors.green,
               labelColor: Colors.green,
               unselectedLabelColor: Colors.grey,
               tabs: [
-                Tab(text: "Completed"),
-                Tab(text: "Missed"),
+                Tab(text: "Completed".tr),
+                Tab(text: "Missed".tr),
               ],
             ),
           ),
@@ -221,7 +221,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                     Row(
                                       children: [
                                         Text(
-                                          "Total Distance: ",
+                                          "Total Distance: ".tr,
                                           maxLines: 2,
                                           style: TextStyle(
                                               color: TColor.primaryText,
@@ -238,7 +238,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                         ),
                                         const Spacer(),
                                         Text(
-                                          "Duration: ",
+                                          "Duration: ".tr,
                                           maxLines: 2,
                                           style: TextStyle(
                                               color: TColor.primaryText,
@@ -262,7 +262,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          "Driver Amount: ",
+                                          "Driver Amount: ".tr,
                                           style: TextStyle(
                                               color: TColor.primaryText,
                                               fontSize: 15,
@@ -281,7 +281,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          "Total Amount: ",
+                                          "Total Amount: ".tr,
                                           style: TextStyle(
                                               color: TColor.primaryText,
                                               fontSize: 15,
@@ -370,7 +370,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
                                       Text(
-                                           rObj.bookedDriver == null ? 'Missed' : '${rObj.orderStatus ?? ""}     ',
+                                           rObj.bookedDriver == null ? 'Missed'.tr : '${rObj.orderStatus ?? ""}     ',
                                         style: TextStyle(
                                             color:Colors.red,
                                             fontSize: 17,

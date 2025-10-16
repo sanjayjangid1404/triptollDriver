@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -11,8 +12,8 @@ extension MDExtensionState on State {
         context: context,
         barrierDismissible: !isForce,
         builder: (context) => CupertinoAlertDialog(
-              title: Text(title),
-              content: Text(message),
+              title: Text(title.tr),
+              content: Text(message.tr),
               actions: [
                 CupertinoDialogAction(
                   child: Text(buttonTitle),

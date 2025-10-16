@@ -43,7 +43,7 @@ class _PaymentListState extends State<PaymentList> {
           backgroundColor: TColor.primary,
           iconTheme: IconThemeData(color: Colors.white),
           title: Text(
-            "Payment", style: TextStyle(fontSize: 18, color: Colors.white),),
+            "Payment".tr, style: TextStyle(fontSize: 18, color: Colors.white),),
 
         ),
         body: authController.paymentHistoryModel != null ?

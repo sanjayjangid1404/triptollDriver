@@ -39,7 +39,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
 
          appBar: AppBar(
            backgroundColor: TColor.primary,
-           title: Text("Select Vehicle",style: TextStyle(color: Colors.white),),
+           title: Text("Select Vehicle".tr,style: TextStyle(color: Colors.white),),
          ),
         body:  authController.isVehicle ? Center(child: CircularProgressIndicator(color: TColor.primary,),):
         ListView.builder(
@@ -112,7 +112,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
 
                //  context.push(  OTPView(number: txtMobile.text, code: countryCode.dialCode) );
              },
-             title: "Save",
+             title: "Save".tr,
            ),
          ),
       ),

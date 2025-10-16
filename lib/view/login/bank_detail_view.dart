@@ -67,7 +67,7 @@ class _BankDetailViewState extends State<BankDetailView> {
           ),
           centerTitle: true,
           title: Text(
-            "Bank Details",
+            "Bank Details".tr,
             style: TextStyle(
                 color: TColor.primaryText,
                 fontSize: 25,
@@ -78,12 +78,12 @@ class _BankDetailViewState extends State<BankDetailView> {
           InkWell(
               onTap: (){
 
-                showCustomSnackBar("Account Created please Login",isError: false);
+                showCustomSnackBar("Account Created please Login".tr,isError: false);
                 Get.offAll(MobileNumberView());
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 8),
-                child: Text("Skip",style: TextStyle(color: Colors.black,fontSize: 22,fontWeight: FontWeight.bold),),
+                child: Text("Skip".tr,style: TextStyle(color: Colors.black,fontSize: 22,fontWeight: FontWeight.bold),),
               ),
             ):SizedBox()
           ],
@@ -99,7 +99,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                 ),
                 LineTextField(
                   readyOnly: authController.isKyc(),
-                  title: "Bank Name",
+                  title: "Bank Name".tr,
                   hintText: "Ex: SBI",
                   controller: txtBankName,
                 ),
@@ -108,7 +108,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                 ),
                 LineTextField(
                   readyOnly: authController.isKyc(),
-                  title: "Account Holder name",
+                  title: "Account Holder name".tr,
                   hintText: "Ex: A Patel",
                   controller: txtAccountHolderName,
                 ),
@@ -117,7 +117,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                 ),
                 LineTextField(
                   readyOnly: authController.isKyc(),
-                  title: "Account Number",
+                  title: "Account Number".tr,
                   hintText: "Ex: 12345678945245",
                   controller: txtAccountNumber,
                   keyboardType: TextInputType.number,
@@ -127,7 +127,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                 ),
                 LineTextField(
                   readyOnly: authController.isKyc(),
-                  title: "IFSC Code",
+                  title: "IFSC Code".tr,
                   hintText: "YT123C",
                   controller: txtSwiftCode,
                 ),
@@ -137,7 +137,7 @@ class _BankDetailViewState extends State<BankDetailView> {
 
                 LineTextField(
                   readyOnly: authController.isKyc(),
-                  title: "UPI",
+                  title: "UPI".tr,
                   hintText: "",
                   controller: txtUPICode,
                 ),
@@ -148,7 +148,7 @@ class _BankDetailViewState extends State<BankDetailView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "By continuing, I confirm that i have read & agree to the",
+                      "By continuing, I confirm that i have read & agree to the".tr,
                       style: TextStyle(
                         color: TColor.secondaryText,
                         fontSize: 11,
@@ -160,21 +160,21 @@ class _BankDetailViewState extends State<BankDetailView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Terms & conditions",
+                      "Terms & conditions".tr,
                       style: TextStyle(
                         color: TColor.primaryText,
                         fontSize: 11,
                       ),
                     ),
                     Text(
-                      " and ",
+                      " and ".tr,
                       style: TextStyle(
                         color: TColor.secondaryText,
                         fontSize: 11,
                       ),
                     ),
                     Text(
-                      "Privacy policy",
+                      "Privacy policy".tr,
                       style: TextStyle(
                         color: TColor.primaryText,
                         fontSize: 11,
@@ -206,7 +206,7 @@ upi_id:viren@axis*/
                    // updateAction();
                     // context.push(const DocumentUploadView(title: "Personal Document" ),);
                   },
-                  title: "Submit",
+                  title: "Submit".tr,
                 ),
               ],
             ),
@@ -220,7 +220,7 @@ upi_id:viren@axis*/
 
   void updateAction() {
     if (txtBankName.text.isEmpty) {
-      mdShowAlert("Error", "Please enter bank name", () {});
+      mdShowAlert("Error".tr, "Please enter bank name".tr, () {});
       return;
     }
 

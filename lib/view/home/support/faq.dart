@@ -72,7 +72,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Triptoll Help Desk",
+                      "Triptoll Help Desk".tr,
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -91,7 +91,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
                         value: selectedFaqId,
                         isExpanded: true,
                         underline: SizedBox(),
-                        hint: Text("Choose a question"),
+                        hint: Text("Choose a question".tr),
                         items: authController.faqDriverResponse.map((FaqDriverResponse item) {
                           return DropdownMenuItem<String>(
                             value: item.id.toString(),
@@ -118,8 +118,8 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
                 // Submit Button
                 authController.checkTicketLimitModel.hasExceededLimit == false ?
                 _buildSubmitButton()
-                    : const Text(
-                  'You have used two tickets, which are currently awaiting approval from the Triptoll team.',
+                    :  Text(
+                  'You have used two tickets, which are currently awaiting approval from the Triptoll team.'.tr,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400,
                       color: Colors.black),
                   textAlign: TextAlign.center,
@@ -162,7 +162,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
               Icon(Icons.language, color: Colors.blue),
               SizedBox(width: 10),
               Text(
-                "Company Website:",
+                "Company Website:".tr,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -196,7 +196,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
               SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  "Triptoll was founded in Aug 2024. we are a trusted and reliable logistics delivery service provider, dedicated to making your relocation experience smooth, efficient, and stress-free. ",
+                  "Triptoll was founded in Aug 2024. we are a trusted and reliable logistics delivery service provider, dedicated to making your relocation experience smooth, efficient, and stress-free. ".tr,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[700],
@@ -230,7 +230,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
           });
           }
           else {
-            showCustomSnackBar("Please select any option");
+            showCustomSnackBar("Please select any option".tr);
           }
         },
         style: ElevatedButton.styleFrom(
@@ -242,7 +242,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
           elevation: 5,
         ),
         child: Text(
-          "SUBMIT",
+          "SUBMIT".tr,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

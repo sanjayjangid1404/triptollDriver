@@ -189,7 +189,7 @@ class _SignUpViewState extends State<SignUpView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Create profile",
+                  "Create profile".tr,
                   style: TextStyle(
                       color: TColor.primaryText,
                       fontSize: 25,
@@ -241,7 +241,7 @@ class _SignUpViewState extends State<SignUpView> {
                 ),
 
                 LineTextField(
-                  title: "Last name",
+                  title: "Last name".tr,
                   hintText: "Ex: Patel",
                   controller: txtLastName,
 
@@ -256,7 +256,7 @@ class _SignUpViewState extends State<SignUpView> {
                   children: [
                     DropdownButtonFormField<CityResponse>(
                       value: selectedCategory,
-                      hint: Text("City"),
+                      hint: Text("City".tr),
                       items: authController.cityResponse!.map((category) {
                         return DropdownMenuItem<CityResponse>(
                           value: category,
@@ -289,7 +289,7 @@ class _SignUpViewState extends State<SignUpView> {
                 ),
 
                 Text(
-                  "Mobile Number",
+                  "Mobile Number".tr,
                   style: TextStyle(color: TColor.placeholder, fontSize: 14),
                 ),
                 Row(
@@ -337,7 +337,7 @@ class _SignUpViewState extends State<SignUpView> {
                           hintStyle: TextStyle(
                             color: Colors.grey
                           ),
-                          hintText: "9876543210",
+                          hintText: "Enter Your Phone Number".tr,
                           suffixIcon: InkWell(
                             onTap: isOtpButtonEnabled
                                 ? () {
@@ -348,7 +348,7 @@ class _SignUpViewState extends State<SignUpView> {
                                   otpVerify = false;
                                 });
                               } else {
-                                showCustomSnackBar("Invalid Mobile no");
+                                showCustomSnackBar("Invalid Mobile no".tr);
                               }
                             }
                                 : null,
@@ -356,8 +356,8 @@ class _SignUpViewState extends State<SignUpView> {
                               padding: EdgeInsets.all(12.0),
                               child: Text(
                                 isOtpButtonEnabled
-                                    ? "GET OTP"
-                                    : "Retry in $secondsRemaining s", // timer dikhega
+                                    ? "GET OTP".tr
+                                    : "${'Retry in'.tr} $secondsRemaining s", // timer dikhega
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: isOtpButtonEnabled ? Colors.green : Colors.grey,
@@ -384,7 +384,7 @@ class _SignUpViewState extends State<SignUpView> {
                       width: 15,
                     ),
                     Text(
-                      "OTP",
+                      "OTP".tr,
                       style: TextStyle(color: TColor.placeholder, fontSize: 14),
                     ),
                     TextField(
@@ -394,7 +394,7 @@ class _SignUpViewState extends State<SignUpView> {
                         contentPadding: EdgeInsets.symmetric(vertical: 12),
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
-                        hintText: "Enter Otp Here",
+                        hintText: "Enter Otp Here".tr,
                           hintStyle: TextStyle(color: Colors.grey)  ,
                           suffixIcon:otpVerify ? SizedBox(): InkWell(
                             onTap: (){
@@ -403,15 +403,15 @@ class _SignUpViewState extends State<SignUpView> {
                                 setState(() {
                                   otpVerify = true;
                                 });
-                                showCustomSnackBar("OTP Verify",isError: false);
+                                showCustomSnackBar("OTP Verify".tr,isError: false);
                               }
                               else {
-                                showCustomSnackBar("Invalid OTP");
+                                showCustomSnackBar("Invalid OTP".tr);
                               }
                             },
                             child: Padding(
                               padding: EdgeInsets.all(12.0),
-                              child: Text("Verify",style: TextStyle(fontSize: 14,color: Colors.green,fontWeight: FontWeight.bold),),
+                              child: Text("Verify".tr,style: TextStyle(fontSize: 14,color: Colors.green,fontWeight: FontWeight.bold),),
                             ),
                           )
 
@@ -460,8 +460,8 @@ class _SignUpViewState extends State<SignUpView> {
                   height: 8,
                 ),
                 LineTextField(
-                  title: "Referral code",
-                  hintText: "Enter Referral Code",
+                  title: "Referral code".tr,
+                  hintText: "Enter Referral Code".tr,
                   controller: referralCt,
                 ),
                 const SizedBox(
@@ -472,7 +472,7 @@ class _SignUpViewState extends State<SignUpView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "By continuing, I confirm that i have read & agree to the",
+                      "By continuing, I confirm that i have read & agree to the".tr,
                       style: TextStyle(
                         color: TColor.secondaryText,
                         fontSize: 11,
@@ -484,21 +484,21 @@ class _SignUpViewState extends State<SignUpView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Terms & conditions",
+                      "Terms & conditions".tr,
                       style: TextStyle(
                         color: TColor.primaryText,
                         fontSize: 11,
                       ),
                     ),
                     Text(
-                      " and ",
+                      " and ".tr,
                       style: TextStyle(
                         color: TColor.secondaryText,
                         fontSize: 11,
                       ),
                     ),
                     Text(
-                      "Privacy policy",
+                      "Privacy policy".tr,
                       style: TextStyle(
                         color: TColor.primaryText,
                         fontSize: 11,
@@ -513,32 +513,32 @@ class _SignUpViewState extends State<SignUpView> {
                   onPressed: () {
 
                     if(txtFirstName.text.isEmpty){
-                      showCustomSnackBar("Enter first name");
+                      showCustomSnackBar("Enter first name".tr);
                     }else if(txtLastName.text.isEmpty){
-                      showCustomSnackBar("Enter last name");
+                      showCustomSnackBar("Enter last name".tr);
                     }
                     else if(txtMobile.text.isEmpty){
-                      showCustomSnackBar("Enter mobile number");
+                      showCustomSnackBar("Enter mobile number".tr);
                     }
                     else if(selectedCategory==null){
-                      showCustomSnackBar("Select city");
+                      showCustomSnackBar("Select city".tr);
                     }else if(emailCt.text.isEmpty){
-                      showCustomSnackBar("Enter valid email");
+                      showCustomSnackBar("Enter valid email".tr);
                     }
                     else if(emailCt.text.isEmpty){
-                      showCustomSnackBar("Enter password");
+                      showCustomSnackBar("Enter password".tr);
                     }
                     else if(isSHowOTP && otpCt.text.isEmpty){
-                      showCustomSnackBar("Enter OTP");
+                      showCustomSnackBar("Enter OTP".tr);
                     }
                     else if(!otpVerify){
-                      showCustomSnackBar("Invalid OTP");
+                      showCustomSnackBar("Invalid OTP".tr);
                     }
                     else if(!isSHowOTP ){
-                      showCustomSnackBar("Verify mobile number");
+                      showCustomSnackBar("Verify mobile number".tr);
                     }
                     else if(_image==null){
-                      showCustomSnackBar("Please select self image");
+                      showCustomSnackBar("Please select self image".tr);
                     }
                     else {
 
@@ -568,7 +568,7 @@ otp:123456*/
 
 
                   },
-                  title: "REGISTER",
+                  title: "REGISTER".tr,
                 ),
 
               ],
@@ -607,7 +607,7 @@ otp:123456*/
                   const SizedBox(height: 20),
                   ListTile(
                     leading: const Icon(Icons.camera_alt, color: Colors.blue),
-                    title: const Text("Take Photo from Camera"),
+                    title:  Text("Take Photo from Camera".tr),
                     onTap: () async {
                       Navigator.pop(ctx);
                       _pickImageCamera();
@@ -615,7 +615,7 @@ otp:123456*/
                   ),
                   ListTile(
                     leading: const Icon(Icons.photo, color: Colors.green),
-                    title: const Text("Choose from Gallery"),
+                    title:  Text("Choose from Gallery".tr),
                     onTap: () async {
                       Navigator.pop(ctx);
                       _pickImage();
@@ -629,7 +629,7 @@ otp:123456*/
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image: ${e.toString()}')),
+        SnackBar(content: Text('${'Failed to pick image:'.tr} ${e.toString()}')),
       );
     }
   }

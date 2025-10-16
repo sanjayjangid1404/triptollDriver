@@ -90,7 +90,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image: ${e.toString()}')),
+        SnackBar(content: Text('${"Failed to pick image:".tr} ${e.toString()}')),
       );
     }
   }
@@ -159,7 +159,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
           children: [
             Icon(Icons.add_a_photo, size: 30),
             SizedBox(height: 8),
-            Text(label, textAlign: TextAlign.center),
+            Text(label.tr, textAlign: TextAlign.center),
           ],
         ),
       ),
@@ -185,7 +185,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
           ),
           centerTitle: true,
           title: Text(
-            "Vehicle Document",
+            "Vehicle Document".tr,
             style: TextStyle(
                 color: TColor.primaryText,
                 fontSize: 25,
@@ -208,14 +208,14 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
                   children: [
                    authController.isKyc() ?
                    LineTextField(
-                     title: "Category",
+                     title: "Category".tr,
                      hintText: "Ex: ",
                      readyOnly:  authController.isKyc(),
                      controller: TextEditingController(text: editCategoryName),
                    ):
                    DropdownButtonFormField<Data>(
                       value: selectedCategory,
-                      hint: Text("Category"),
+                      hint: Text("Category".tr),
                       items: authController.vehicleData!.data!.map((category) {
                         return DropdownMenuItem<Data>(
                           value: category,
@@ -265,7 +265,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
                   children: [
                     DropdownButtonFormField<String>(
                       value: selectedFuel,
-                      hint: Text("Fuel Type"),
+                      hint: Text("Fuel Type".tr),
                       items: fuelType.map((category) {
                         return DropdownMenuItem<String>(
                           value: category,
@@ -311,7 +311,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
                 ),
 
                 LineTextField(
-                  title: "Vehicle Model",
+                  title: "Vehicle Model".tr,
                   hintText: "Ex: ",
                   readyOnly:  authController.isKyc(),
                   controller: vehicleModelCt,
@@ -320,7 +320,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
                   height: 8,
                 ),
                 LineTextField(
-                  title: "Vehicle Number",
+                  title: "Vehicle Number".tr,
                   hintText: "Ex: ",
                   readyOnly: authController.isKyc(),
                   controller: vehicleNumberCt,
@@ -330,7 +330,7 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
                 ),
 
                 LineTextField(
-                  title: "RC Number",
+                  title: "RC Number".tr,
                   hintText: "Ex: ",
                   readyOnly:  authController.isKyc(),
                   controller: rcNumberCt,
@@ -344,21 +344,21 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
                 // _buildImageBox(_images.vehicleImage, 'Add Vehicle Photo', true,false),
 
                 SizedBox(height: 20),
-                Text('RC Document', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('RC Document'.tr, style: TextStyle(fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Column(
                       children: [
-                        Text('Front Side'),
+                        Text('Front Side'.tr),
                         SizedBox(height: 8),
                         _buildImageBox(_images.rcFrontImage, 'RC Front', false,false,rcforntImage),
                       ],
                     ),
                     Column(
                       children: [
-                        Text('Back Side'),
+                        Text('Back Side'.tr),
                         SizedBox(height: 8),
                         _buildImageBox(_images.rcBackImage, 'RC Back', false,true,rcBackImage),
                       ],
@@ -376,18 +376,18 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
 
                     if(widget.isEdit){
                       if(editCategoryID.isEmpty){
-                        showCustomSnackBar("Select Category");
+                        showCustomSnackBar("Select Category".tr);
                       }else if(editfuelType.isEmpty){
-                        showCustomSnackBar("Select Fuel type");
+                        showCustomSnackBar("Select Fuel type".tr);
                       }
                       else if(vehicleModelCt.text.isEmpty){
-                        showCustomSnackBar("Enter vehicle model");
+                        showCustomSnackBar("Enter vehicle model".tr);
                       }
                       else if(vehicleNumberCt.text.isEmpty){
-                        showCustomSnackBar("Enter vehicle number");
+                        showCustomSnackBar("Enter vehicle number".tr);
                       }else if(rcNumberCt.text.isEmpty) {
 
-                        showCustomSnackBar("Enter RC number");
+                        showCustomSnackBar("Enter RC number".tr);
                       }
                       // else if(_images.vehicleImage==null){
                       //   showCustomSnackBar("Select vehicle image");
@@ -418,27 +418,27 @@ rc_no:*/
                     }
                     else {
                       if(selectedCategory==null){
-                        showCustomSnackBar("Select Category");
+                        showCustomSnackBar("Select Category".tr);
                       }else if(selectedFuel==null){
-                        showCustomSnackBar("Select Fuel type");
+                        showCustomSnackBar("Select Fuel type".tr);
                       }
                       else if(vehicleModelCt.text.isEmpty){
-                        showCustomSnackBar("Enter vehicle model");
+                        showCustomSnackBar("Enter vehicle model".tr);
                       }else if(vehicleNumberCt.text.isEmpty){
-                        showCustomSnackBar("Enter vehicle number");
+                        showCustomSnackBar("Enter vehicle number".tr);
                       }else if(rcNumberCt.text.isEmpty) {
 
-                        showCustomSnackBar("Enter RC number");
+                        showCustomSnackBar("Enter RC number".tr);
                       }
                       // else if(_images.vehicleImage==null){
                       //   showCustomSnackBar("Select vehicle image");
                       // }
 
                       else if(_images.rcFrontImage==null){
-                        showCustomSnackBar("Select RC front image");
+                        showCustomSnackBar("Select RC front image".tr);
                       }
                       else if(_images.rcBackImage==null){
-                        showCustomSnackBar("Select RC back image");
+                        showCustomSnackBar("Select RC back image".tr);
                       }
                       else {
                         /*driver_id:2376
@@ -468,7 +468,7 @@ rc_no:*/
 
 
                   },
-                  title:widget.isEdit ? "UPDATE": "NEXT",
+                  title:widget.isEdit ? "UPDATE".tr: "NEXT".tr,
                 ),
                 SizedBox(height: 30,)
 
