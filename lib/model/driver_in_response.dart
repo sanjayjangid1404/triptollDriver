@@ -314,7 +314,7 @@ class DriverDetails {
     _deviceToken = json['device_token'];
     _categoryName = json['category_name'];
     _fileName = json['file_name'];
-    _weightName = json['weight_name'];
+    _weightName = json['weight_value'];
     _weightType = json['weight_type'];
     _vehicleName = json['vehicle_name'];
     _adharFrontImg = json['adhar_front_img'];
@@ -710,7 +710,7 @@ class DriverDetails {
     map['device_token'] = _deviceToken;
     map['category_name'] = _categoryName;
     map['file_name'] = _fileName;
-    map['weight_name'] = _weightName;
+    map['weight_value'] = _weightName;
     map['weight_type'] = _weightType;
     map['vehicle_name'] = _vehicleName;
     map['adhar_front_img'] = _adharFrontImg;

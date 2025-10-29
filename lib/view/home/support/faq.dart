@@ -25,6 +25,10 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
   @override
   void initState() {
     super.initState();
+    authController.checkTicket({
+      "driver_id":authController.getUserID().toString(),
+      "user_type":"driver"
+    });
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
@@ -34,10 +38,7 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
       curve: Curves.easeInOut,
     );
     _animationController.forward();
-    authController.checkTicket({
-      "driver_id":authController.getUserID().toString(),
-      "user_type":"driver"
-    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() {});
     });
@@ -228,6 +229,10 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
             "user_type":"driver"
 
           });
+            authController.checkTicket({
+              "driver_id":authController.getUserID().toString(),
+              "user_type":"driver"
+            });
           }
           else {
             showCustomSnackBar("Please select any option".tr);

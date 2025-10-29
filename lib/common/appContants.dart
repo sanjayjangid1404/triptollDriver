@@ -33,8 +33,8 @@ class AppContants
   static String userPhone = "User Phone";
   static String notification = "Notification ID";
   // static String baseURl = "https://apitest.crossroadhelpline.in/api/"; 
-  static String baseURl = "https://dev.triptoll.in/api/";
-  // static String baseURl = "https://triptoll.in/app-admin/api/";
+  // static String baseURl = "https://dev.triptoll.in/api/";
+  static String baseURl = "https://triptoll.in/app-admin/api/";
   // static String imageURL = "https://dev.triptoll.in/";
   static String imageURL = "https://triptoll.in/app-admin/";
   static String loginUrl = "User/login/tbl_driver";
@@ -50,6 +50,7 @@ class AppContants
   static String updateDriverVehicleDetail = "Driver/updateDriverVehicleDetail";
   static String updateDriverKycURL = "Driver/updateDriverKYCDetail";
   static String forgetPasswordURL = "User/forgotPasswordOTP";
+  static String getNotificationHistoryURL = "User/getNotificationHistory";
   static String updatePasswordURL = "User/updatePassword";
   static String updateDriverPaymentStatusURL = "Driver/updateDriverPaymentStatus";
   static String sendDriverOTPURL = "Driver/driverSignupOTP";
@@ -57,6 +58,12 @@ class AppContants
   static String orderPaymentURL = "Booking/orderPayment";
   static String updateDriverVehicleURL = "Driver/updateDriverVehicle";
   static String driverInfoURL = "Driver/getDataById/";
+  static String uploadAdharFrontURL = "Driver/uploadAdharFront";
+  static String uploadAdharBackURL = "Driver/uploadAdharBack";
+  static String uploadPanImageURL = "Driver/uploadPanImage";
+  static String uploadLicenseFrontURL = "Driver/uploadLicenseFront";
+  static String uploadLicenseBackURL = "Driver/uploadLicenseBack";
+  static String uploadInsuranceImageURL = "Driver/uploadInsuranceImage";
   static String changeLoginStatusURL = "Driver/driver_status";
   static String accpetBookingURL = "Booking/accpetBooking";
   static String orderPickedURL = "Booking/orderPicked";

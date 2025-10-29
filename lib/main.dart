@@ -152,7 +152,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   //await player.setReleaseMode(ReleaseMode.loop);
 
   await player.play(AssetSource("sounds/booking.mp3"));
-
+  Future.delayed(const Duration(seconds: 60), () async {
+    await flutterLocalNotificationsPlugin.cancelAll();
+    await stopRingtone();
+  });
   // ✅ App open करने के लिए
   if (Platform.isAndroid) {
     final service = FlutterBackgroundService();

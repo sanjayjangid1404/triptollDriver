@@ -103,24 +103,65 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
 
       Get.find<AuthController>().getAllVehicleData();
 
-      if(Get.find<AuthController>().driverInResponse!=null){
-        vehicleModelCt.text = Get.find<AuthController>().driverInResponse!.driverDetails!.vehicleType??"";
-        vehicleNumberCt.text = Get.find<AuthController>().driverInResponse!.driverDetails!.vehicleNumber??"";
-        rcNumberCt.text = Get.find<AuthController>().driverInResponse!.driverDetails!.rcNo??"";
-        editCategoryName = Get.find<AuthController>().driverInResponse!.driverDetails!.categoryName??"";
-        editfuelType = Get.find<AuthController>().driverInResponse!.driverDetails!.vehicleType??"";
-        editCategoryID = Get.find<AuthController>().driverInResponse!.driverDetails!.categoryId??"";
-        editRegistrationFees = Get.find<AuthController>().driverInResponse!.driverDetails!.registrationFees??"0";
-        selectedFuel = Get.find<AuthController>().driverInResponse!.driverDetails!.vehicleType?? 'Petrol';
-        rcforntImage = AppContants.imageURL+"/uploaded_files/id_proof_img/"+(Get.find<AuthController>().driverInResponse!.driverDetails!.rcFrontImg??"");
-        rcBackImage = AppContants.imageURL+"/uploaded_files/id_proof_back_img/"+(Get.find<AuthController>().driverInResponse!.driverDetails!.rcBackImg??"");
-
+      if (Get.find<AuthController>().driverInResponse != null) {
+        if (Get.find<AuthController>().driverInResponse!.driverDetails != null) {
+          vehicleModelCt.text = Get.find<AuthController>()
+                  .driverInResponse!
+                  .driverDetails!
+                  .vehicleType ??
+              "";
+          vehicleNumberCt.text = Get.find<AuthController>()
+                  .driverInResponse!
+                  .driverDetails!
+                  .vehicleNumber ??
+              "";
+          rcNumberCt.text = Get.find<AuthController>()
+                  .driverInResponse!
+                  .driverDetails!
+                  .rcNo ??
+              "";
+          editCategoryName = Get.find<AuthController>()
+                  .driverInResponse!
+                  .driverDetails!
+                  .categoryName ??
+              "";
+          editfuelType = Get.find<AuthController>()
+                  .driverInResponse!
+                  .driverDetails!
+                  .vehicleType ??
+              "";
+          editCategoryID = Get.find<AuthController>()
+                  .driverInResponse!
+                  .driverDetails!
+                  .categoryId ??
+              "";
+          editRegistrationFees = Get.find<AuthController>()
+                  .driverInResponse!
+                  .driverDetails!
+                  .registrationFees ??
+              "0";
+          selectedFuel = Get.find<AuthController>()
+                  .driverInResponse!
+                  .driverDetails!
+                  .vehicleType ??
+              'Petrol';
+          rcforntImage = AppContants.imageURL +
+              "/uploaded_files/id_proof_img/" +
+              (Get.find<AuthController>()
+                      .driverInResponse!
+                      .driverDetails!
+                      .rcFrontImg ??
+                  "");
+          rcBackImage = AppContants.imageURL +
+              "/uploaded_files/id_proof_back_img/" +
+              (Get.find<AuthController>()
+                      .driverInResponse!
+                      .driverDetails!
+                      .rcBackImg ??
+                  "");
+        }
       }
-      setState(() {
-
-      });
-
-
+      setState(() {});
     });
 
 
@@ -311,8 +352,8 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
                 ),
 
                 LineTextField(
-                  title: "Vehicle Model".tr,
-                  hintText: "Ex: ",
+                  title: "Vehicle Name".tr,
+                  hintText: "Ex: splendor,platina",
                   readyOnly:  authController.isKyc(),
                   controller: vehicleModelCt,
                 ),

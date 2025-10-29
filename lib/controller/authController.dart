@@ -2,10 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +45,7 @@ import '../model/inactive_wallet_model.dart';
 import '../model/life_time_earn_model.dart';
 import '../model/missed_order_list_model.dart';
 import '../model/monthly_earn_model.dart';
+import '../model/notification_history_model.dart';
 import '../model/running_order_response.dart';
 import '../model/subCategoryVehicle.dart' hide Data;
 import '../model/vehicle_data.dart' hide Data;
@@ -144,6 +142,7 @@ class AuthController extends GetxController implements GetxService {
     currentDropIndex.value = 0;
     print("Drop index cleared for booking $bookingId");
   }
+  RxInt isShow = 0.obs;
   @override
   void onInit() {
     super.onInit();
@@ -505,6 +504,20 @@ class AuthController extends GetxController implements GetxService {
     isLoading = false;
     update();
     }
+  }
+  Future<void> getNotificationHistory(body) async {
+    // update();
+    Response response = await authRepo.notificationHistory(body);
+    if (response.statusCode == 200) {
+
+      notificationHistoryModel.value = NotificationHistoryModel.fromJson(response.body);
+    }
+    else {
+      ApiChecker.checkApi(response);
+    }
+
+    isLoading = false;
+    // update();
   }
 
   Future<void> getDailyEarningsFun(date) async {
@@ -1036,7 +1049,8 @@ class AuthController extends GetxController implements GetxService {
 
 
   Future<void> updateDriverKyc(body, BuildContext context,
-      {XFile? adhaarF, XFile? adhaarb, XFile? panImage, XFile? licenseNumberB, XFile? lienB, XFile? insur, bool isEdit = false}) async {
+      {XFile? adhaarF, XFile? adhaarb, XFile? panImage, XFile? licenseNumberB, XFile? lienB, XFile? insur, bool isEdit = false}) async
+  {
     isUploading = true;
 
     update();
@@ -1098,6 +1112,116 @@ class AuthController extends GetxController implements GetxService {
     update();
   }
 
+  Future<void> updateAdharFront(body,
+      {XFile? adhaarF}) async
+  {
+    // isUploading = true;
+
+    update();
+
+
+    //  LoginResponse? loginResponse;
+
+    List<MultipartBody> multipartBody = [];
+
+
+    if (adhaarF != null) {
+      multipartBody.add(MultipartBody("adhar_front", XFile(adhaarF.path)));
+    }
+
+    Response response = await authRepo.updateAdharFrontKyc(body, multipartBody);
+    if (response.statusCode == 200) {
+      // if(response.body["data"]!=null){
+
+      // }
+
+
+    }
+    else {
+
+
+    }
+
+    isUploading = false;
+    Globs.hideHUD();
+    update();
+  }
+  Future<void> updateAdharBack(body,
+      {XFile? adhaarB}) async
+  {
+    update();
+    List<MultipartBody> multipartBody = [];
+
+    if (adhaarB != null) {
+      multipartBody.add(MultipartBody("adhaar_back", XFile(adhaarB.path)));
+    }
+    Response response = await authRepo.updateAdharBackKyc(body, multipartBody);
+    if (response.statusCode == 200) {}
+    else {}
+    Globs.hideHUD();
+    update();
+  }
+  Future<void> updatePenCard(body,
+      {XFile? adhaarB}) async
+  {
+    update();
+    List<MultipartBody> multipartBody = [];
+
+    if (adhaarB != null) {
+      multipartBody.add(MultipartBody("pan_image", XFile(adhaarB.path)));
+    }
+    Response response = await authRepo.updatePenCardKyc(body, multipartBody);
+    if (response.statusCode == 200) {}
+    else {}
+    Globs.hideHUD();
+    update();
+  }
+  Future<void> updateLicenceFKyc(body,
+      {XFile? adhaarB}) async
+  {
+    update();
+    List<MultipartBody> multipartBody = [];
+
+    if (adhaarB != null) {
+      multipartBody.add(MultipartBody("license_front", XFile(adhaarB.path)));
+    }
+    Response response = await authRepo.updateLicenceFKyc(body, multipartBody);
+    if (response.statusCode == 200) {}
+    else {}
+    Globs.hideHUD();
+    update();
+  }
+  Future<void> updateLicenceBKyc(body,
+      {XFile? adhaarB}) async
+  {
+    update();
+    List<MultipartBody> multipartBody = [];
+
+    if (adhaarB != null) {
+      multipartBody.add(MultipartBody("license_back", XFile(adhaarB.path)));
+    }
+    Response response = await authRepo.updateLicenceBKyc(body, multipartBody);
+    if (response.statusCode == 200) {}
+    else {}
+    Globs.hideHUD();
+    update();
+  }
+  Future<void> updateInsuranceImageURLKyc(body,
+      {XFile? adhaarB}) async
+  {
+    update();
+    List<MultipartBody> multipartBody = [];
+
+    if (adhaarB != null) {
+      multipartBody.add(MultipartBody("insurance_img", XFile(adhaarB.path)));
+    }
+    Response response = await authRepo.updateInsuranceImageURLKyc(body, multipartBody);
+    if (response.statusCode == 200) {}
+    else {}
+    Globs.hideHUD();
+    update();
+  }
+
   Future<void> updateDriverBankDetail(body, BuildContext context,
       {bool isEdit = false}) async {
     isUploading = true;
@@ -1152,6 +1276,7 @@ class AuthController extends GetxController implements GetxService {
   CheckTicketLimitModel checkTicketLimitModel = CheckTicketLimitModel();
   DeviceLogoutModel deviceLogoutModel = DeviceLogoutModel();
   Rx<DailyEarningsMd> dailyEarningsMd = DailyEarningsMd().obs;
+  Rx<NotificationHistoryModel> notificationHistoryModel = NotificationHistoryModel().obs;
   Rx<LifeTimeEarnModel> lifeTimeEarnModel = LifeTimeEarnModel().obs;
   Rx<WeeklyEarn> weeklyEarn = WeeklyEarn().obs;
   Rx<MonthlyEarnModel> monthlyEarnModel = MonthlyEarnModel().obs;
@@ -1952,6 +2077,7 @@ class AuthController extends GetxController implements GetxService {
 
     // ✅ Optional: navigate to login or splash screen
     Get.offAll(MobileNumberView());
+    driverInResponse = DriverInResponse();
   }
 
 
@@ -2581,14 +2707,14 @@ class AuthController extends GetxController implements GetxService {
                               double.parse(drop.lat.toString()),
                               double.parse(drop.lng.toString()),
                             );
-                            final firestore = FirebaseFirestore.instance;
-                            await firestore.collection('location_id_direction').add({
-                              'bookingId': bookingResponse.bookingId.toString(),
-                              'locationId': drop.locationId.toString(),
-                              'timestamp': DateTime.now(),
-                            });
-                            print("🗺️ Opening map for sequence ${drop.sequence} "
-                                "| Location ID: ${drop.locationId}");
+                            // final firestore = FirebaseFirestore.instance;
+                            // await firestore.collection('location_id_direction').add({
+                            //   'bookingId': bookingResponse.bookingId.toString(),
+                            //   'locationId': drop.locationId.toString(),
+                            //   'timestamp': DateTime.now(),
+                            // });
+                            // print("🗺️ Opening map for sequence ${drop.sequence} "
+                            //     "| Location ID: ${drop.locationId}");
                           } else {
                             print("✅ All drops completed");
                           }
@@ -2680,13 +2806,13 @@ class AuthController extends GetxController implements GetxService {
                             bookingResponse.bookingId.toString(),
                             drop.locationId.toString(),
                           );
-                          final firestore = FirebaseFirestore.instance;
-                          await firestore.collection('location_id_unloading').add({
-                            'bookingId': bookingResponse.bookingId.toString(),
-                            'locationId': drop.locationId.toString(),
-                            'timestamp': DateTime.now(),
-                          });
-                          print("📦 Unloading completed for sequence ${drop.sequence}");
+                          // final firestore = FirebaseFirestore.instance;
+                          // await firestore.collection('location_id_unloading').add({
+                          //   'bookingId': bookingResponse.bookingId.toString(),
+                          //   'locationId': drop.locationId.toString(),
+                          //   'timestamp': DateTime.now(),
+                          // });
+                          // print("📦 Unloading completed for sequence ${drop.sequence}");
                           await nextDrop(sortedDrops.length);
                         }
 

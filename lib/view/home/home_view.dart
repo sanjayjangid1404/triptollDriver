@@ -115,7 +115,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           "driver_id":Get.find<AuthController>().getUserID()
         });
         final response = await http.post(
-          Uri.parse("https://dev.triptoll.in/api/Booking/findNewBookings"),
+          Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
           body: jsonEncode({
             "driver_id":Get.find<AuthController>().getUserID()
           })
@@ -149,23 +149,28 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
 
       checkLanguage();
-      Get.snackbar(
-        "Missed orders".tr,
-        "Click here to check your missed orders.".tr,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.blue,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(10),
-        duration: const Duration(seconds: 10),
-      );
+      if( Get.find<AuthController>().isShow.value == 0) {
+        Get.snackbar(
+          "Missed orders".tr,
+          "Click here to check your missed orders.".tr,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 10),
+          onTap: (snack) {
+            Get.to(() => DriverMyRidesView());
+          },
+        );
+      }
       controller = AnimationController(vsync: this);
       // configureBackgroundGeolocation();
       Get.find<AuthController>().incomeDriver();
       Get.find<AuthController>().driverOnlineTIme();
       Get.find<AuthController>().driverOnlineTotalTIme();
       Get.find<AuthController>().getDriverFAQ();
-
       Get.find<AuthController>().driverInfo(context);
+      Get.find<AuthController>().isShow.value = 1;
      // Get.find<AuthController>().getBookingNotification();
       _getCurrentLocation();
       _razorpay = Razorpay();
@@ -507,16 +512,17 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                         ]),
                     child: Column(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                              onPressed: () {
+                        Padding(
+                          padding: const EdgeInsets.only(left: 18.0),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: InkWell(
+                              onTap: () {
                                 setState(() {
                                   isOpen = !isOpen;
                                 });
                               },
-                              icon: Image.asset(
+                              child: Image.asset(
                                 isOpen
                                     ? "assets/img/open_btn.png"
                                     : "assets/img/close_btn.png",
@@ -524,6 +530,19 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                 height: 15,
                               ),
                             ),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() != "online" ?
+                             Icon(Icons.arrow_upward, color: Colors.red,)   : SizedBox.shrink(),
+                            // authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() != "online" ?
+                            SizedBox(
+                              width: 40,
+                            ),
+                                // : SizedBox.shrink(),
                             Text(
                               authController.driverInResponse!=null && authController.driverInResponse!.driverDetails != null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ? "You're online".tr : "You're offline".tr,
                               style: TextStyle(
@@ -531,8 +550,15 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800),
                             ),
+                            // authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ?
+                            SizedBox(
+                              width: 40,
+                            ),
+                                // : SizedBox.shrink(),
+                            authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ?
+                            Icon(Icons.arrow_upward, color: Colors.green,)   : SizedBox.shrink(),
                             const SizedBox(
-                              width: 50,
+                              // width: 50,
                               height: 50,
                             ),
                           ],
@@ -905,7 +931,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
   Future<void> saveFakeId(String id, dynamic isFake) async {
     final prefs = await SharedPreferences.getInstance();
-    final bool shouldSave = isFake == 1 || isFake == '1';
+    final bool shouldSave = isFake == true;
 
     if (shouldSave) {
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -1828,11 +1854,14 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
 
   double _dragStartX = 0.0;
   bool _isDragging = false;
+
   void _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    Get.find<AuthController>().isLoadingTime = prefs.getBool(AppContants.isLoadingTime) ?? false;
+    Get.find<AuthController>().isLoadingTime =
+        prefs.getBool(AppContants.isLoadingTime) ?? false;
     print('dsdskdsds ${Get.find<AuthController>().isLoadingTime}');
   }
+
   @override
   void initState() {
     super.initState();
@@ -1843,9 +1872,9 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
       });
     });
 
-    _isOnline =
-        widget.authController.driverInResponse?.driverDetails!.loginStatus.toString() ==
-            "online";
+    _isOnline = widget.authController.driverInResponse?.driverDetails!.loginStatus
+        .toString() ==
+        "online";
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -1854,17 +1883,19 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
     _thumbPosition = _isOnline ? _maxSlideDistance : 0.0;
 
     if (_isOnline) {
-      widget.authController.onlineStartTime = DateTime.now(); // start tracking if already online
+      widget.authController.onlineStartTime =
+          DateTime.now(); // start tracking if already online
     }
     widget.authController.time = _formatDuration();
     _timer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (_isOnline) {
         setState(() {
-        widget.authController.time = _formatDuration();
-      });
+          widget.authController.time = _formatDuration();
+        });
       }
     });
   }
+
   Timer? _timer;
   @override
   void dispose() {
@@ -1919,24 +1950,24 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
         'last_saved_date', DateTime.now().toIso8601String().split("T").first);
   }
 
+  // 🔥 CHANGED: simplified toggle logic
   void _toggleStatus(bool newStatus) async {
     setState(() {
       _isOnline = newStatus;
 
       if (newStatus) {
-        // Going Online
         _animationController.forward();
         _thumbPosition = _maxSlideDistance;
         widget.authController.onlineStartTime = DateTime.now();
-        saveStoredData();   // ✅ start time भी save होगा
+        saveStoredData();
       } else {
-        // Going Offline
         if (widget.authController.onlineStartTime != null) {
-          final session = DateTime.now().difference(widget.authController.onlineStartTime!);
+          final session = DateTime.now()
+              .difference(widget.authController.onlineStartTime!);
           widget.authController.totalOnlineDuration += session;
         }
         widget.authController.onlineStartTime = null;
-        saveStoredData();   // ✅ total duration save होगा
+        saveStoredData();
         _animationController.reverse();
         _thumbPosition = 0.0;
       }
@@ -1947,6 +1978,7 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
       );
     });
   }
+
   String _formatDuration() {
     Duration total = widget.authController.totalOnlineDuration;
 
@@ -1958,57 +1990,29 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
     final minutes = total.inMinutes.remainder(60);
     return "$hours h $minutes m";
   }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        _maxSlideDistance = constraints.maxWidth - 160; // 60 is thumb width
+        _maxSlideDistance = constraints.maxWidth - 160; // 🔥 CHANGED: smoother thumb range
 
         return GestureDetector(
-
           behavior: HitTestBehavior.translucent,
-          onHorizontalDragStart: (details) {
-            _dragStartX = details.globalPosition.dx;
-            _isDragging = false;
-          },
-          onHorizontalDragUpdate: (details) {
-            // अगर movement threshold cross हो जाए तभी drag माने
-            if ((details.globalPosition.dx - _dragStartX).abs() > 5) {
-              _isDragging = true;
-              setState(() {
-                _thumbPosition = (_thumbPosition + details.primaryDelta!)
-                    .clamp(0.0, _maxSlideDistance);
-                _animationController.value =
-                    _thumbPosition / _maxSlideDistance;
-              });
-            }
+
+          // 🔥 CHANGED: simplified gestures
+          onTap: () {
+            _toggleStatus(!_isOnline); // Tap se toggle ho jaaye
           },
           onHorizontalDragEnd: (details) {
-            if (!_isDragging) {
-              // Tap ignore
-              return;
-            }
-
-            if (_isOnline) {
-              // Online से Offline सिर्फ तब जब पूरी तरह बाएं पहुँचे
-              if (_thumbPosition <= 0) {
-                _toggleStatus(false);
-              } else {
-                _animationController.animateTo(1.0,
-                    duration: Duration(milliseconds: 200));
-                setState(() => _thumbPosition = _maxSlideDistance);
-              }
-            } else {
-              // Offline से Online सिर्फ तब जब पूरी तरह दाएं पहुँचे
-              if (_thumbPosition >= _maxSlideDistance) {
-                _toggleStatus(true);
-              } else {
-                _animationController.animateTo(0.0,
-                    duration: Duration(milliseconds: 200));
-                setState(() => _thumbPosition = 0.0);
-              }
+            if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+              _toggleStatus(true); // Right slide → Online
+            } else if (details.primaryVelocity != null &&
+                details.primaryVelocity! < 0) {
+              _toggleStatus(false); // Left slide → Offline
             }
           },
+
           child: Container(
             width: double.infinity,
             height: 60,
@@ -2026,18 +2030,16 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
             ),
             child: Stack(
               children: [
-                // Label
                 Center(
                   child: Text(
                     "${"Swipe To".tr} ${_isOnline ? "Offline".tr : "Online".tr}",
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
                 ),
-                // Thumb
                 AnimatedBuilder(
                   animation: _animationController,
                   builder: (context, child) {
@@ -2059,7 +2061,6 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
                         ),
                         child: Center(
                           child: Text(
-                            // _formatDuration(),
                             _isOnline ? "ON".tr : "OFF".tr,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,

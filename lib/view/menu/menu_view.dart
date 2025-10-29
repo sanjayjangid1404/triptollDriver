@@ -136,7 +136,7 @@ class _MenuViewState extends State<MenuView> {
                                     ),
                                    InkWell(
                                             onTap: (){
-                                              context.push(const RatingsView() );
+                                              // context.push(const RatingsView() );
                                             },
                                             child: Container(
                                       padding: const EdgeInsets.symmetric(

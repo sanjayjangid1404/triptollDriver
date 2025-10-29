@@ -147,7 +147,7 @@ class _MyProfileViewState extends State<MyProfileView> {
                               ),
                               InkWell(
                                 onTap: () {
-                                  context.push(const RatingsView());
+                                  // context.push(const RatingsView());
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(

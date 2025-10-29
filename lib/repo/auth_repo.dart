@@ -118,6 +118,36 @@ class AuthRepo{
     return await apiClient.postMultipartData(
         AppContants.updateDriverKycURL,body,multipartBody);
   }
+  Future<Response> updateAdharFrontKyc(body,List<MultipartBody> multipartBody) async {
+
+    return await apiClient.postMultipartData(
+        AppContants.uploadAdharFrontURL,body,multipartBody);
+  }
+  Future<Response> updateAdharBackKyc(body,List<MultipartBody> multipartBody) async {
+
+    return await apiClient.postMultipartData(
+        AppContants.uploadAdharBackURL,body,multipartBody);
+  }
+  Future<Response> updatePenCardKyc(body,List<MultipartBody> multipartBody) async {
+
+    return await apiClient.postMultipartData(
+        AppContants.uploadPanImageURL,body,multipartBody);
+  }
+  Future<Response> updateLicenceFKyc(body,List<MultipartBody> multipartBody) async {
+
+    return await apiClient.postMultipartData(
+        AppContants.uploadLicenseFrontURL,body,multipartBody);
+  }
+  Future<Response> updateLicenceBKyc(body,List<MultipartBody> multipartBody) async {
+
+    return await apiClient.postMultipartData(
+        AppContants.uploadLicenseBackURL,body,multipartBody);
+  }
+  Future<Response> updateInsuranceImageURLKyc(body,List<MultipartBody> multipartBody) async {
+
+    return await apiClient.postMultipartData(
+        AppContants.uploadInsuranceImageURL,body,multipartBody);
+  }
 
   Future<Response> forgetPassword(body) async {
     return await apiClient.postData(
@@ -301,6 +331,12 @@ class AuthRepo{
 
     });
   }
+  Future<Response> notificationHistory(body) async {
+    print("call:::::::::::::::::::");
+    return await apiClient.postMultipartData(
+        AppContants.getNotificationHistoryURL,body,[]);
+  }
+
 
   Future<Response> getDailyEarnings({String? date,String? userID}) async {
     print("call");

@@ -170,21 +170,57 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
         switch (docType) {
           case 'aadhar_front':
             _kycDocs.aadharFront = File(image.path);
+            var body = {
+              "driver_id": widget.id,
+            };
+            Get.find<AuthController>().updateAdharFront(
+                body,adhaarF:_kycDocs.aadharFront!=null ? XFile(_kycDocs.aadharFront!.path):null);
+
             break;
           case 'aadhar_back':
             _kycDocs.aadharBack = File(image.path);
+            var body = {
+              "driver_id": widget.id,
+            };
+            Get.find<AuthController>().updateAdharBack(
+                body,adhaarB:_kycDocs.aadharBack!=null ? XFile(_kycDocs.aadharBack!.path):null);
+
             break;
           case 'psu':
             _kycDocs.psuImage = File(image.path);
+            var body = {
+              "driver_id": widget.id,
+            };
+            Get.find<AuthController>().updatePenCard(
+                body,adhaarB:_kycDocs.psuImage!=null ? XFile(_kycDocs.psuImage!.path):null);
+
             break;
           case 'license_front':
             _kycDocs.licenseFront = File(image.path);
+            var body = {
+              "driver_id": widget.id,
+            };
+            Get.find<AuthController>().updateLicenceFKyc(
+                body,adhaarB:_kycDocs.licenseFront!=null ? XFile(_kycDocs.licenseFront!.path):null);
+
             break;
           case 'license_back':
             _kycDocs.licenseBack = File(image.path);
+            var body = {
+              "driver_id": widget.id,
+            };
+            Get.find<AuthController>().updateLicenceBKyc(
+                body,adhaarB:_kycDocs.licenseBack!=null ? XFile(_kycDocs.licenseBack!.path):null);
+
             break;
           case 'insurance':
             _kycDocs.insuranceImage = File(image.path);
+            var body = {
+              "driver_id": widget.id,
+            };
+            Get.find<AuthController>().updateInsuranceImageURLKyc(
+                body,adhaarB:_kycDocs.insuranceImage!=null ? XFile(_kycDocs.insuranceImage!.path):null);
+
             break;
         }
       });
@@ -489,12 +525,14 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                         "insurance": insuranceCt.text,
                       };
                       authController.updateDriverKyc(
-                          body,context,isEdit: widget.isEdit, adhaarF:_kycDocs.aadharFront!=null ? XFile(_kycDocs.aadharFront!.path):null,
-                          adhaarb: _kycDocs.aadharBack!=null ? XFile(_kycDocs.aadharBack!.path):null,
-                          insur:_kycDocs.insuranceImage!=null ? XFile(_kycDocs.insuranceImage!.path):null,
-                          licenseNumberB:_kycDocs.licenseFront!=null ? XFile(_kycDocs.licenseFront!.path):null,
-                          lienB: _kycDocs.licenseBack!=null ?XFile(_kycDocs.licenseBack!.path):null,
-                          panImage:_kycDocs.psuImage!=null ? XFile(_kycDocs.psuImage!.path):null);
+                          body,context,isEdit: widget.isEdit,
+                          // adhaarF:_kycDocs.aadharFront!=null ? XFile(_kycDocs.aadharFront!.path):null,
+                          // adhaarb: _kycDocs.aadharBack!=null ? XFile(_kycDocs.aadharBack!.path):null,
+                          // insur:_kycDocs.insuranceImage!=null ? XFile(_kycDocs.insuranceImage!.path):null,
+                          // licenseNumberB:_kycDocs.licenseFront!=null ? XFile(_kycDocs.licenseFront!.path):null,
+                          // lienB: _kycDocs.licenseBack!=null ?XFile(_kycDocs.licenseBack!.path):null,
+                          // panImage:_kycDocs.psuImage!=null ? XFile(_kycDocs.psuImage!.path):null
+                      );
                     }
                     }
                   },
