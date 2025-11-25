@@ -87,6 +87,7 @@ dependencies:
   flutter_overlay_window: ^0.5.0
   device_info_plus: ^10.0.0
   quickalert: ^1.1.0
+  android_intent_plus: ^6.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

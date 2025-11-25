@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 // import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/services.dart';
@@ -49,6 +50,13 @@ class OverlayHelper {
       await platform.invokeMethod("bringToFront");
     } catch (e) {
       print("Overlay errordfjdf: $e");
+    }
+  }
+  static Future<void> bringToFrontCustom() async {
+    try {
+      await platform.invokeMethod('bringToFrontCustom');
+    } catch (e) {
+      print("Error bringToFrontCustom: $e");
     }
   }
 }
@@ -146,7 +154,8 @@ Future<void> setupFirebaseMessaging() async {
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Background message received: ${message.notification?.title}");
-
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   // Sound play
 
   //await player.setReleaseMode(ReleaseMode.loop);
@@ -156,10 +165,43 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     await flutterLocalNotificationsPlugin.cancelAll();
     await stopRingtone();
   });
-  // ✅ App open करने के लिए
+
   if (Platform.isAndroid) {
-    final service = FlutterBackgroundService();
-    service.invoke("openApp");
+    await bringAppToFront();
+  }
+  // ✅ App open करने के लिए
+  // if (Platform.isAndroid) {
+  //   final service = FlutterBackgroundService();
+  //   service.invoke("openApp");
+  // }
+}
+
+Future<void> bringAppToFront() async {
+  const platform = MethodChannel('service.triptoll.in/main_overlay');
+
+  try {
+    await platform.invokeMethod('bringToFrontMain');
+    print("✅ bringToFrontCustom executed successfully");
+  } catch (e) {
+    print("⚠️ bringToFrontCustom failed: $e");
+    print("➡️ Trying fallback intent...");
+
+    try {
+      final intent = AndroidIntent(
+        action: 'android.intent.action.MAIN',
+        package: 'service.triptoll.in',
+        componentName: '.MainActivity',
+        category: 'android.intent.category.LAUNCHER',
+        flags: <int>[
+          268435456, // FLAG_ACTIVITY_NEW_TASK
+          67108864,  // FLAG_ACTIVITY_CLEAR_TOP
+        ],
+      );
+      await intent.launch();
+      print("✅ App launched via Intent");
+    } catch (err) {
+      print("❌ Intent launch failed: $err");
+    }
   }
 }
 
@@ -562,5 +604,4 @@ void overlayMain() {
     ),
   );
 }
-
 
