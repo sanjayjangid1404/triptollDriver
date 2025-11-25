@@ -228,7 +228,8 @@ Orders copyWith({  String? bookingId,
 class Dropoffs {
   Dropoffs({
       String? locationId, 
-      String? address, 
+      String? status,
+      String? address,
       String? lat, 
       String? lng, 
       String? name, 
@@ -244,6 +245,7 @@ class Dropoffs {
       String? unloadingTime, 
       String? unloadingCharge,}){
     _locationId = locationId;
+    _status = status;
     _address = address;
     _lat = lat;
     _lng = lng;
@@ -263,6 +265,7 @@ class Dropoffs {
 
   Dropoffs.fromJson(dynamic json) {
     _locationId = json['location_id'];
+    _status = json['status'];
     _address = json['address'];
     _lat = json['lat'];
     _lng = json['lng'];
@@ -280,6 +283,7 @@ class Dropoffs {
     _unloadingCharge = json['unloading_charge'];
   }
   String? _locationId;
+  String? _status;
   String? _address;
   String? _lat;
   String? _lng;
@@ -296,6 +300,7 @@ class Dropoffs {
   String? _unloadingTime;
   String? _unloadingCharge;
 Dropoffs copyWith({  String? locationId,
+  String? status,
   String? address,
   String? lat,
   String? lng,
@@ -313,6 +318,7 @@ Dropoffs copyWith({  String? locationId,
   String? unloadingCharge,
 }) => Dropoffs(  locationId: locationId ?? _locationId,
   address: address ?? _address,
+  status: status ?? _status,
   lat: lat ?? _lat,
   lng: lng ?? _lng,
   name: name ?? _name,
@@ -329,6 +335,7 @@ Dropoffs copyWith({  String? locationId,
   unloadingCharge: unloadingCharge ?? _unloadingCharge,
 );
   String? get locationId => _locationId;
+  String? get status => _status;
   String? get address => _address;
   String? get lat => _lat;
   String? get lng => _lng;
@@ -348,6 +355,7 @@ Dropoffs copyWith({  String? locationId,
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['location_id'] = _locationId;
+    map['status'] = _status;
     map['address'] = _address;
     map['lat'] = _lat;
     map['lng'] = _lng;
@@ -384,7 +392,8 @@ Dropoffs copyWith({  String? locationId,
 class Pickup {
   Pickup({
       String? locationId, 
-      String? address, 
+      String? status,
+      String? address,
       String? lat, 
       String? lng, 
       String? name, 
@@ -396,6 +405,7 @@ class Pickup {
       String? loadingTime, 
       String? loadingCharge,}){
     _locationId = locationId;
+    _status = status;
     _address = address;
     _lat = lat;
     _lng = lng;
@@ -411,6 +421,7 @@ class Pickup {
 
   Pickup.fromJson(dynamic json) {
     _locationId = json['location_id'];
+    _status = json['status'];
     _address = json['address'];
     _lat = json['lat'];
     _lng = json['lng'];
@@ -424,6 +435,7 @@ class Pickup {
     _loadingCharge = json['loading_charge'];
   }
   String? _locationId;
+  String? _status;
   String? _address;
   String? _lat;
   String? _lng;
@@ -436,6 +448,7 @@ class Pickup {
   String? _loadingTime;
   String? _loadingCharge;
 Pickup copyWith({  String? locationId,
+  String? status,
   String? address,
   String? lat,
   String? lng,
@@ -448,6 +461,7 @@ Pickup copyWith({  String? locationId,
   String? loadingTime,
   String? loadingCharge,
 }) => Pickup(  locationId: locationId ?? _locationId,
+  status: status ?? _status,
   address: address ?? _address,
   lat: lat ?? _lat,
   lng: lng ?? _lng,
@@ -461,6 +475,7 @@ Pickup copyWith({  String? locationId,
   loadingCharge: loadingCharge ?? _loadingCharge,
 );
   String? get locationId => _locationId;
+  String? get status => _status;
   String? get address => _address;
   String? get lat => _lat;
   String? get lng => _lng;
@@ -476,6 +491,7 @@ Pickup copyWith({  String? locationId,
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['location_id'] = _locationId;
+    map['status'] = _status;
     map['address'] = _address;
     map['lat'] = _lat;
     map['lng'] = _lng;

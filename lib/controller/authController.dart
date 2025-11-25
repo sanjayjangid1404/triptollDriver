@@ -60,6 +60,8 @@ import '../view/home/unloading_timer.dart';
 import '../view/login/document_upload_view.dart';
 import 'package:http/http.dart' as http;
 
+import '../view/running/runnig_order_screen.dart';
+
 class AuthController extends GetxController implements GetxService {
 
 
@@ -1481,7 +1483,7 @@ class AuthController extends GetxController implements GetxService {
   }
 
   Future<void> orderPicked(
-      {String? cus_id, String? orderID, String? amount, int? value,String? locationID}) async {
+      {String? cus_id, String? orderID, String? amount, int? value,String? locationID,context}) async {
     isLoading = true;
     Globs.showHUD();
 
@@ -1504,8 +1506,8 @@ class AuthController extends GetxController implements GetxService {
       stopRingtone();
       authRepo.saveUserBooking(orderID.toString());
       hasShownSheet = false;
-
-      Get.offAll(HomeView());
+      checkDriverBooking(context);
+      // Get.offAll(HomeView());
     }
     else {
       ApiChecker.checkApi(response);
@@ -1517,7 +1519,7 @@ class AuthController extends GetxController implements GetxService {
   }
 
   Future<void> orderDelivered(
-      {String? cus_id, String? orderID, String? amount, int? value}) async
+      {String? cus_id, String? orderID, String? amount, int? value,context}) async
   {
     isLoading = true;
     Globs.showHUD();
@@ -1538,7 +1540,8 @@ class AuthController extends GetxController implements GetxService {
       hasShownSheet = false;
       authRepo.saveUserBooking("0");
       startJourneyToNext(  cus_id: getUserID(), orderID: orderID);
-      Get.offAll(HomeView());
+      // Get.offAll(HomeView());
+      checkDriverBooking(context);
     }
     else {
       ApiChecker.checkApi(response);
@@ -1566,7 +1569,7 @@ class AuthController extends GetxController implements GetxService {
 
     if (response.statusCode == 200 || response.statusCode == 400) {
 
-      Get.offAll(HomeView());
+      // Get.offAll(HomeView());
     }
     else {
       ApiChecker.checkApi(response);
@@ -1605,7 +1608,8 @@ class AuthController extends GetxController implements GetxService {
           checkAndStartBookingNotification(context);
         }
         else {
-          checkAndShowBottomSheet(context);
+          // checkAndShowBottomSheet(context);
+          checkAndShowPage(context);
         }
 
 
@@ -1679,7 +1683,8 @@ class AuthController extends GetxController implements GetxService {
 
     if (response.statusCode == 200 || response.statusCode == 400) {
       hasShownSheet = false;
-      Get.offAll(HomeView());
+      checkDriverBooking(context);
+      // Get.offAll(HomeView());
       update();
     }
     else {
@@ -1704,7 +1709,8 @@ class AuthController extends GetxController implements GetxService {
 
     if (response.statusCode == 200 || response.statusCode == 400) {
       hasShownSheet = false;
-      Get.offAll(HomeView());
+      checkDriverBooking(context);
+      // Get.offAll(HomeView());
       update();
     }
     else {
@@ -1760,7 +1766,8 @@ class AuthController extends GetxController implements GetxService {
                 response.body["bookings"][i]));
           }
 
-          checkAndShowBottomSheet(context);
+          // checkAndShowBottomSheet(context);
+          checkAndShowPage(context);
           checkDriverBooking(context);
           stopBookingNotificationPolling();
 
@@ -2130,7 +2137,8 @@ class AuthController extends GetxController implements GetxService {
 
 
   void showRunningDetailsSheet(Orders? notificationResponse,
-      BuildContext context) {
+      BuildContext context)
+  {
     showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -2163,7 +2171,7 @@ class AuthController extends GetxController implements GetxService {
                     constraints: BoxConstraints(
                       minHeight: MediaQuery.of(context).size.height * 0.3,
                     ),
-                    child: _buildRunningDetailsContent(
+                    child: buildRunningDetailsContent(
                       notificationResponse!,
                       context,
                     ),
@@ -2383,8 +2391,84 @@ class AuthController extends GetxController implements GetxService {
       ],
     );
   }
+  void openDirection(Orders order) {
+    if (order.orderStatus!.toLowerCase() == "picked") {
+      final sorted = List.from(order.dropoffs!)
+        ..sort((a, b) => int.parse(a.sequence!).compareTo(int.parse(b.sequence!)));
 
-  Widget _buildRunningDetailsContent(Orders bookingResponse,
+      final drop = sorted[currentDropIndex.value];
+
+      openGoogleMap(double.parse(drop.lat!), double.parse(drop.lng!));
+    } else {
+      openGoogleMap(double.parse(order.pickup!.lat!), double.parse(order.pickup!.lng!));
+    }
+  }
+  String getStatusButtonText(Orders order) {
+    final status = order.orderStatus!.toLowerCase();
+
+    if (status == "accpeted") return "Start Loading";
+    if (status == "loading") return "Start Trip";
+    if (status == "picked") return "Unloading";
+    if (status == "unloading") return "Completed";
+
+    return "Action";
+  }
+
+  void handleStatusAction(Orders order, BuildContext context) async {
+    final status = order.orderStatus!.toLowerCase();
+
+    if (status == "accpeted") {
+      startLoadingApi(getUserID().toString(), context, order.bookingId.toString(),
+          order.pickup!.locationId.toString());
+    }
+
+    else if (status == "loading") {
+      orderPicked(orderID: order.bookingId.toString(),
+          locationID: order.pickup!.locationId.toString(),context: context);
+    }
+
+    else if (status == "picked") {
+
+      final drops = order.dropoffs ?? [];
+      final sorted = List.from(drops)
+        ..sort((a, b) => int.parse(a.sequence!).compareTo(int.parse(b.sequence!)));
+
+      final drop = sorted[currentDropIndex.value];
+
+      await startUnLoadingApi(
+        getUserID().toString(),
+        context,
+        order.bookingId.toString(),
+        drop.locationId.toString(),
+      );
+
+      await nextDrop(sorted.length);
+    }
+
+    else if (status == "unloading") {
+      orderDelivered(orderID: order.bookingId.toString());
+    }
+  }
+
+  void checkAndShowPage(BuildContext context) {
+    if (runningOrderResponse != null &&
+        runningOrderResponse!.orders != null &&
+        runningOrderResponse!.orders!.isNotEmpty) {
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RunningOrderScreen(
+              // order: runningOrderResponse!.orders![0],
+            ),
+          ),
+        );
+      });
+    }
+  }
+
+  Widget buildRunningDetailsContent(Orders bookingResponse,
       BuildContext context) {
     return Column(
       children: [
