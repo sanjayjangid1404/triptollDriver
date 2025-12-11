@@ -2735,7 +2735,7 @@ class AuthController extends GetxController implements GetxService {
                       loadingStart.value = false;
                       unloadingStart.value = false;
                       showCompletePayment.value = false;
-                      orderPayment(bookingResponse.orderId.toString(),
+                      orderPayment(bookingResponse.bookingId.toString(),
                           bookingResponse.driverId.toString(),
                           generate8DigitKey().toString());
                     },

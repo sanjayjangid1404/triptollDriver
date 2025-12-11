@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,6 @@ import 'package:taxi_driver/controller/authController.dart';
 import 'package:taxi_driver/view/login/otp_view.dart';
 import 'package:taxi_driver/view/login/profile_image_view.dart';
 import 'package:taxi_driver/view/login/sign_up_view.dart';
-
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
 import '../../cubit/login_cubit.dart';
@@ -50,7 +48,11 @@ class _MobileNumberViewState extends State<MobileNumberView> {
     } else if (lang == "தமிழ்" || lang == "Tamil") {
       Get.updateLocale(const Locale('ta', 'IN'));
       authController.selectedLanguage.value = 'தமிழ்';
-    } else if (lang == "తెలుగు" || lang == "Telugu") {
+    }  else if (lang == "हिन्दी" ||lang == "Hindi") {
+      Get.updateLocale(const Locale('hi', 'IN'));
+      authController.selectedLanguage.value = "Hindi";
+    }
+    else if (lang == "తెలుగు" || lang == "Telugu") {
       Get.updateLocale(const Locale('te', 'IN'));
       authController.selectedLanguage.value = 'తెలుగు';
     } else if (lang == "বাংলা" || lang == "Bengali") {
@@ -151,6 +153,27 @@ class _MobileNumberViewState extends State<MobileNumberView> {
                                               setState(() {});
                                             },
                                           )),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: const Color(0xffDCDCDC)),
+                                          borderRadius: BorderRadius.circular(15),
+                                        ),
+                                        child: RadioListTile(
+                                          title: Text('हिन्दी'.tr),
+                                          activeColor: const Color(0xff014E70),
+                                          value: "Hindi",
+                                          groupValue: authController.selectedLanguage.value,
+                                          onChanged: (value) {
+                                            locale = const Locale('hi', 'IN');
+                                            authController.selectedLanguage.value = value!;
+                                            updateLanguage("Hindi");
+                                            setState(() {});
+                                          },
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(
                                       height: 10,

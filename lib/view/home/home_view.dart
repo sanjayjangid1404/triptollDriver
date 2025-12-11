@@ -95,7 +95,11 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     } else if (lang == "தமிழ்" || lang == "Tamil") {
       Get.updateLocale(const Locale('ta', 'IN'));
       authController.selectedLanguage.value = 'தமிழ்';
-    } else if (lang == "తెలుగు" || lang == "Telugu") {
+    }  else if (lang == "हिन्दी" ||lang == "Hindi") {
+      Get.updateLocale(const Locale('hi', 'IN'));
+      authController.selectedLanguage.value = "Hindi";
+    }
+    else if (lang == "తెలుగు" || lang == "Telugu") {
       Get.updateLocale(const Locale('te', 'IN'));
       authController.selectedLanguage.value = 'తెలుగు';
     } else if (lang == "বাংলা" || lang == "Bengali") {
@@ -462,26 +466,48 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   ? Center(child: CircularProgressIndicator())
                   : _currentPosition == null
                   ?Text("No Location Get"):
-              GoogleMap(
-                onMapCreated: (controller) => mapController = controller,
-                initialCameraPosition: CameraPosition(
-                  target: _currentPosition!,
-                  zoom: 15,
-                ),
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-
-                zoomControlsEnabled: true,
-                markers: {
-                  if (_currentPosition != null)
-                    Marker(
-                      markerId: MarkerId('currentLocation'),
-                      position: _currentPosition!,
-                      icon: BitmapDescriptor.defaultMarkerWithHue(
-                        BitmapDescriptor.hueRed,
-                      ),
+              Stack(
+                children: [
+                  GoogleMap(
+                    onMapCreated: (controller) => mapController = controller,
+                    initialCameraPosition: CameraPosition(
+                      target: _currentPosition!,
+                      zoom: 15,
                     ),
-                },
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: true,
+                    markers: {
+                      if (_currentPosition != null)
+                        Marker(
+                          markerId: MarkerId('currentLocation'),
+                          position: _currentPosition!,
+                          icon: BitmapDescriptor.defaultMarkerWithHue(
+                            BitmapDescriptor.hueRed,
+                          ),
+                        ),
+                    },
+                  ),
+                  Positioned(
+                    bottom: 260,
+                    right: 10,
+                    child: FloatingActionButton(
+                      mini: true,
+                      backgroundColor: Colors.white,
+                      onPressed: () {
+                        mapController.animateCamera(
+                          CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              target: _currentPosition!,
+                              zoom: 16,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Icon(Icons.my_location, color: Colors.green),
+                    ),
+                  ),
+                ],
               ),
 
 

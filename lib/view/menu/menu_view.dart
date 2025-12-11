@@ -337,6 +337,27 @@ class _MenuViewState extends State<MenuView> {
                                                 },
                                               )),
                                         ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: const Color(0xffDCDCDC)),
+                                              borderRadius: BorderRadius.circular(15),
+                                            ),
+                                            child: RadioListTile(
+                                              title: Text('हिन्दी'.tr),
+                                              activeColor: const Color(0xff014E70),
+                                              value: "Hindi",
+                                              groupValue: authController.selectedLanguage.value,
+                                              onChanged: (value) {
+                                                locale = const Locale('hi', 'IN');
+                                                authController.selectedLanguage.value = value!;
+                                                updateLanguage("Hindi");
+                                                setState(() {});
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                         const SizedBox(
                                           height: 10,
                                         ),

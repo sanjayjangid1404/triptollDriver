@@ -1,24 +1,16 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 import '../../common/appContants.dart';
 import '../../common/color_extension.dart';
 import '../../controller/authController.dart';
-import '../../model/running_order_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../home/show_timer.dart';
 import '../home/support/faq.dart';
 import '../home/unloading_timer.dart';
 
 
 class RunningOrderScreen extends StatefulWidget {
-  // final Orders order;
 
-  // const RunningOrderScreen({
-  //   // required this.order
-  //
-  // });
 
   @override
   State<RunningOrderScreen> createState() => _RunningOrderScreenState();
@@ -457,12 +449,34 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
               "pending" ?
 
       Column(
+
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
+
         children: [
-          Text("Collect Payment".tr, style: TextStyle(fontSize: 16,
-              color: TColor.primary,
-              fontWeight: FontWeight.bold),),
-          SizedBox(height: 10,),
+          Padding(
+            padding:const EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Collect Payment".tr, style: TextStyle(fontSize: 16,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold),),
+                Flexible(
+                  child: Text(
+                    "${AppContants.rupessSystem} ${controller.runningOrderResponse!.orders![0].amount ?? ""}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: TColor.secondaryText,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20,),
 
           InkWell(
             onTap: () {
@@ -471,7 +485,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
               controller.loadingStart.value = false;
               controller.unloadingStart.value = false;
               controller.showCompletePayment.value = false;
-              controller.orderPayment(controller.runningOrderResponse!.orders![0].orderId.toString(),
+              controller.orderPayment(controller.runningOrderResponse!.orders![0].bookingId.toString(),
                   controller.runningOrderResponse!.orders![0].driverId.toString(),
                   controller.generate8DigitKey().toString());
             },
@@ -560,7 +574,8 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                       Icons.directions_outlined, color: Colors.white,),
                     SizedBox(width: 10,),
                     Text(
-                      "Direction".tr,
+                      controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked"
+                          ? "Drop Location".tr :  "Direction".tr,
                       style: TextStyle(
                         color: TColor.primaryTextW,
                         fontSize: 14,

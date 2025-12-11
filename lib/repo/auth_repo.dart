@@ -62,7 +62,8 @@ class AuthRepo{
         AppContants.orderPaymentURL,{
       "booking_id":id,
       "driver_id":driverID,
-      "razorpay_payment_id":key,
+      "transaction_id":key,
+      // "razorpay_payment_id":key,
       "payment_status":"success",
       "payment_type":"cash",
     });

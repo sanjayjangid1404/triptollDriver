@@ -260,7 +260,7 @@ class DriverDetails {
     _uniqId = json['uniq_id'];
     _ownerId = json['owner_id'];
     _categoryId = json['category_id'];
-    _file_name = json['file_name'];
+    _file_name = json['profile_photo'];
     _weight = json['weight'];
     _vehicleId = json['vehicle_id'];
     _referralCode = json['referral_code'];
@@ -313,7 +313,7 @@ class DriverDetails {
     _userStatus = json['user_status'];
     _deviceToken = json['device_token'];
     _categoryName = json['category_name'];
-    _fileName = json['file_name'];
+    _fileName = json['profile_photo'];
     _weightName = json['weight_value'];
     _weightType = json['weight_type'];
     _vehicleName = json['vehicle_name'];
@@ -656,7 +656,7 @@ class DriverDetails {
     map['uniq_id'] = _uniqId;
     map['owner_id'] = _ownerId;
     map['category_id'] = _categoryId;
-    map['file_name'] = _file_name;
+    map['profile_photo'] = _file_name;
     map['weight'] = _weight;
     map['vehicle_id'] = _vehicleId;
     map['referral_code'] = _referralCode;
@@ -709,7 +709,7 @@ class DriverDetails {
     map['user_status'] = _userStatus;
     map['device_token'] = _deviceToken;
     map['category_name'] = _categoryName;
-    map['file_name'] = _fileName;
+    map['profile_photo'] = _fileName;
     map['weight_value'] = _weightName;
     map['weight_type'] = _weightType;
     map['vehicle_name'] = _vehicleName;
