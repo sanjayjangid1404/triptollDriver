@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -35,6 +36,7 @@ import '../../model/booking_notification_response.dart';
 import '../login/document_upload_view.dart';
 import 'driver_my_rides_view.dart';
 import 'notification_screen.dart';
+// import 'notification_screen.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -119,7 +121,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           "driver_id":Get.find<AuthController>().getUserID()
         });
         final response = await http.post(
-          Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
+          Uri.parse("https://triptoll.online/app-admin/api/Booking/findNewBookings"),
           body: jsonEncode({
             "driver_id":Get.find<AuthController>().getUserID()
           })
@@ -709,17 +711,42 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                       borderRadius: BorderRadius.circular(30),
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(20),
-                                      child:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.file_name!=null && authController.driverInResponse!.driverDetails!.file_name!.isNotEmpty ?
-                                      Image.network("${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}", width: 40,
-                                        height: 40,fit: BoxFit.cover,):
-                                      Image.asset(
-                                        "assets/img/u1.png",
-                                        width: 40,
-                                        height: 40,
+                                        borderRadius: BorderRadius.circular(20),
+                                        child:
+                                            authController.driverInResponse !=
+                                                        null &&
+                                                    authController
+                                                            .driverInResponse!
+                                                            .driverDetails!
+                                                            .file_name !=
+                                                        null &&
+                                                    authController
+                                                        .driverInResponse!
+                                                        .driverDetails!
+                                                        .file_name!
+                                                        .isNotEmpty
+                                                ? CachedNetworkImage(
+                                                    imageUrl:
+                                                        "${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}",
+                                                    width: 40,
+                                                    height: 40,
+                                                    fit: BoxFit.cover,
+                                                    errorWidget:
+                                                        (context, url, error) {
+                                                      return Image.asset(
+                                                        "assets/img/u1.png",
+                                                        width: 40,
+                                                        height: 40,
+                                                      );
+                                                    },
+                                                  )
+                                                : Image.asset(
+                                                    "assets/img/u1.png",
+                                                    width: 40,
+                                                    height: 40,
+                                                  ),
                                       ),
                                     ),
-                                  ),
                                 ),
                                 // Container(
                                 //   padding: const EdgeInsets.symmetric(

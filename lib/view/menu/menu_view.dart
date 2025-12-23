@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -127,8 +128,19 @@ class _MenuViewState extends State<MenuView> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(50),
                                       child:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.file_name!=null && authController.driverInResponse!.driverDetails!.file_name!.isNotEmpty ?
-                                      Image.network("${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}", width: 100,
-                                        height: 100,fit: BoxFit.cover,): Image.asset(
+                                          CachedNetworkImage(
+                                              imageUrl: "${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}",
+                                              width: 100,
+                                              height: 100,fit: BoxFit.cover,
+                                            errorWidget:  (context, url, error) {
+                                             return  Image.asset(
+                                              "assets/img/u1.png",
+                                              width: 100,
+                                              height: 100,
+                                            );
+                                            },
+                                          ):
+                                      Image.asset(
                                         "assets/img/u1.png",
                                         width: 100,
                                         height: 100,

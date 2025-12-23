@@ -9,14 +9,8 @@ import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
 import 'package:taxi_driver/common_widget/round_button.dart';
 import 'package:taxi_driver/controller/authController.dart';
-import 'package:taxi_driver/view/login/otp_view.dart';
-import 'package:taxi_driver/view/login/profile_image_view.dart';
 import 'package:taxi_driver/view/login/sign_up_view.dart';
-import '../../common/globs.dart';
-import '../../common/service_call.dart';
 import '../../cubit/login_cubit.dart';
-import '../home/home_view.dart';
-import '../user/user_home_view.dart';
 import 'forgot.dart';
 
 Locale locale = const Locale('en', 'US');
@@ -64,6 +58,51 @@ class _MobileNumberViewState extends State<MobileNumberView> {
       authController.selectedLanguage.value = "English";
     }
   }
+  Future<void> showLocationPermissionDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
+            children: const [
+              Icon(Icons.location_on, color: Colors.green),
+              SizedBox(width: 8),
+              Text("Location Permission"),
+            ],
+          ),
+          content: const SingleChildScrollView(
+            child: Text(
+              "Our application uses background location access only for order tracking purposes.\n\n"
+                  "We collect your location even when the app is closed or not in use to track active customer orders and provide real-time updates.\n\n"
+                  "We do not misuse your location data. Location access is strictly limited to order tracking and is not used for any other purpose.",
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                "Deny",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+              },
+              child: const Text("Allow & Continue"),
+            ),
+          ],
+        );
+      },
+    );
+  }
   Future<void> getDeviceId() async {
     final deviceInfoPlugin = DeviceInfoPlugin();
 
@@ -91,6 +130,9 @@ class _MobileNumberViewState extends State<MobileNumberView> {
     super.initState();
     checkLanguage();
     getDeviceId();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showLocationPermissionDialog(context);
+    });
     countryCode = countryCodePicker.countryCodes
         .firstWhere((element) => element.name == "India");
   }
