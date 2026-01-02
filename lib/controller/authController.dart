@@ -1447,7 +1447,7 @@ class AuthController extends GetxController implements GetxService {
     }
     else {
 
-
+     showCustomSnackBar(response.body['message'].toString(),isError: true,getXSnackBar: true);
     }
 
     isUploading = false;

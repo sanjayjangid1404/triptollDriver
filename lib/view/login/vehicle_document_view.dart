@@ -69,10 +69,11 @@ class _VehicleDocumentUploadViewState extends State<VehicleDocumentUploadView> {
       final XFile? image = await _picker.pickImage(source: source);
       if (image != null) {
         File file = File(image.path);
+        print('image type is ${image.path.toString()}');
 
-        // Convert if PNG
         if (file.path.toLowerCase().endsWith(".png")) {
           file = await convertPngToJpg(file);
+          print('image type is ${file.toString()}');
         }
 
         setState(() {
