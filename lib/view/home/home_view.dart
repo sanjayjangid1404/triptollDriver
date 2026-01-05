@@ -316,6 +316,9 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
         'contact': '${Get.find<AuthController>().getUserPhone().toString()}',
         'email': 'tritoll@gmail.com'
       },
+      'notes': {
+        'driver_id': Get.find<AuthController>().getUserID().toString(),
+      },
       'theme': {
         'color': '#FF6B6B' // Your app theme color
       }

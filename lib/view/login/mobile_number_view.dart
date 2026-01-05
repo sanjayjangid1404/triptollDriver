@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
@@ -124,14 +126,48 @@ class _MobileNumberViewState extends State<MobileNumberView> {
       });
     }
   }
+  Future<bool> isAppLiveCheck() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('is_app_live')
+          .doc('RbpYicRIDMd25rbFBZcu')
+          .get();
+
+      if (doc.exists) {
+        return doc['is_app_live'] == true;
+      }
+      return false;
+    } catch (e) {
+      print("Firestore error: $e");
+      return false;
+    }
+  }
+  Future<void> checkForUpdate() async {
+    try {
+      final info = await InAppUpdate.checkForUpdate();
+
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+
+        await InAppUpdate.performImmediateUpdate();
+      }
+
+    } catch (e) {
+      // await logUpdateError(e.toString());
+    }
+  }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    print('calll:::::::');
     checkLanguage();
+    checkForUpdate();
     getDeviceId();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showLocationPermissionDialog(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      bool isLive = await isAppLiveCheck();
+      if (!isLive) {
+        showLocationPermissionDialog(context);
+      }
     });
     countryCode = countryCodePicker.countryCodes
         .firstWhere((element) => element.name == "India");
