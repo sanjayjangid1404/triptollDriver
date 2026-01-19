@@ -11,6 +11,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -269,7 +270,6 @@ class AuthController extends GetxController implements GetxService {
     ).listen((Position position) {
       print("📍 New Position: ${position.latitude}, ${position.longitude}");
 
-      // Throttle - sirf har 3 second me API call
       if (_locationUpdateTimer == null || !_locationUpdateTimer!.isActive) {
         _updateDriverLocationOnServer(position.latitude, position.longitude);
 
@@ -333,12 +333,14 @@ class AuthController extends GetxController implements GetxService {
   }
   Future<void> _updateDriverLocationOnServer(double latitude,
       double longitude) async {
+
     try {
-      print("🚀 Updating location with lat: $latitude, long: $longitude");
+      print("🚀 Updating location with lat: $latitude, long: $longitude, ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())}");
 
       await updateDriverLocation(
         lat: latitude.toString(),
         long: longitude.toString(),
+        locationTime: DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       );
 
       print("✅ Location updated successfully");
@@ -667,7 +669,7 @@ class AuthController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> updateDriverLocation({String? lat, String? long}) async {
+  Future<void> updateDriverLocation({String? lat, String? long, String? locationTime}) async {
     isLoading = true;
 
     update();
@@ -676,12 +678,12 @@ class AuthController extends GetxController implements GetxService {
 
     if (isLoggedIn()) {
       Response response = await authRepo.updateDriverLocation(
-          userID: getUserID(), long: long, lat: lat);
+          userID: getUserID(), long: long, lat: lat,locationTimer: locationTime);
 
       //  LoginResponse? loginResponse;
 
       if (response.statusCode == 200 || response.statusCode == 400) {
-
+        print('response himu ${response.body.toString()}');
 
         /// updateDriverLocation(lat:lat.toString(),long:long.toString());
 
@@ -1589,7 +1591,7 @@ class AuthController extends GetxController implements GetxService {
 
     if (isKyc() && isPayment()) {
       isLoading = true;
-      Globs.showHUD();
+      // Globs.showHUD();
       Response response = await authRepo.checkDriverBooking(
           userID: getUserID());
 
@@ -1620,7 +1622,7 @@ class AuthController extends GetxController implements GetxService {
       }
 
       isLoading = false;
-      Globs.hideHUD();
+      // Globs.hideHUD();
       update();
     }
   }

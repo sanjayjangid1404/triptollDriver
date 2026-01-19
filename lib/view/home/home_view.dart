@@ -121,7 +121,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           "driver_id":Get.find<AuthController>().getUserID()
         });
         final response = await http.post(
-          Uri.parse("https://triptoll.online/app-admin/api/Booking/findNewBookings"),
+          Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
           body: jsonEncode({
             "driver_id":Get.find<AuthController>().getUserID()
           })
@@ -1950,12 +1950,17 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
         });
       }
     });
+    _bookingStream = Stream.periodic(const Duration(seconds: 30)).listen((_) {
+      if (!mounted) return;
+      widget.authController.checkDriverBooking(context);
+    });
   }
-
+  late StreamSubscription _bookingStream;
   Timer? _timer;
   @override
   void dispose() {
     _timer?.cancel();
+    _bookingStream.cancel();
     _animationController.dispose();
     super.dispose();
   }

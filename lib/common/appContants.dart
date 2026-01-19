@@ -36,8 +36,8 @@ class AppContants
   // static String baseURl = "https://dev.triptoll.in/api/";
   // static String baseURl = "https://triptoll.in/app-admin/api/";
   // static String imageURL = "https://dev.triptoll.in/";
-  static String baseURl = "https://triptoll.online/app-admin/api/";
-  static String imageURL = "https://triptoll.online/app-admin/";
+  static String baseURl = "https://triptoll.in/app-admin/api/";
+  static String imageURL = "https://triptoll.in/app-admin/";
   static String loginUrl = "User/login/tbl_driver";
   static String incomeDriverURL = "Driver/getWalletAmount";
   static String paymentHistoryURL = "Driver/getPaymentHistory";
