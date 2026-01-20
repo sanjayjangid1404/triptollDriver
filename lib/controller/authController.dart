@@ -678,7 +678,9 @@ class AuthController extends GetxController implements GetxService {
 
     if (isLoggedIn()) {
       Response response = await authRepo.updateDriverLocation(
-          userID: getUserID(), long: long, lat: lat,locationTimer: locationTime);
+          userID: getUserID(), long: long, lat: lat,locationTimer: locationTime,
+        driverStatus: driverInResponse!.driverDetails!.loginStatus.toString()
+      );
 
       //  LoginResponse? loginResponse;
 

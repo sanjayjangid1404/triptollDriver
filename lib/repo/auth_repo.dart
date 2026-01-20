@@ -38,7 +38,7 @@ class AuthRepo{
   Future<Response> getFaqList() async {
     return await apiClient.getData(AppContants.driverFAQHelpURl);
   }
-  Future<Response> updateDriverLocation({String? userID,String? lat,String? long,String? locationTimer}) async {
+  Future<Response> updateDriverLocation({String? userID,String? lat,String? long,String? locationTimer,String? driverStatus}) async {
     print("call");
     return await apiClient.postData(
         AppContants.updateDriverLocation,{
@@ -46,6 +46,7 @@ class AuthRepo{
           "user_id":userID,
           "long":long,
           "location_time":locationTimer,
+          "driver_status" : driverStatus
     });
   }
   Future<Response> addWalletPayment({String? customerID,String? amount,String? trnId}) async {

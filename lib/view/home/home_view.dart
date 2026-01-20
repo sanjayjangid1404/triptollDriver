@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-// import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:lottie/lottie.dart' as ls;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:share_plus/share_plus.dart';
@@ -18,25 +15,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
-import 'package:taxi_driver/common/custom_snackbar.dart';
 import 'package:taxi_driver/common/globs.dart';
-import 'package:taxi_driver/common/location_helper.dart';
 import 'package:taxi_driver/common/service_call.dart';
-import 'package:taxi_driver/common/socket_manager.dart';
 import 'package:taxi_driver/common_widget/Icon_title_subtitle_button.dart';
 import 'package:taxi_driver/model/running_order_response.dart';
-import 'package:taxi_driver/view/home/run_ride_view.dart';
-import 'package:taxi_driver/view/home/tip_request_view.dart';
 import 'package:taxi_driver/view/home/unloading_timer.dart';
 import 'package:taxi_driver/view/menu/menu_view.dart';
-
 import '../../controller/authController.dart';
 import '../../main.dart';
 import '../../model/booking_notification_response.dart';
 import '../login/document_upload_view.dart';
 import 'driver_my_rides_view.dart';
 import 'notification_screen.dart';
-// import 'notification_screen.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -569,19 +559,19 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                           children: [
                             authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() != "online" ?
                              Icon(Icons.arrow_upward, color: Colors.red,)   : SizedBox.shrink(),
-                            // authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() != "online" ?
+                            // authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() != "online" ?
                             SizedBox(
                               width: 40,
                             ),
                                 // : SizedBox.shrink(),
                             Text(
-                              authController.driverInResponse!=null && authController.driverInResponse!.driverDetails != null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ? "You're online".tr : "You're offline".tr,
+                              authController.driverInResponse!=null && authController.driverInResponse != null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ? "You're online".tr : "You're offline".tr,
                               style: TextStyle(
                                   color:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ?  TColor.primary:TColor.red,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800),
                             ),
-                            // authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ?
+                            // authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() == "online" ?
                             SizedBox(
                               width: 40,
                             ),
@@ -719,13 +709,11 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                             authController.driverInResponse !=
                                                         null &&
                                                     authController
-                                                            .driverInResponse!
-                                                            .driverDetails!
+                                                            .driverInResponse!.driverDetails!
                                                             .file_name !=
                                                         null &&
                                                     authController
-                                                        .driverInResponse!
-                                                        .driverDetails!
+                                                        .driverInResponse!.driverDetails!
                                                         .file_name!
                                                         .isNotEmpty
                                                 ? CachedNetworkImage(
