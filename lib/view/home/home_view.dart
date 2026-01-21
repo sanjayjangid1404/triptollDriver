@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:share_plus/share_plus.dart';
@@ -1051,8 +1052,9 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       backgroundColor: Colors.transparent, // Makes the rounded corners visible
       builder: (context) => Container(
         padding: const EdgeInsets.only(top: 20), // Space for the drag handle
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration:  BoxDecoration(
+          color: notificationResponse.orderStatus == 'scheduled' ?
+             Color(0xFFcfecf7): Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -1225,6 +1227,18 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     // Share using device's share dialog
     await Share.share(shareText);
   }
+  String formatScheduleDate(String? date) {
+    if (date == null || date.isEmpty) return '';
+    DateTime parsedDate = DateTime.parse(date);
+    return DateFormat('dd-MM-yyyy').format(parsedDate);
+  }
+
+  String formatScheduleTime(String? date, String? time) {
+    if (date == null || time == null) return '';
+    DateTime parsedTime = DateTime.parse("$date $time");
+    return DateFormat('hh:mm a').format(parsedTime);
+  }
+
   Widget _buildRideDetailsContent(Data bookingResponse) {
     return Column(
       children: [
@@ -1233,7 +1247,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           width: 40,
           height: 5,
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: bookingResponse.orderStatus == 'scheduled' ?
+            Colors.black : Colors.grey[300],
             borderRadius: BorderRadius.circular(2.5),
           ),
         ),
@@ -1244,7 +1259,87 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
           child: Column(
             children: [
-
+             bookingResponse.orderStatus == 'scheduled' ?
+             Row(
+               crossAxisAlignment: CrossAxisAlignment.center,
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: [
+                 Text(
+                   "Schedule Order",
+                   textAlign: TextAlign.center,
+                   style: TextStyle(
+                     color: Colors.black,
+                     fontSize: 22,
+                     fontWeight: FontWeight.w500
+                   ),
+                 ),
+               ],
+             ) : SizedBox.shrink(),
+              bookingResponse.orderStatus == 'scheduled' ?
+                  SizedBox(
+                    height: 15,
+                  ) : SizedBox.shrink(),
+              bookingResponse.orderStatus == 'scheduled' ?
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Schedule Date",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400
+                    ),
+                  ),
+                  Text(
+                    formatScheduleDate(bookingResponse.scheduleDate),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400
+                    ),
+                  ),
+                ],
+              ) : SizedBox.shrink(),
+              bookingResponse.orderStatus == 'scheduled' ?
+              SizedBox(
+                height: 10,
+              ) : SizedBox.shrink(),
+              bookingResponse.orderStatus == 'scheduled' ?
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Schedule Time",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400
+                    ),
+                  ),
+                  Text(
+                    formatScheduleTime(
+                      bookingResponse.scheduleDate,
+                      bookingResponse.scheduleTime,
+                    ),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400
+                    ),
+                  ),
+                ],
+              ) : SizedBox.shrink(),
+              bookingResponse.orderStatus == 'scheduled' ?
+              SizedBox(
+                height: 20,
+              ) : SizedBox.shrink(),
               Row(
                 children: [
                   Expanded(
@@ -1252,21 +1347,11 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       "${AppContants.rupessSystem} ${bookingResponse.amount ?? ""}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: TColor.secondaryText,
+                        color: Colors.black,
                         fontSize: 18,
                       ),
                     ),
                   ),
-                  // Expanded(
-                  //   child: Text(
-                  //     "${calculateDistance(double.parse(bookingResponse.pickupLat??"0"),double.parse(bookingResponse.pickupLong??"0"),double.parse(bookingResponse.dropLat??"0"),double.parse(bookingResponse.dropLong??"0")).toStringAsFixed(2)}  KM",
-                  //     textAlign: TextAlign.center,
-                  //     style: TextStyle(
-                  //       color: TColor.secondaryText,
-                  //       fontSize: 18,
-                  //     ),
-                  //   ),
-                  // ),
                   Expanded(
                     child: FutureBuilder<Map<String, dynamic>>(
                       future: calculateDropDistancesForBooking(bookingResponse),
@@ -1287,7 +1372,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                           return Text(
                             "${km.toStringAsFixed(2)} KM • $duration",
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: TColor.secondaryText, fontSize: 18),
+                            style: TextStyle(color: Colors.black, fontSize: 18),
                           );
                         }
                       },
@@ -1401,10 +1486,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       },
                       child: Container(
                         width: double.maxFinite,
+                        height: 40,
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: TColor.primary,
+                          color: bookingResponse.orderStatus == 'scheduled' ?
+                          Colors.orangeAccent
+                              : TColor.primary,
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Stack(
@@ -1420,26 +1508,26 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),
-                                ),
+                                )
                               ],
                             ),
-                            Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.black12,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                "Click".tr,
-                                style: TextStyle(
-                                  color: TColor.primaryTextW,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
+                            // Container(
+                            //   height: 40,
+                            //   width: 40,
+                            //   decoration: BoxDecoration(
+                            //     color: Colors.black12,
+                            //     borderRadius: BorderRadius.circular(20),
+                            //   ),
+                            //   alignment: Alignment.center,
+                            //   child: Text(
+                            //     "Click".tr,
+                            //     style: TextStyle(
+                            //       color: TColor.primaryTextW,
+                            //       fontSize: 14,
+                            //       fontWeight: FontWeight.w700,
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),

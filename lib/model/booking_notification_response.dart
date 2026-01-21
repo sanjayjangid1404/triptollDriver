@@ -64,7 +64,10 @@ class Data {
       String? orderId, 
       String? amount, 
       dynamic vehicleId, 
-      String? cusId, 
+      dynamic orderStatus,
+      dynamic scheduleTime,
+      dynamic scheduleDate,
+      String? cusId,
       dynamic isFake, 
       Pickup? pickup, 
       List<Dropoffs>? dropoffs, 
@@ -73,6 +76,9 @@ class Data {
     _orderId = orderId;
     _amount = amount;
     _vehicleId = vehicleId;
+    _orderStatus = orderStatus;
+    _scheduleTime = scheduleTime;
+    _scheduleDate = scheduleDate;
     _cusId = cusId;
     _isFake = isFake;
     _pickup = pickup;
@@ -85,6 +91,9 @@ class Data {
     _orderId = json['order_id'];
     _amount = json['amount'];
     _vehicleId = json['vehicle_id'];
+    _orderStatus = json['order_status'];
+    _scheduleDate = json['schedule_date'];
+    _scheduleTime = json['schedule_time'];
     _cusId = json['cus_id'];
     _isFake = json['is_fake'];
     _pickup = json['pickup'] != null ? Pickup.fromJson(json['pickup']) : null;
@@ -100,6 +109,9 @@ class Data {
   String? _orderId;
   String? _amount;
   dynamic _vehicleId;
+  dynamic _orderStatus;
+  dynamic _scheduleTime;
+  dynamic _scheduleDate;
   String? _cusId;
   dynamic _isFake;
   Pickup? _pickup;
@@ -109,6 +121,9 @@ Data copyWith({  String? bookingId,
   String? orderId,
   String? amount,
   dynamic vehicleId,
+  dynamic orderStatus,
+  dynamic scheduleTime,
+  dynamic scheduleDate,
   String? cusId,
   dynamic isFake,
   Pickup? pickup,
@@ -118,6 +133,9 @@ Data copyWith({  String? bookingId,
   orderId: orderId ?? _orderId,
   amount: amount ?? _amount,
   vehicleId: vehicleId ?? _vehicleId,
+  scheduleTime: scheduleTime ?? _scheduleTime,
+  scheduleDate: scheduleDate ?? _scheduleDate,
+  orderStatus: orderStatus ?? _orderStatus,
   cusId: cusId ?? _cusId,
   isFake: isFake ?? _isFake,
   pickup: pickup ?? _pickup,
@@ -128,6 +146,9 @@ Data copyWith({  String? bookingId,
   String? get orderId => _orderId;
   String? get amount => _amount;
   dynamic get vehicleId => _vehicleId;
+  dynamic get scheduleTime => _scheduleTime;
+  dynamic get scheduleDate => _scheduleDate;
+  dynamic get orderStatus => _orderStatus;
   String? get cusId => _cusId;
   dynamic get isFake => _isFake;
   Pickup? get pickup => _pickup;
@@ -140,6 +161,9 @@ Data copyWith({  String? bookingId,
     map['order_id'] = _orderId;
     map['amount'] = _amount;
     map['vehicle_id'] = _vehicleId;
+    map['order_status'] = _orderStatus;
+    map['schedule_date'] = _scheduleDate;
+    map['schedule_time'] = _scheduleTime;
     map['cus_id'] = _cusId;
     map['is_fake'] = _isFake;
     if (_pickup != null) {
