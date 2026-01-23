@@ -28,6 +28,7 @@ import '../../model/booking_notification_response.dart';
 import '../login/document_upload_view.dart';
 import 'driver_my_rides_view.dart';
 import 'notification_screen.dart';
+import 'order/schedule_delivery_list.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -424,37 +425,16 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(
       builder: (AuthController authController) {
+        final allOrders =
+            Get.find<AuthController>().getMyScheduleOrderModel.value.data;
+
+        final pendingOrders = allOrders
+            ?.where((e) => e.orderStatus?.toLowerCase() != "delivered")
+            .toList();
+
         print((int.parse(authController.walletAmount.toString())<= -99) );
-
-
-        // if(authController.runningOrderResponse!=null && authController.runningOrderResponse!.data!=null){
-        //   WidgetsBinding.instance.addPostFrameCallback((_) {
-        //     showRunningDetailsSheet(
-        //         authController.runningOrderResponse!.data!,
-        //         authController
-        //     );
-        //   });
-        // }
-        // else if (authController.notificationResponse.isNotEmpty &&
-        //     authController.notificationResponse[0].bookingFound! &&
-        //     authController.notificationResponse[0].status.toString() == "pending" &&
-        //     !authController.hasShownSheet) {  // Add this condition
-        //
-        //   authController.hasShownSheet = true;
-        //   authController.update(); // Update the controller state
-        //
-        //   WidgetsBinding.instance.addPostFrameCallback((_) {
-        //     showRideDetailsSheet(
-        //         authController.notificationResponse[0],
-        //         authController
-        //     );
-        //   });
-        // }
-
-        return
-       PopScope(
+        return PopScope(
          canPop: false,
-
          child: Scaffold(
           body: Stack(
             children: [
@@ -503,11 +483,9 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       child: Icon(Icons.my_location, color: Colors.green),
                     ),
                   ),
+
                 ],
               ),
-
-
-
               Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -558,7 +536,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() != "online" ?
+                            authController.driverInResponse!=null && authController.driverInResponse?.driverDetails?.loginStatus.toString() != "online" ?
                              Icon(Icons.arrow_upward, color: Colors.red,)   : SizedBox.shrink(),
                             // authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() != "online" ?
                             SizedBox(
@@ -566,9 +544,9 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                             ),
                                 // : SizedBox.shrink(),
                             Text(
-                              authController.driverInResponse!=null && authController.driverInResponse != null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ? "You're online".tr : "You're offline".tr,
+                              authController.driverInResponse!=null && authController.driverInResponse != null && authController.driverInResponse?.driverDetails?.loginStatus.toString() == "online" ? "You're online".tr : "You're offline".tr,
                               style: TextStyle(
-                                  color:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ?  TColor.primary:TColor.red,
+                                  color:authController.driverInResponse!=null && authController.driverInResponse?.driverDetails?.loginStatus.toString() == "online" ?  TColor.primary:TColor.red,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800),
                             ),
@@ -577,7 +555,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               width: 40,
                             ),
                                 // : SizedBox.shrink(),
-                            authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.loginStatus.toString() == "online" ?
+                            authController.driverInResponse!=null && authController.driverInResponse?.driverDetails?.loginStatus.toString() == "online" ?
                             Icon(Icons.arrow_upward, color: Colors.green,)   : SizedBox.shrink(),
                             const SizedBox(
                               // width: 50,
@@ -609,7 +587,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               ),
                               Expanded(
                                 child: IconTitleSubtitleButton(
-                                    title: "${authController.driverInResponse!=null ? double.parse(authController.driverInResponse!.driverDetails!.totalRating ??"0").toStringAsFixed(2):"0"}",
+                                    title: "${authController.driverInResponse!=null ? double.parse(authController.driverInResponse?.driverDetails?.totalRating ??"0").toStringAsFixed(2):"0"}",
                                     subtitle: "Rating",
                                     icon: "assets/img/rate.png",
                                     onPressed: () {}),
@@ -709,10 +687,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                         child:
                                             authController.driverInResponse !=
                                                         null &&
-                                                    authController
-                                                            .driverInResponse!.driverDetails!
-                                                            .file_name !=
-                                                        null &&
+                                                    authController.driverInResponse?.driverDetails?.file_name != null &&
                                                     authController
                                                         .driverInResponse!.driverDetails!
                                                         .file_name!
@@ -813,7 +788,121 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   ],
                 ),
               ),
+              Get.find<AuthController>().getMyScheduleOrderModel.value.data != null ?
+              Positioned(
+                top: 120,
+                left: 16,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children:  [
+                          Text(
+                            "Scheduled Delivery",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: (){
+                              Get.to(() => ScheduleDeliveryList());
+                            },
+                            child: Text(
+                              "See All",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                decoration: TextDecoration.underline
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: pendingOrders == null
+                            ? 0
+                            : (pendingOrders.length > 2 ? 2 : pendingOrders.length),
+                        padding: EdgeInsets.zero,
+                        itemBuilder: (context, index) {
+                          final item = Get.find<AuthController>().getMyScheduleOrderModel.value.data![index];
+                          String formattedDate = '';
+                          if (item.scheduleDate != null && item.scheduleDate!.isNotEmpty) {
+                            DateTime date = DateTime.parse(item.scheduleDate!);
+                            formattedDate = DateFormat('dd-MM-yyyy').format(date);
+                          }
 
+                          String formattedTime = '';
+                          if (item.scheduleTime != null && item.scheduleTime!.isNotEmpty) {
+                            DateTime time =
+                            DateFormat("HH:mm:ss").parse(item.scheduleTime!);
+                            formattedTime = DateFormat('hh:mm a').format(time);
+                          }
+                          final colors = [
+                            const Color(0xFF9E4B2F),
+                            const Color(0xFFCC6A4A),
+                          ];
+
+                          return GestureDetector(
+                            onTap: (){
+                              Get.to(() => ScheduleDeliveryList());
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: colors[index],
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    formattedDate,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 1),
+                                   Text(
+                                     formattedTime,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ) :
+                  SizedBox.shrink(),
               authController.isPayment() ? authController.isKyc() ?(int.parse(authController.walletAmount.toString())>= -99)?   SizedBox():
               AlertDialog(
                 title: Text('Pay Wallet Amount'.tr),
@@ -2003,10 +2092,8 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
         widget.authController.time = _formatDuration();
       });
     });
-
-    _isOnline = widget.authController.driverInResponse?.driverDetails!.loginStatus
-        .toString() ==
-        "online";
+    Get.find<AuthController>().getMyScheduledOrderFun();
+    _isOnline = widget.authController.driverInResponse?.driverDetails?.loginStatus.toString() == "online";
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),

@@ -42,10 +42,12 @@ import '../model/device_logout_model.dart';
 import '../model/faq_driver_response.dart';
 import '../model/faq_model.dart';
 import '../model/getBookingsBydateAndDriver_model.dart';
+import '../model/get_sceduled_order_list_model.dart';
 import '../model/inactive_wallet_model.dart';
 import '../model/life_time_earn_model.dart';
 import '../model/missed_order_list_model.dart';
 import '../model/monthly_earn_model.dart';
+import '../model/mySchedule_order_model.dart';
 import '../model/notification_history_model.dart';
 import '../model/running_order_response.dart';
 import '../model/subCategoryVehicle.dart' hide Data;
@@ -369,7 +371,7 @@ class AuthController extends GetxController implements GetxService {
   }
 
   RxString selectedLanguage = "English".obs;
-  Future<void> loginFunction(String email, String password,deviceToken) async {
+  Future<void> loginFunction(String email, String password,deviceToken, BuildContext context) async {
     isLoading = true;
 
     update();
@@ -387,7 +389,8 @@ class AuthController extends GetxController implements GetxService {
     Response response = await authRepo.login(
         token: token,
         phone: email, password: password,
-    deviceToken: deviceToken);
+    deviceToken: deviceToken,
+    );
 
     //  LoginResponse? loginResponse;
 
@@ -395,6 +398,7 @@ class AuthController extends GetxController implements GetxService {
       if (response.body["status"].toString() == "false") {
         showCustomSnackBar(
             response.body["message"], getXSnackBar: false, isError: true);
+        driverInfo(context);
       }
       else {
         showCustomSnackBar(
@@ -406,12 +410,14 @@ class AuthController extends GetxController implements GetxService {
             response.body["category_id"].isNotEmpty &&
             response.body["category_id"].toString() != "0") {
           authRepo.isCategoryValue(true);
+          authRepo.saveUserCategoryIdNew(response.body['category_id']);
         }
         else {
           authRepo.isCategoryValue(false);
         }
         authRepo.saveUserName(response.body['name']);
         authRepo.saveUserEmail(response.body['email']);
+        authRepo.saveUserCityId(response.body['city_id']);
         authRepo.setMaxTime(response.body['max_loading_time'].toString());
         authRepo.setPricePerMinute(response.body['loading_charge_per_min'].toString());
 
@@ -702,6 +708,8 @@ class AuthController extends GetxController implements GetxService {
   List<WalletResponse>walletResponseList = [];
   // List<InactiveWalletModel>walletInactiveList = [];
   InactiveWalletModel inactiveWalletModel = InactiveWalletModel();
+  Rx<GetScheduledOrderModel> getScheduledOrderModel = GetScheduledOrderModel().obs;
+  Rx<GetMyScheduleOrderModel> getMyScheduleOrderModel = GetMyScheduleOrderModel().obs;
   Future<void> changeLoginStatus(
       {String? status, BuildContext? context}) async {
     isLoading = true;
@@ -718,13 +726,13 @@ class AuthController extends GetxController implements GetxService {
     if (response.statusCode == 200 || response.statusCode == 400) {
       if (status == "online") {
         await DriverNotificationService.showOnlineNotification();
+        driverInfo(context!);
       }
 
       else {
         await DriverNotificationService.showOfflineNotification();
       }
 
-      driverInfo(context!);
     }
     else {
       ApiChecker.checkApi(response);
@@ -732,6 +740,30 @@ class AuthController extends GetxController implements GetxService {
 
     isLoading = false;
     update();
+  }
+  Future<void> getScheduledOrderFun() async {
+    Response response = await authRepo.getAvailableScheduledBookings(
+      catID: getCategoryID(), cityId: getCityID());
+
+    if (response.statusCode == 200 || response.statusCode == 400) {
+      getScheduledOrderModel.value = GetScheduledOrderModel.fromJson(response.body);
+    }
+    else {
+      showCustomSnackBar(response.body["message"].toString(),getXSnackBar: true,isError: true);
+      ApiChecker.checkApi(response);
+    }
+  }
+  Future<void> getMyScheduledOrderFun() async {
+    Response response = await authRepo.getMyScheduledBookings(
+        userId: getUserID());
+
+    if (response.statusCode == 200 || response.statusCode == 400) {
+      getMyScheduleOrderModel.value = GetMyScheduleOrderModel.fromJson(response.body);
+    }
+    else {
+      showCustomSnackBar(response.body["message"].toString(),getXSnackBar: true,isError: true);
+      ApiChecker.checkApi(response);
+    }
   }
 
 
@@ -2043,6 +2075,9 @@ class AuthController extends GetxController implements GetxService {
   bool isKyc() {
     return authRepo.sharedPreferences.getBool(AppContants.userKYC) ?? false;
   }
+  String? getCategoryID() {
+    return authRepo.sharedPreferences.getString(AppContants.cateIdNew);
+  }
 
   bool isPayment() {
     return authRepo.sharedPreferences.getBool(AppContants.userPayment) ?? false;
@@ -2054,6 +2089,8 @@ class AuthController extends GetxController implements GetxService {
 
   String? getUserID() {
     return authRepo.sharedPreferences.getString(AppContants.userID);
+  } String? getCityID() {
+    return authRepo.sharedPreferences.getString(AppContants.cityId);
   }
 
   String? getRegistrationFee() {
@@ -2082,13 +2119,9 @@ class AuthController extends GetxController implements GetxService {
 
   Future<void> logoutUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    // ✅ Clear all stored preferences
     await prefs.clear();
-
-    // ✅ Optional: navigate to login or splash screen
-    Get.offAll(MobileNumberView());
-    driverInResponse = DriverInResponse();
+    Get.offAll(() =>MobileNumberView());
+    Future.delayed(Duration(seconds: 4),() =>  driverInResponse = DriverInResponse(),);
   }
 
 

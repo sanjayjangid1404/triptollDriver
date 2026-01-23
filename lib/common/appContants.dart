@@ -27,9 +27,11 @@ class AppContants
   static String loadingCharges = "loading charges";
   static String isLoadingTime = "is loading time";
   static String userKYC = "User KYC";
+  static String cateIdNew = "Category ID New";
   static String userPayment = "User Payment";
   static String userFee= "User Fee";
   static String userEmail = "User Email";
+  static String cityId = "City Id";
   static String userPhone = "User Phone";
   static String notification = "Notification ID";
   // static String baseURl = "https://apitest.crossroadhelpline.in/api/"; 
@@ -57,6 +59,8 @@ class AppContants
   static String sendDriverOTPURL = "Driver/driverSignupOTP";
   static String updateDriverLocation = "User/updateLocation";
   static String orderPaymentURL = "Booking/orderPayment";
+  static String getAvailableScheduledBookingsURL = "Booking/getAvailableScheduledBookings";
+  static String getDriverScheduledBookingsURL = "Booking/getDriverScheduledBookings";
   static String updateDriverVehicleURL = "Driver/updateDriverVehicle";
   static String driverInfoURL = "Driver/getDataById/";
   static String uploadAdharFrontURL = "Driver/uploadAdharFront";

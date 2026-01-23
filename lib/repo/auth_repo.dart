@@ -80,6 +80,23 @@ class AuthRepo{
 
     },[]);
   }
+  Future<Response> getAvailableScheduledBookings({String? catID,String? cityId}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.getAvailableScheduledBookingsURL,{
+          "city_id":cityId!,
+          "category_id":catID!,
+
+    });
+  }
+  Future<Response> getMyScheduledBookings({String? userId}) async {
+    print("call");
+    return await apiClient.postData(
+        AppContants.getDriverScheduledBookingsURL,{
+          "driver_id":userId!,
+
+    });
+  }
 
   Future<Response> driverBasicInfo(body,List<MultipartBody> multipartBody) async {
 
@@ -575,6 +592,13 @@ class AuthRepo{
   Future<bool>saveUserEmail(String name)
   async{
     return await sharedPreferences.setString(AppContants.userEmail, name);
+  }
+  Future<bool>saveUserCityId(String cityId)
+  async{
+    return await sharedPreferences.setString(AppContants.cityId, cityId);
+  } Future<bool>saveUserCategoryIdNew(String catIDNew)
+  async{
+    return await sharedPreferences.setString(AppContants.cateIdNew, catIDNew);
   }
 
   Future<bool>saveUserPhone(String name)

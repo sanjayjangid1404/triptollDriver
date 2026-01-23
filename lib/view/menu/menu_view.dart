@@ -21,6 +21,7 @@ import 'package:taxi_driver/view/user/user_my_rides_view.dart';
 
 import '../../common/appContants.dart';
 import '../../common_widget/setting_row.dart';
+import '../home/order/schedule_delivery_list.dart';
 import '../home/support/faq.dart';
 import '../login/bank_detail_view.dart';
 import '../login/document_upload_view.dart';
@@ -127,55 +128,61 @@ class _MenuViewState extends State<MenuView> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(50),
-                                      child:authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.file_name!=null && authController.driverInResponse!.driverDetails!.file_name!.isNotEmpty ?
-                                          CachedNetworkImage(
-                                              imageUrl: "${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}",
-                                              width: 100,
-                                              height: 100,fit: BoxFit.cover,
-                                            errorWidget:  (context, url, error) {
-                                             return  Image.asset(
-                                              "assets/img/u1.png",
-                                              width: 100,
-                                              height: 100,
-                                            );
-                                            },
-                                          ):
-                                      Image.asset(
+                                      child: authController.driverInResponse != null &&
+                                          authController.driverInResponse!.driverDetails != null &&
+                                          authController.driverInResponse!.driverDetails!.file_name != null &&
+                                          authController.driverInResponse!.driverDetails!.file_name!.isNotEmpty
+                                          ? CachedNetworkImage(
+                                        imageUrl:
+                                        "${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}",
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                        errorWidget: (context, url, error) {
+                                          return Image.asset(
+                                            "assets/img/u1.png",
+                                            width: 100,
+                                            height: 100,
+                                          );
+                                        },
+                                      )
+                                          : Image.asset(
                                         "assets/img/u1.png",
                                         width: 100,
                                         height: 100,
                                       ),
-                                    ),
-                                   InkWell(
-                                            onTap: (){
-                                              // context.push(const RatingsView() );
-                                            },
-                                            child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 2),
-                                      color: Colors.white,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Image.asset(
-                                            "assets/img/rate_profile.png",
-                                            width: 15,
-                                            height: 15,
-                                          ),
-                                          const SizedBox(
-                                            width: 4,
-                                          ),
-                                           Text(
-                                             authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.ratings!=null && authController.driverInResponse!.driverDetails!.ratings!.isNotEmpty ?"${authController.driverInResponse!.driverDetails!.ratings!}":"",
-                                              style: TextStyle(
-                                                color: TColor.primaryText,
-                                                fontSize: 13,
-                                              ),
-                                            ),
 
-                                        ],
-                                      ),
-                                    ),),
+                                    ),
+                                   // InkWell(
+                                   //          onTap: (){
+                                   //            // context.push(const RatingsView() );
+                                   //          },
+                                   //          child: Container(
+                                   //    padding: const EdgeInsets.symmetric(
+                                   //        horizontal: 8, vertical: 2),
+                                   //    color: Colors.white,
+                                   //    child: Row(
+                                   //      mainAxisSize: MainAxisSize.min,
+                                   //      children: [
+                                   //        Image.asset(
+                                   //          "assets/img/rate_profile.png",
+                                   //          width: 15,
+                                   //          height: 15,
+                                   //        ),
+                                   //        const SizedBox(
+                                   //          width: 4,
+                                   //        ),
+                                   //         Text(
+                                   //           authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.ratings!=null && authController.driverInResponse!.driverDetails!.ratings!.isNotEmpty ?"${authController.driverInResponse!.driverDetails!.ratings!}":"",
+                                   //            style: TextStyle(
+                                   //              color: TColor.primaryText,
+                                   //              fontSize: 13,
+                                   //            ),
+                                   //          ),
+                                   //
+                                   //      ],
+                                   //    ),
+                                   //  ),),
                                   ],
                                 ),
                                 const SizedBox(
@@ -185,7 +192,7 @@ class _MenuViewState extends State<MenuView> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
-                                      authController.driverInResponse!.driverDetails!.firstName??"${authController.driverInResponse!.driverDetails!.lastName??""}",
+                                      authController.driverInResponse?.driverDetails?.firstName??"${authController.driverInResponse?.driverDetails?.lastName??""}",
                                       style: TextStyle(
                                         color: TColor.primaryTextW,
                                         fontSize: 16,
@@ -193,7 +200,7 @@ class _MenuViewState extends State<MenuView> {
                                     ),
 
                                     Text(
-                                      authController.driverInResponse!.driverDetails!.categoryName??"",
+                                      authController.driverInResponse?.driverDetails?.categoryName??"",
                                       style: TextStyle(
                                         color: TColor.primaryTextW,
                                         fontSize: 16,
@@ -243,6 +250,12 @@ class _MenuViewState extends State<MenuView> {
                             context.push(const DriverMyRidesView());
                           // }
 
+                        }),
+                    MenuRow(
+                        title: "Schedule Deliveries".tr,
+                        icon: "assets/img/sm_my_vehicle.png",
+                        onPressed: () {
+                            context.push(const ScheduleDeliveryList());
                         }),
 
                     Container(
@@ -519,14 +532,14 @@ class _MenuViewState extends State<MenuView> {
                         title: "Logout",
                         icon: "assets/img/logout.png",
                         onPressed: () async {
-                          final prefs = await SharedPreferences.getInstance();
-                          prefs.clear();
-                          Globs.udBoolSet(false, Globs.userLogin);
-                          Globs.udSet({}, Globs.userPayload);
                           authController.changeLoginStatus(
                             status: "offline",
                             context: context,
                           );
+                          final prefs = await SharedPreferences.getInstance();
+                          prefs.clear();
+                          Globs.udBoolSet(false, Globs.userLogin);
+                          Globs.udSet({}, Globs.userPayload);
                           Get.find<AuthController>().logoutUser();
 
                          // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const WelcomeView() ) , (route) => false);

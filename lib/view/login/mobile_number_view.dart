@@ -189,410 +189,412 @@ class _MobileNumberViewState extends State<MobileNumberView> {
         ),
       ),
       body: GetBuilder<AuthController>(
-        builder: (authController) =>
-         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: InkWell(
-                  onTap: () {
-                    showModalBottomSheet<void>(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (BuildContext context) {
-                          return Container(
-                              decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-                              child: Obx(() {
-                                return Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-                                      child: Container(
+        builder: (authController) => SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: MediaQuery.viewInsetsOf(context).bottom ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.topRight,
+                  child: InkWell(
+                    onTap: () {
+                      showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (BuildContext context) {
+                            return Container(
+                                decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+                                child: Obx(() {
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                                        child: Container(
+                                            decoration: BoxDecoration(
+                                                border: Border.all(color: const Color(0xffDCDCDC)),
+                                                borderRadius: BorderRadius.circular(15)),
+                                            child: RadioListTile(
+                                              title: Text('English'.tr),
+                                              activeColor: const Color(0xff014E70),
+                                              value: "English",
+                                              groupValue: authController.selectedLanguage.value,
+                                              onChanged: (value) {
+                                                locale = const Locale('en', 'US');
+                                                authController.selectedLanguage.value = value!;
+                                                updateLanguage("English");
+                                                setState(() {});
+                                              },
+                                            )),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                                        child: Container(
                                           decoration: BoxDecoration(
-                                              border: Border.all(color: const Color(0xffDCDCDC)),
-                                              borderRadius: BorderRadius.circular(15)),
+                                            border: Border.all(color: const Color(0xffDCDCDC)),
+                                            borderRadius: BorderRadius.circular(15),
+                                          ),
                                           child: RadioListTile(
-                                            title: Text('English'.tr),
+                                            title: Text('हिन्दी'.tr),
                                             activeColor: const Color(0xff014E70),
-                                            value: "English",
+                                            value: "Hindi",
                                             groupValue: authController.selectedLanguage.value,
                                             onChanged: (value) {
-                                              locale = const Locale('en', 'US');
+                                              locale = const Locale('hi', 'IN');
                                               authController.selectedLanguage.value = value!;
-                                              updateLanguage("English");
+                                              updateLanguage("Hindi");
                                               setState(() {});
                                             },
-                                          )),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: const Color(0xffDCDCDC)),
-                                          borderRadius: BorderRadius.circular(15),
-                                        ),
-                                        child: RadioListTile(
-                                          title: Text('हिन्दी'.tr),
-                                          activeColor: const Color(0xff014E70),
-                                          value: "Hindi",
-                                          groupValue: authController.selectedLanguage.value,
-                                          onChanged: (value) {
-                                            locale = const Locale('hi', 'IN');
-                                            authController.selectedLanguage.value = value!;
-                                            updateLanguage("Hindi");
-                                            setState(() {});
-                                          },
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 20, right: 20),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: const Color(0xffDCDCDC)),
-                                          borderRadius: BorderRadius.circular(15),
-                                        ),
-                                        child: RadioListTile(
-                                          title: Text('தமிழ்'.tr),
-                                          activeColor: const Color(0xff014E70),
-                                          value: "தமிழ்",
-                                          groupValue: authController.selectedLanguage.value,
-                                          onChanged: (value) {
-                                            locale = const Locale('ta', 'IN');
-                                            authController.selectedLanguage.value = value!;
-                                            updateLanguage("தமிழ்");
-                                            setState(() {});
-                                          },
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20, right: 20),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(color: const Color(0xffDCDCDC)),
+                                            borderRadius: BorderRadius.circular(15),
+                                          ),
+                                          child: RadioListTile(
+                                            title: Text('தமிழ்'.tr),
+                                            activeColor: const Color(0xff014E70),
+                                            value: "தமிழ்",
+                                            groupValue: authController.selectedLanguage.value,
+                                            onChanged: (value) {
+                                              locale = const Locale('ta', 'IN');
+                                              authController.selectedLanguage.value = value!;
+                                              updateLanguage("தமிழ்");
+                                              setState(() {});
+                                            },
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 20, right: 20),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: const Color(0xffDCDCDC)),
-                                          borderRadius: BorderRadius.circular(15),
-                                        ),
-                                        child: RadioListTile(
-                                          title: Text('বাংলা'.tr),
-                                          activeColor: const Color(0xff014E70),
-                                          value: "বাংলা",
-                                          groupValue: authController.selectedLanguage.value,
-                                          onChanged: (value) {
-                                            locale = const Locale('bn', 'BD');
-                                            authController.selectedLanguage.value = value!;
-                                            updateLanguage("বাংলা");
-                                            setState(() {});
-                                          },
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20, right: 20),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(color: const Color(0xffDCDCDC)),
+                                            borderRadius: BorderRadius.circular(15),
+                                          ),
+                                          child: RadioListTile(
+                                            title: Text('বাংলা'.tr),
+                                            activeColor: const Color(0xff014E70),
+                                            value: "বাংলা",
+                                            groupValue: authController.selectedLanguage.value,
+                                            onChanged: (value) {
+                                              locale = const Locale('bn', 'BD');
+                                              authController.selectedLanguage.value = value!;
+                                              updateLanguage("বাংলা");
+                                              setState(() {});
+                                            },
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 20, right: 20),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: const Color(0xffDCDCDC)),
-                                          borderRadius: BorderRadius.circular(15),
-                                        ),
-                                        child: RadioListTile(
-                                          title: Text('తెలుగు'.tr),
-                                          activeColor: const Color(0xff014E70),
-                                          value: "తెలుగు",
-                                          groupValue: authController.selectedLanguage.value,
-                                          onChanged: (value) {
-                                            locale = const Locale('te', 'IN');
-                                            authController.selectedLanguage.value = value!;
-                                            updateLanguage("తెలుగు");
-                                            setState(() {});
-                                          },
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20, right: 20),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(color: const Color(0xffDCDCDC)),
+                                            borderRadius: BorderRadius.circular(15),
+                                          ),
+                                          child: RadioListTile(
+                                            title: Text('తెలుగు'.tr),
+                                            activeColor: const Color(0xff014E70),
+                                            value: "తెలుగు",
+                                            groupValue: authController.selectedLanguage.value,
+                                            onChanged: (value) {
+                                              locale = const Locale('te', 'IN');
+                                              authController.selectedLanguage.value = value!;
+                                              updateLanguage("తెలుగు");
+                                              setState(() {});
+                                            },
+                                          ),
                                         ),
                                       ),
-                                    ),
 
-                                    // const SizedBox(
-                                    //   height: 10,
-                                    // ),
-                                    // Padding(
-                                    //     padding: const EdgeInsets.only(left: 20, right: 20),
-                                    //     child: Container(
-                                    //         decoration: BoxDecoration(
-                                    //             border: Border.all(color: const Color(0xffDCDCDC)),
-                                    //             borderRadius: BorderRadius.circular(15)),
-                                    //         child: RadioListTile(
-                                    //           title: const Text('Several languages'),
-                                    //           activeColor: const Color(0xff014E70),
-                                    //           value: "Several languages",
-                                    //           groupValue: language.value,
-                                    //           onChanged: (value) {
-                                    //             print(selectedLAnguage.value.toString());
-                                    //             setState(() {
-                                    //               language.value = value!;
-                                    //             });
-                                    //           },
-                                    //         ))),
-                                    SizedBox(
-                                      height: 20,
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        Get.updateLocale(locale);
-                                        Get.back();
-                                      },
-                                      child: Center(
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                                          child: Container(
-                                            height: 56,
-                                            width: MediaQuery.sizeOf(context).width,
-                                            color: Color(0xFFEC6C0C),
-                                            child: Center(
-                                              child: Text(
-                                                'Apply'.tr,
-                                                style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.white),
+                                      // const SizedBox(
+                                      //   height: 10,
+                                      // ),
+                                      // Padding(
+                                      //     padding: const EdgeInsets.only(left: 20, right: 20),
+                                      //     child: Container(
+                                      //         decoration: BoxDecoration(
+                                      //             border: Border.all(color: const Color(0xffDCDCDC)),
+                                      //             borderRadius: BorderRadius.circular(15)),
+                                      //         child: RadioListTile(
+                                      //           title: const Text('Several languages'),
+                                      //           activeColor: const Color(0xff014E70),
+                                      //           value: "Several languages",
+                                      //           groupValue: language.value,
+                                      //           onChanged: (value) {
+                                      //             print(selectedLAnguage.value.toString());
+                                      //             setState(() {
+                                      //               language.value = value!;
+                                      //             });
+                                      //           },
+                                      //         ))),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Get.updateLocale(locale);
+                                          Get.back();
+                                        },
+                                        child: Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+                                            child: Container(
+                                              height: 56,
+                                              width: MediaQuery.sizeOf(context).width,
+                                              color: Color(0xFFEC6C0C),
+                                              child: Center(
+                                                child: Text(
+                                                  'Apply'.tr,
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w500,
+                                                      color: Colors.white),
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    )
-                                  ],
-                                );
-                              }));
-                        });
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Icon(Icons.language,),
-                      Text('Language'.tr,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 20,),
-              Image.asset("assets/img/triptoll_name.png",height: 120,),
-              Text(
-                "Login Driver".tr,
-                style: TextStyle(
-                    color: TColor.primaryText,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  InkWell(
-                    onTap: () async {
-                      // final code =
-                      //     await countryCodePicker.showPicker(context: context);
-                      // if (code != null) {
-                      //   countryCode = code;
-                      //   setState(() {});
-                      // }
+                                      )
+                                    ],
+                                  );
+                                }));
+                          });
                     },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        SizedBox(
-                          width: 30,
-                          height: 20,
-                          child: countryCode.flagImage(),
-                        ),
-                        Text(
-                          "  ${countryCode.dialCode}",
-                          style:
-                          TextStyle(color: TColor.primaryText, fontSize: 16),
+                        Icon(Icons.language,),
+                        Text('Language'.tr,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: txtMobile,
-                      keyboardType: TextInputType.phone,
-                      decoration:  InputDecoration(
-                        contentPadding: EdgeInsets.zero,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        // hintText: "9876543210",
-                        hintText: "Enter Your Mobile Number".tr,
-                        hintStyle: TextStyle(color: Colors.grey)
+                ),
+                SizedBox(height: 20,),
+                Image.asset("assets/img/triptoll_name.png",height: 120,),
+                Text(
+                  "Login Driver".tr,
+                  style: TextStyle(
+                      color: TColor.primaryText,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: () async {
+                        // final code =
+                        //     await countryCodePicker.showPicker(context: context);
+                        // if (code != null) {
+                        //   countryCode = code;
+                        //   setState(() {});
+                        // }
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 30,
+                            height: 20,
+                            child: countryCode.flagImage(),
+                          ),
+                          Text(
+                            "  ${countryCode.dialCode}",
+                            style:
+                            TextStyle(color: TColor.primaryText, fontSize: 16),
+                          ),
+                        ],
                       ),
                     ),
-                  )
-                ],
-              ),
-              const Divider(),
-
-              TextField(
-                controller: passwordMobile,
-                keyboardType: TextInputType.text,
-                obscureText: _obscureText,
-                decoration:  InputDecoration(
-                  contentPadding: EdgeInsets.zero,
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  hintText: "Password".tr,
-                  hintStyle: TextStyle(color: Colors.grey),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
+                    const SizedBox(
+                      width: 15,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureText = !_obscureText; // toggle password visibility
-                      });
+                    Expanded(
+                      child: TextField(
+                        controller: txtMobile,
+                        keyboardType: TextInputType.phone,
+                        decoration:  InputDecoration(
+                          contentPadding: EdgeInsets.zero,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          // hintText: "9876543210",
+                          hintText: "Enter Your Mobile Number".tr,
+                          hintStyle: TextStyle(color: Colors.grey)
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                const Divider(),
+
+                TextField(
+                  controller: passwordMobile,
+                  keyboardType: TextInputType.text,
+                  obscureText: _obscureText,
+                  decoration:  InputDecoration(
+                    contentPadding: EdgeInsets.zero,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    hintText: "Password".tr,
+                    hintStyle: TextStyle(color: Colors.grey),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText; // toggle password visibility
+                        });
+                      },
+                    ),
+
+                  ),
+                ),
+                const Divider(),
+                const SizedBox(
+                  height: 8,
+                ),
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () {
+                      // TODO: Navigate to forget password screen
+                      Get.to(Forgot());
+                      print("Forget Password tapped");
                     },
+                    child: Text(
+                      "Forgot Password?".tr,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Roboto',
+                        color: TColor.primary,
+                        // decoration: TextDecoration.underline,
+                        // decorationColor: AppColors.primaryGradient
+                      ),
+                    ),
                   ),
-
                 ),
-              ),
-              const Divider(),
-              const SizedBox(
-                height: 8,
-              ),
 
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () {
-                    // TODO: Navigate to forget password screen
-                    Get.to(Forgot());
-                    print("Forget Password tapped");
+                SizedBox(height: 8,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "By continuing, I confirm that i have read & agree to the".tr,
+                      style: TextStyle(
+                        color: TColor.secondaryText,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Terms & conditions".tr,
+                      style: TextStyle(
+                        color: TColor.primaryText,
+                        fontSize: 11,
+                      ),
+                    ),
+                    Text(
+                      " and ".tr,
+                      style: TextStyle(
+                        color: TColor.secondaryText,
+                        fontSize: 11,
+                      ),
+                    ),
+                    Text(
+                      "Privacy policy".tr,
+                      style: TextStyle(
+                        color: TColor.primaryText,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                RoundButton(
+                  onPressed: () {
+                    if(txtMobile.text.isEmpty || txtMobile.text.length!=10){
+                      mdShowAlert("Fail".tr, "Enter valid mobile no.".tr, () {});
+                    }
+                    else if(passwordMobile.text.isEmpty){
+                      mdShowAlert("Fail".tr, "Enter password".tr, () {});
+                    }
+                    else {
+                      authController.loginFunction(txtMobile.text, passwordMobile.text,authController.deviceId,context);
+                      Future.delayed(Duration(seconds: 5),() {
+                        authController.checkDriverDevice(authController.deviceId);
+                      },);
+
+                    }
+
+                    //  context.push(  OTPView(number: txtMobile.text, code: countryCode.dialCode) );
                   },
-                  child: Text(
-                    "Forgot Password?".tr,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'Roboto',
-                      color: TColor.primary,
-                      // decoration: TextDecoration.underline,
-                      // decorationColor: AppColors.primaryGradient
-                    ),
-                  ),
+                  title: "Login as Driver".tr,
                 ),
-              ),
 
-              SizedBox(height: 8,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "By continuing, I confirm that i have read & agree to the".tr,
-                    style: TextStyle(
-                      color: TColor.secondaryText,
-                      fontSize: 11,
-                    ),
+
+
+                InkWell(
+                  onTap: (){
+
+                    Get.to(SignUpView());
+
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                    child: Text("Create Account".tr,style: TextStyle(fontSize: 16,color: TColor.primary,decoration: TextDecoration.underline),),
                   ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Terms & conditions".tr,
-                    style: TextStyle(
-                      color: TColor.primaryText,
-                      fontSize: 11,
-                    ),
-                  ),
-                  Text(
-                    " and ".tr,
-                    style: TextStyle(
-                      color: TColor.secondaryText,
-                      fontSize: 11,
-                    ),
-                  ),
-                  Text(
-                    "Privacy policy".tr,
-                    style: TextStyle(
-                      color: TColor.primaryText,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              RoundButton(
-                onPressed: () {
-                  if(txtMobile.text.isEmpty || txtMobile.text.length!=10){
-                    mdShowAlert("Fail".tr, "Enter valid mobile no.".tr, () {});
-                  }
-                  else if(passwordMobile.text.isEmpty){
-                    mdShowAlert("Fail".tr, "Enter password".tr, () {});
-                  }
-                  else {
-                    authController.loginFunction(txtMobile.text, passwordMobile.text,authController.deviceId);
-                    Future.delayed(Duration(seconds: 5),() {
-                      authController.checkDriverDevice(authController.deviceId);
-                    },);
+                )
 
-                  }
-
-                  //  context.push(  OTPView(number: txtMobile.text, code: countryCode.dialCode) );
-                },
-                title: "Login as Driver".tr,
-              ),
-
-
-
-              InkWell(
-                onTap: (){
-
-                  Get.to(SignUpView());
-
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15.0),
-                  child: Text("Create Account".tr,style: TextStyle(fontSize: 16,color: TColor.primary,decoration: TextDecoration.underline),),
-                ),
-              )
-
-              // const SizedBox(
-              //   height: 15,
-              // ),
-              // RoundButton(
-              //   onPressed: () {
-              //     context.push(  OTPView(number: txtMobile.text, code: countryCode.dialCode, isDriver: false,) );
-              //   },
-              //   title: "Login AS USER",
-              // )
-            ],
+                // const SizedBox(
+                //   height: 15,
+                // ),
+                // RoundButton(
+                //   onPressed: () {
+                //     context.push(  OTPView(number: txtMobile.text, code: countryCode.dialCode, isDriver: false,) );
+                //   },
+                //   title: "Login AS USER",
+                // )
+              ],
+            ),
           ),
         ),
       ),
