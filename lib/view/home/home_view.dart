@@ -790,7 +790,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               ),
               Get.find<AuthController>().getMyScheduleOrderModel.value.data != null ?
               Positioned(
-                top: 120,
+                top: 150,
                 left: 16,
                 right: 16,
                 child: Container(
@@ -866,15 +866,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
                                 color: colors[index],
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Column(
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  SizedBox(
-                                    height: 5,
-                                  ),
+
                                   Text(
                                     formattedDate,
                                     style: const TextStyle(

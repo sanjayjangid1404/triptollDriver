@@ -71,8 +71,6 @@ class _ScheduleDeliveryListState extends State<ScheduleDeliveryList>
         controller: _tabController,
         children: [
           ScheduledOrdersList(),
-
-          /// TAB 1 – Accepted
           AcceptedScheduledOrdersList(),
         ],
       ),
@@ -197,14 +195,14 @@ class ScheduledOrderCard extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: isAccepted
-                      ? Colors.green.shade100
+                      ? Colors.orange.shade100
                       : Colors.orange.shade100,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   isAccepted ? "Accepted" : "Pending",
                   style: TextStyle(
-                    color: isAccepted ? Colors.green : Colors.orange,
+                    color: isAccepted ? Colors.orange : Colors.orange,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -289,9 +287,10 @@ class ScheduledOrderCard extends StatelessWidget {
                     },
                     child: Text(item.contactNumber ?? '',
                                     style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.blue,
                       fontWeight: FontWeight.w500,
-                      fontSize: 16
+                      fontSize: 16,
+                      decoration: TextDecoration.underline
                                     ),
                                   ),
                   )),
