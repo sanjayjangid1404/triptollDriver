@@ -757,7 +757,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blueGrey,
+                    color: Color(0xFF0175b0),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Column(
@@ -813,11 +813,6 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                             DateFormat("HH:mm:ss").parse(item.scheduleTime!);
                             formattedTime = DateFormat('hh:mm a').format(time);
                           }
-                          final colors = [
-                            const Color(0xFF9E4B2F),
-                            const Color(0xFFCC6A4A),
-                          ];
-
                           return GestureDetector(
                             onTap: (){
                               Get.to(() => ScheduleDeliveryList(isClick: true,));
@@ -826,7 +821,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               margin: const EdgeInsets.only(bottom: 6),
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
-                                color: colors[index],
+                                color:  Color(0xFFe85900),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
