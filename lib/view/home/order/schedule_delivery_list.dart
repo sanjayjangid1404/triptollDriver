@@ -8,7 +8,8 @@ import '../../../common/appContants.dart';
 import '../../../controller/authController.dart';
 
 class ScheduleDeliveryList extends StatefulWidget {
-  const ScheduleDeliveryList({super.key});
+  bool isClick = false;
+   ScheduleDeliveryList({super.key,required this.isClick});
 
   @override
   State<ScheduleDeliveryList> createState() => _ScheduleDeliveryListState();
@@ -24,6 +25,12 @@ class _ScheduleDeliveryListState extends State<ScheduleDeliveryList>
     super.initState();
 
     _tabController = TabController(length: 2, vsync: this);
+    if(widget.isClick == true){
+      _tabController.index = 1;
+      setState(() {
+
+      });
+    }
      Get.find<AuthController>().getScheduledOrderFun();
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;

@@ -56,57 +56,57 @@
 
 class BookingDetailsResponse {
   BookingDetailsResponse({
-      String? id, 
-      String? orderId, 
-      String? cusId, 
-      String? driverId, 
+     dynamic id, 
+     dynamic orderId, 
+     dynamic cusId, 
+     dynamic driverId, 
       dynamic asignedDriver, 
-      String? categoryId, 
-      String? vehicleId, 
-      String? rate, 
-      String? amount, 
-      String? totalAmount, 
-      String? stopCharge, 
-      String? bookingDate, 
-      String? status, 
-      String? readStatus, 
+     dynamic categoryId, 
+     dynamic vehicleId, 
+     dynamic rate, 
+     dynamic amount, 
+     dynamic totalAmount, 
+     dynamic stopCharge, 
+     dynamic bookingDate, 
+     dynamic status, 
+     dynamic readStatus, 
       dynamic acceptTime, 
       dynamic closeTime, 
-      String? discount, 
-      String? discountPercentage, 
-      String? paymentType, 
-      String? trnId, 
-      String? pickupLat, 
-      String? pickupLong, 
-      String? pickupAddress, 
-      String? senderName, 
-      String? senderContactNumber, 
-      String? apartmentType, 
-      String? dropLat, 
-      String? dropLong, 
-      String? dropAddress, 
-      String? receiverName, 
-      String? receiverContactNumber, 
+     dynamic discount, 
+     dynamic discountPercentage, 
+     dynamic paymentType, 
+     dynamic trnId, 
+     dynamic pickupLat, 
+     dynamic pickupLong, 
+     dynamic pickupAddress, 
+     dynamic senderName, 
+     dynamic senderContactNumber, 
+     dynamic apartmentType, 
+     dynamic dropLat, 
+     dynamic dropLong, 
+     dynamic dropAddress, 
+     dynamic receiverName, 
+     dynamic receiverContactNumber, 
       dynamic reason, 
       dynamic additionalComment, 
-      String? startTrip, 
-      String? addDate, 
-      String? contactNumber, 
-      String? lat, 
-      String? long, 
-      String? firstName, 
-      String? lastName, 
-      String? gender, 
-      String? vehicleName, 
-      String? model, 
-      String? rcNo, 
-      String? weight, 
-      String? weightType, 
-      String? categoryName, 
-      String? vehicleImg, 
-      String? idProofImg, 
-      String? idProofBackImg, 
-      String? categoryImg, 
+     dynamic startTrip, 
+     dynamic addDate, 
+     dynamic contactNumber, 
+     dynamic lat, 
+     dynamic long, 
+     dynamic firstName, 
+     dynamic lastName, 
+     dynamic gender, 
+     dynamic vehicleName, 
+     dynamic model, 
+     dynamic rcNo, 
+     dynamic weight, 
+     dynamic weightType, 
+     dynamic categoryName, 
+     dynamic vehicleImg, 
+     dynamic idProofImg, 
+     dynamic idProofBackImg, 
+     dynamic categoryImg, 
       dynamic driverImg, 
       dynamic review, 
       dynamic rating, 
@@ -230,112 +230,112 @@ class BookingDetailsResponse {
     //   });
     // }
   }
-  String? _id;
-  String? _orderId;
-  String? _cusId;
-  String? _driverId;
+ dynamic _id;
+ dynamic _orderId;
+ dynamic _cusId;
+ dynamic _driverId;
   dynamic _asignedDriver;
-  String? _categoryId;
-  String? _vehicleId;
-  String? _rate;
-  String? _amount;
-  String? _totalAmount;
-  String? _stopCharge;
-  String? _bookingDate;
-  String? _status;
-  String? _readStatus;
+ dynamic _categoryId;
+ dynamic _vehicleId;
+ dynamic _rate;
+ dynamic _amount;
+ dynamic _totalAmount;
+ dynamic _stopCharge;
+ dynamic _bookingDate;
+ dynamic _status;
+ dynamic _readStatus;
   dynamic _acceptTime;
   dynamic _closeTime;
-  String? _discount;
-  String? _discountPercentage;
-  String? _paymentType;
-  String? _trnId;
-  String? _pickupLat;
-  String? _pickupLong;
-  String? _pickupAddress;
-  String? _senderName;
-  String? _senderContactNumber;
-  String? _apartmentType;
-  String? _dropLat;
-  String? _dropLong;
-  String? _dropAddress;
-  String? _receiverName;
-  String? _receiverContactNumber;
+ dynamic _discount;
+ dynamic _discountPercentage;
+ dynamic _paymentType;
+ dynamic _trnId;
+ dynamic _pickupLat;
+ dynamic _pickupLong;
+ dynamic _pickupAddress;
+ dynamic _senderName;
+ dynamic _senderContactNumber;
+ dynamic _apartmentType;
+ dynamic _dropLat;
+ dynamic _dropLong;
+ dynamic _dropAddress;
+ dynamic _receiverName;
+ dynamic _receiverContactNumber;
   dynamic _reason;
   dynamic _additionalComment;
-  String? _startTrip;
-  String? _addDate;
-  String? _contactNumber;
-  String? _lat;
-  String? _long;
-  String? _firstName;
-  String? _lastName;
-  String? _gender;
-  String? _vehicleName;
-  String? _model;
-  String? _rcNo;
-  String? _weight;
-  String? _weightType;
-  String? _categoryName;
-  String? _vehicleImg;
-  String? _idProofImg;
-  String? _idProofBackImg;
-  String? _categoryImg;
+ dynamic _startTrip;
+ dynamic _addDate;
+ dynamic _contactNumber;
+ dynamic _lat;
+ dynamic _long;
+ dynamic _firstName;
+ dynamic _lastName;
+ dynamic _gender;
+ dynamic _vehicleName;
+ dynamic _model;
+ dynamic _rcNo;
+ dynamic _weight;
+ dynamic _weightType;
+ dynamic _categoryName;
+ dynamic _vehicleImg;
+ dynamic _idProofImg;
+ dynamic _idProofBackImg;
+ dynamic _categoryImg;
   dynamic _driverImg;
   dynamic _review;
   dynamic _rating;
   List<dynamic>? _allDropAddress;
-BookingDetailsResponse copyWith({  String? id,
-  String? orderId,
-  String? cusId,
-  String? driverId,
+BookingDetailsResponse copyWith({ dynamic id,
+ dynamic orderId,
+ dynamic cusId,
+ dynamic driverId,
   dynamic asignedDriver,
-  String? categoryId,
-  String? vehicleId,
-  String? rate,
-  String? amount,
-  String? totalAmount,
-  String? stopCharge,
-  String? bookingDate,
-  String? status,
-  String? readStatus,
+ dynamic categoryId,
+ dynamic vehicleId,
+ dynamic rate,
+ dynamic amount,
+ dynamic totalAmount,
+ dynamic stopCharge,
+ dynamic bookingDate,
+ dynamic status,
+ dynamic readStatus,
   dynamic acceptTime,
   dynamic closeTime,
-  String? discount,
-  String? discountPercentage,
-  String? paymentType,
-  String? trnId,
-  String? pickupLat,
-  String? pickupLong,
-  String? pickupAddress,
-  String? senderName,
-  String? senderContactNumber,
-  String? apartmentType,
-  String? dropLat,
-  String? dropLong,
-  String? dropAddress,
-  String? receiverName,
-  String? receiverContactNumber,
+ dynamic discount,
+ dynamic discountPercentage,
+ dynamic paymentType,
+ dynamic trnId,
+ dynamic pickupLat,
+ dynamic pickupLong,
+ dynamic pickupAddress,
+ dynamic senderName,
+ dynamic senderContactNumber,
+ dynamic apartmentType,
+ dynamic dropLat,
+ dynamic dropLong,
+ dynamic dropAddress,
+ dynamic receiverName,
+ dynamic receiverContactNumber,
   dynamic reason,
   dynamic additionalComment,
-  String? startTrip,
-  String? addDate,
-  String? contactNumber,
-  String? lat,
-  String? long,
-  String? firstName,
-  String? lastName,
-  String? gender,
-  String? vehicleName,
-  String? model,
-  String? rcNo,
-  String? weight,
-  String? weightType,
-  String? categoryName,
-  String? vehicleImg,
-  String? idProofImg,
-  String? idProofBackImg,
-  String? categoryImg,
+ dynamic startTrip,
+ dynamic addDate,
+ dynamic contactNumber,
+ dynamic lat,
+ dynamic long,
+ dynamic firstName,
+ dynamic lastName,
+ dynamic gender,
+ dynamic vehicleName,
+ dynamic model,
+ dynamic rcNo,
+ dynamic weight,
+ dynamic weightType,
+ dynamic categoryName,
+ dynamic vehicleImg,
+ dynamic idProofImg,
+ dynamic idProofBackImg,
+ dynamic categoryImg,
   dynamic driverImg,
   dynamic review,
   dynamic rating,
@@ -396,57 +396,57 @@ BookingDetailsResponse copyWith({  String? id,
   rating: rating ?? _rating,
   allDropAddress: allDropAddress ?? _allDropAddress,
 );
-  String? get id => _id;
-  String? get orderId => _orderId;
-  String? get cusId => _cusId;
-  String? get driverId => _driverId;
+ dynamic get id => _id;
+ dynamic get orderId => _orderId;
+ dynamic get cusId => _cusId;
+ dynamic get driverId => _driverId;
   dynamic get asignedDriver => _asignedDriver;
-  String? get categoryId => _categoryId;
-  String? get vehicleId => _vehicleId;
-  String? get rate => _rate;
-  String? get amount => _amount;
-  String? get totalAmount => _totalAmount;
-  String? get stopCharge => _stopCharge;
-  String? get bookingDate => _bookingDate;
-  String? get status => _status;
-  String? get readStatus => _readStatus;
+ dynamic get categoryId => _categoryId;
+ dynamic get vehicleId => _vehicleId;
+ dynamic get rate => _rate;
+ dynamic get amount => _amount;
+ dynamic get totalAmount => _totalAmount;
+ dynamic get stopCharge => _stopCharge;
+ dynamic get bookingDate => _bookingDate;
+ dynamic get status => _status;
+ dynamic get readStatus => _readStatus;
   dynamic get acceptTime => _acceptTime;
   dynamic get closeTime => _closeTime;
-  String? get discount => _discount;
-  String? get discountPercentage => _discountPercentage;
-  String? get paymentType => _paymentType;
-  String? get trnId => _trnId;
-  String? get pickupLat => _pickupLat;
-  String? get pickupLong => _pickupLong;
-  String? get pickupAddress => _pickupAddress;
-  String? get senderName => _senderName;
-  String? get senderContactNumber => _senderContactNumber;
-  String? get apartmentType => _apartmentType;
-  String? get dropLat => _dropLat;
-  String? get dropLong => _dropLong;
-  String? get dropAddress => _dropAddress;
-  String? get receiverName => _receiverName;
-  String? get receiverContactNumber => _receiverContactNumber;
+ dynamic get discount => _discount;
+ dynamic get discountPercentage => _discountPercentage;
+ dynamic get paymentType => _paymentType;
+ dynamic get trnId => _trnId;
+ dynamic get pickupLat => _pickupLat;
+ dynamic get pickupLong => _pickupLong;
+ dynamic get pickupAddress => _pickupAddress;
+ dynamic get senderName => _senderName;
+ dynamic get senderContactNumber => _senderContactNumber;
+ dynamic get apartmentType => _apartmentType;
+ dynamic get dropLat => _dropLat;
+ dynamic get dropLong => _dropLong;
+ dynamic get dropAddress => _dropAddress;
+ dynamic get receiverName => _receiverName;
+ dynamic get receiverContactNumber => _receiverContactNumber;
   dynamic get reason => _reason;
   dynamic get additionalComment => _additionalComment;
-  String? get startTrip => _startTrip;
-  String? get addDate => _addDate;
-  String? get contactNumber => _contactNumber;
-  String? get lat => _lat;
-  String? get long => _long;
-  String? get firstName => _firstName;
-  String? get lastName => _lastName;
-  String? get gender => _gender;
-  String? get vehicleName => _vehicleName;
-  String? get model => _model;
-  String? get rcNo => _rcNo;
-  String? get weight => _weight;
-  String? get weightType => _weightType;
-  String? get categoryName => _categoryName;
-  String? get vehicleImg => _vehicleImg;
-  String? get idProofImg => _idProofImg;
-  String? get idProofBackImg => _idProofBackImg;
-  String? get categoryImg => _categoryImg;
+ dynamic get startTrip => _startTrip;
+ dynamic get addDate => _addDate;
+ dynamic get contactNumber => _contactNumber;
+ dynamic get lat => _lat;
+ dynamic get long => _long;
+ dynamic get firstName => _firstName;
+ dynamic get lastName => _lastName;
+ dynamic get gender => _gender;
+ dynamic get vehicleName => _vehicleName;
+ dynamic get model => _model;
+ dynamic get rcNo => _rcNo;
+ dynamic get weight => _weight;
+ dynamic get weightType => _weightType;
+ dynamic get categoryName => _categoryName;
+ dynamic get vehicleImg => _vehicleImg;
+ dynamic get idProofImg => _idProofImg;
+ dynamic get idProofBackImg => _idProofBackImg;
+ dynamic get categoryImg => _categoryImg;
   dynamic get driverImg => _driverImg;
   dynamic get review => _review;
   dynamic get rating => _rating;

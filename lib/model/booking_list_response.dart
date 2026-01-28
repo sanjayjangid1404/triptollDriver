@@ -1,330 +1,238 @@
-/// id : "665"
-/// order_id : "604832511236"
-/// cus_id : "309"
-/// driver_id : "338"
-/// asigned_driver : null
-/// category_id : "114"
-/// vehicle_id : "0"
-/// rate : "0"
-/// amount : "42"
-/// total_amount : "42"
-/// stop_charge : "0"
-/// booking_date : "2025-08-11 11:08:58"
-/// order_status : "paid"
-/// read_status : "new"
-/// accept_time : "2025-08-11 11:13:41"
-/// close_time : null
-/// discount : "0"
-/// discount_percentage : "0"
-/// payment_type : "cash"
-/// trn_id : "81523552"
-/// pickup_lat : "26.844379797008706"
-/// pickup_long : "75.83841316401958"
-/// pickup_address : "Jaipur, Ghat Ki Guni, Jaipur, India"
-/// sender_name : "Mohan S"
-/// sender_contact_number : "9266809133"
-/// apartment_type : ""
-/// drop_lat : "26.83702775763531"
-/// drop_long : "75.8339362218976"
-/// drop_address : "538, Durgapura, Jaipur, India"
-/// receiver_name : "ffr"
-/// receiver_contact_number : "9565958585"
-/// reason : null
-/// additional_comment : null
-/// start_trip : "yes"
-/// add_date : "2025-08-11 11:08:58"
-
 class BookingListResponse {
-  BookingListResponse({
-      String? id, 
-      String? orderId, 
-      String? cusId, 
-      String? driverId, 
-      dynamic asignedDriver, 
-      String? categoryId, 
-      String? vehicleId, 
-      String? rate, 
-      String? amount, 
-      String? totalAmount, 
-      String? stopCharge, 
-      String? bookingDate, 
-      String? orderStatus, 
-      String? readStatus, 
-      String? acceptTime, 
-      dynamic closeTime, 
-      String? discount, 
-      String? discountPercentage, 
-      String? paymentType, 
-      String? trnId, 
-      String? pickupLat, 
-      String? pickupLong, 
-      String? pickupAddress, 
-      String? senderName, 
-      String? senderContactNumber, 
-      String? apartmentType, 
-      String? dropLat, 
-      String? dropLong, 
-      String? dropAddress, 
-      String? receiverName, 
-      String? receiverContactNumber, 
-      dynamic reason, 
-      dynamic additionalComment, 
-      String? startTrip, 
-      String? addDate,}){
-    _id = id;
-    _orderId = orderId;
-    _cusId = cusId;
-    _driverId = driverId;
-    _asignedDriver = asignedDriver;
-    _categoryId = categoryId;
-    _vehicleId = vehicleId;
-    _rate = rate;
-    _amount = amount;
-    _totalAmount = totalAmount;
-    _stopCharge = stopCharge;
-    _bookingDate = bookingDate;
-    _orderStatus = orderStatus;
-    _readStatus = readStatus;
-    _acceptTime = acceptTime;
-    _closeTime = closeTime;
-    _discount = discount;
-    _discountPercentage = discountPercentage;
-    _paymentType = paymentType;
-    _trnId = trnId;
-    _pickupLat = pickupLat;
-    _pickupLong = pickupLong;
-    _pickupAddress = pickupAddress;
-    _senderName = senderName;
-    _senderContactNumber = senderContactNumber;
-    _apartmentType = apartmentType;
-    _dropLat = dropLat;
-    _dropLong = dropLong;
-    _dropAddress = dropAddress;
-    _receiverName = receiverName;
-    _receiverContactNumber = receiverContactNumber;
-    _reason = reason;
-    _additionalComment = additionalComment;
-    _startTrip = startTrip;
-    _addDate = addDate;
-}
+  bool? status;
+  List<BookingListResponseData>? data;
 
-  BookingListResponse.fromJson(dynamic json) {
-    _id = json['id'];
-    _orderId = json['order_id'];
-    _cusId = json['cus_id'];
-    _driverId = json['driver_id'];
-    _asignedDriver = json['asigned_driver'];
-    _categoryId = json['category_id'];
-    _vehicleId = json['vehicle_id'];
-    _rate = json['rate'];
-    _amount = json['amount'];
-    _totalAmount = json['total_amount'];
-    _stopCharge = json['stop_charge'];
-    _bookingDate = json['booking_date'];
-    _orderStatus = json['order_status'];
-    _readStatus = json['read_status'];
-    _acceptTime = json['accept_time'];
-    _closeTime = json['close_time'];
-    _discount = json['discount'];
-    _discountPercentage = json['discount_percentage'];
-    _paymentType = json['payment_type'];
-    _trnId = json['trn_id'];
-    _pickupLat = json['pickup_lat'];
-    _pickupLong = json['pickup_long'];
-    _pickupAddress = json['pickup_address'];
-    _senderName = json['sender_name'];
-    _senderContactNumber = json['sender_contact_number'];
-    _apartmentType = json['apartment_type'];
-    _dropLat = json['drop_lat'];
-    _dropLong = json['drop_long'];
-    _dropAddress = json['drop_address'];
-    _receiverName = json['receiver_name'];
-    _receiverContactNumber = json['receiver_contact_number'];
-    _reason = json['reason'];
-    _additionalComment = json['additional_comment'];
-    _startTrip = json['start_trip'];
-    _addDate = json['add_date'];
+  BookingListResponse({this.status, this.data});
+
+  BookingListResponse.fromJson(Map<String, dynamic> json) {
+    status = json['status'];
+    if (json['data'] != null) {
+      data = <BookingListResponseData>[];
+      json['data'].forEach((v) {
+        data!.add(new BookingListResponseData.fromJson(v));
+      });
+    }
   }
-  String? _id;
-  String? _orderId;
-  String? _cusId;
-  String? _driverId;
-  dynamic _asignedDriver;
-  String? _categoryId;
-  String? _vehicleId;
-  String? _rate;
-  String? _amount;
-  String? _totalAmount;
-  String? _stopCharge;
-  String? _bookingDate;
-  String? _orderStatus;
-  String? _readStatus;
-  String? _acceptTime;
-  dynamic _closeTime;
-  String? _discount;
-  String? _discountPercentage;
-  String? _paymentType;
-  String? _trnId;
-  String? _pickupLat;
-  String? _pickupLong;
-  String? _pickupAddress;
-  String? _senderName;
-  String? _senderContactNumber;
-  String? _apartmentType;
-  String? _dropLat;
-  String? _dropLong;
-  String? _dropAddress;
-  String? _receiverName;
-  String? _receiverContactNumber;
-  dynamic _reason;
-  dynamic _additionalComment;
-  String? _startTrip;
-  String? _addDate;
-BookingListResponse copyWith({  String? id,
-  String? orderId,
-  String? cusId,
-  String? driverId,
-  dynamic asignedDriver,
-  String? categoryId,
-  String? vehicleId,
-  String? rate,
-  String? amount,
-  String? totalAmount,
-  String? stopCharge,
-  String? bookingDate,
-  String? orderStatus,
-  String? readStatus,
-  String? acceptTime,
-  dynamic closeTime,
-  String? discount,
-  String? discountPercentage,
-  String? paymentType,
-  String? trnId,
-  String? pickupLat,
-  String? pickupLong,
-  String? pickupAddress,
-  String? senderName,
-  String? senderContactNumber,
-  String? apartmentType,
-  String? dropLat,
-  String? dropLong,
-  String? dropAddress,
-  String? receiverName,
-  String? receiverContactNumber,
-  dynamic reason,
-  dynamic additionalComment,
-  String? startTrip,
-  String? addDate,
-}) => BookingListResponse(  id: id ?? _id,
-  orderId: orderId ?? _orderId,
-  cusId: cusId ?? _cusId,
-  driverId: driverId ?? _driverId,
-  asignedDriver: asignedDriver ?? _asignedDriver,
-  categoryId: categoryId ?? _categoryId,
-  vehicleId: vehicleId ?? _vehicleId,
-  rate: rate ?? _rate,
-  amount: amount ?? _amount,
-  totalAmount: totalAmount ?? _totalAmount,
-  stopCharge: stopCharge ?? _stopCharge,
-  bookingDate: bookingDate ?? _bookingDate,
-  orderStatus: orderStatus ?? _orderStatus,
-  readStatus: readStatus ?? _readStatus,
-  acceptTime: acceptTime ?? _acceptTime,
-  closeTime: closeTime ?? _closeTime,
-  discount: discount ?? _discount,
-  discountPercentage: discountPercentage ?? _discountPercentage,
-  paymentType: paymentType ?? _paymentType,
-  trnId: trnId ?? _trnId,
-  pickupLat: pickupLat ?? _pickupLat,
-  pickupLong: pickupLong ?? _pickupLong,
-  pickupAddress: pickupAddress ?? _pickupAddress,
-  senderName: senderName ?? _senderName,
-  senderContactNumber: senderContactNumber ?? _senderContactNumber,
-  apartmentType: apartmentType ?? _apartmentType,
-  dropLat: dropLat ?? _dropLat,
-  dropLong: dropLong ?? _dropLong,
-  dropAddress: dropAddress ?? _dropAddress,
-  receiverName: receiverName ?? _receiverName,
-  receiverContactNumber: receiverContactNumber ?? _receiverContactNumber,
-  reason: reason ?? _reason,
-  additionalComment: additionalComment ?? _additionalComment,
-  startTrip: startTrip ?? _startTrip,
-  addDate: addDate ?? _addDate,
-);
-  String? get id => _id;
-  String? get orderId => _orderId;
-  String? get cusId => _cusId;
-  String? get driverId => _driverId;
-  dynamic get asignedDriver => _asignedDriver;
-  String? get categoryId => _categoryId;
-  String? get vehicleId => _vehicleId;
-  String? get rate => _rate;
-  String? get amount => _amount;
-  String? get totalAmount => _totalAmount;
-  String? get stopCharge => _stopCharge;
-  String? get bookingDate => _bookingDate;
-  String? get orderStatus => _orderStatus;
-  String? get readStatus => _readStatus;
-  String? get acceptTime => _acceptTime;
-  dynamic get closeTime => _closeTime;
-  String? get discount => _discount;
-  String? get discountPercentage => _discountPercentage;
-  String? get paymentType => _paymentType;
-  String? get trnId => _trnId;
-  String? get pickupLat => _pickupLat;
-  String? get pickupLong => _pickupLong;
-  String? get pickupAddress => _pickupAddress;
-  String? get senderName => _senderName;
-  String? get senderContactNumber => _senderContactNumber;
-  String? get apartmentType => _apartmentType;
-  String? get dropLat => _dropLat;
-  String? get dropLong => _dropLong;
-  String? get dropAddress => _dropAddress;
-  String? get receiverName => _receiverName;
-  String? get receiverContactNumber => _receiverContactNumber;
-  dynamic get reason => _reason;
-  dynamic get additionalComment => _additionalComment;
-  String? get startTrip => _startTrip;
-  String? get addDate => _addDate;
 
   Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['id'] = _id;
-    map['order_id'] = _orderId;
-    map['cus_id'] = _cusId;
-    map['driver_id'] = _driverId;
-    map['asigned_driver'] = _asignedDriver;
-    map['category_id'] = _categoryId;
-    map['vehicle_id'] = _vehicleId;
-    map['rate'] = _rate;
-    map['amount'] = _amount;
-    map['total_amount'] = _totalAmount;
-    map['stop_charge'] = _stopCharge;
-    map['booking_date'] = _bookingDate;
-    map['order_status'] = _orderStatus;
-    map['read_status'] = _readStatus;
-    map['accept_time'] = _acceptTime;
-    map['close_time'] = _closeTime;
-    map['discount'] = _discount;
-    map['discount_percentage'] = _discountPercentage;
-    map['payment_type'] = _paymentType;
-    map['trn_id'] = _trnId;
-    map['pickup_lat'] = _pickupLat;
-    map['pickup_long'] = _pickupLong;
-    map['pickup_address'] = _pickupAddress;
-    map['sender_name'] = _senderName;
-    map['sender_contact_number'] = _senderContactNumber;
-    map['apartment_type'] = _apartmentType;
-    map['drop_lat'] = _dropLat;
-    map['drop_long'] = _dropLong;
-    map['drop_address'] = _dropAddress;
-    map['receiver_name'] = _receiverName;
-    map['receiver_contact_number'] = _receiverContactNumber;
-    map['reason'] = _reason;
-    map['additional_comment'] = _additionalComment;
-    map['start_trip'] = _startTrip;
-    map['add_date'] = _addDate;
-    return map;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['status'] = this.status;
+    if (this.data != null) {
+      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class BookingListResponseData {
+  dynamic id;
+  dynamic orderId;
+  dynamic cusId;
+  dynamic driverId;
+  dynamic categoryId;
+  dynamic rate;
+  dynamic amount;
+  dynamic totalAmount;
+  dynamic bookingDate;
+  dynamic orderStatus;
+  dynamic acceptTime;
+  dynamic closeTime;
+  dynamic paymentType;
+  dynamic trnId;
+  dynamic startTrip;
+  dynamic addDate;
+  Pickup? pickup;
+  List<Dropoffs>? dropoffs;
+
+  BookingListResponseData(
+      {this.id,
+        this.orderId,
+        this.cusId,
+        this.driverId,
+        this.categoryId,
+        this.rate,
+        this.amount,
+        this.totalAmount,
+        this.bookingDate,
+        this.orderStatus,
+        this.acceptTime,
+        this.closeTime,
+        this.paymentType,
+        this.trnId,
+        this.startTrip,
+        this.addDate,
+        this.pickup,
+        this.dropoffs});
+
+  BookingListResponseData.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    orderId = json['order_id'];
+    cusId = json['cus_id'];
+    driverId = json['driver_id'];
+    categoryId = json['category_id'];
+    rate = json['rate'];
+    amount = json['amount'];
+    totalAmount = json['total_amount'];
+    bookingDate = json['booking_date'];
+    orderStatus = json['order_status'];
+    acceptTime = json['accept_time'];
+    closeTime = json['close_time'];
+    paymentType = json['payment_type'];
+    trnId = json['trn_id'];
+    startTrip = json['start_trip'];
+    addDate = json['add_date'];
+    pickup =
+    json['pickup'] != null ? new Pickup.fromJson(json['pickup']) : null;
+    if (json['dropoffs'] != null) {
+      dropoffs = <Dropoffs>[];
+      json['dropoffs'].forEach((v) {
+        dropoffs!.add(new Dropoffs.fromJson(v));
+      });
+    }
   }
 
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['order_id'] = this.orderId;
+    data['cus_id'] = this.cusId;
+    data['driver_id'] = this.driverId;
+    data['category_id'] = this.categoryId;
+    data['rate'] = this.rate;
+    data['amount'] = this.amount;
+    data['total_amount'] = this.totalAmount;
+    data['booking_date'] = this.bookingDate;
+    data['order_status'] = this.orderStatus;
+    data['accept_time'] = this.acceptTime;
+    data['close_time'] = this.closeTime;
+    data['payment_type'] = this.paymentType;
+    data['trn_id'] = this.trnId;
+    data['start_trip'] = this.startTrip;
+    data['add_date'] = this.addDate;
+    if (this.pickup != null) {
+      data['pickup'] = this.pickup!.toJson();
+    }
+    if (this.dropoffs != null) {
+      data['dropoffs'] = this.dropoffs!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Pickup {
+  dynamic locationId;
+  dynamic address;
+  dynamic lat;
+  dynamic lng;
+  dynamic distanceToNext;
+  dynamic expectedTimeToNext;
+  dynamic completionTime;
+  dynamic loadingDuration;
+  dynamic loadingTime;
+  dynamic loadingCharge;
+
+  Pickup(
+      {this.locationId,
+        this.address,
+        this.lat,
+        this.lng,
+        this.distanceToNext,
+        this.expectedTimeToNext,
+        this.completionTime,
+        this.loadingDuration,
+        this.loadingTime,
+        this.loadingCharge});
+
+  Pickup.fromJson(Map<String, dynamic> json) {
+    locationId = json['location_id'];
+    address = json['address'];
+    lat = json['lat'];
+    lng = json['lng'];
+    distanceToNext = json['distance_to_next'];
+    expectedTimeToNext = json['expected_time_to_next'];
+    completionTime = json['completion_time'];
+    loadingDuration = json['loading_duration'];
+    loadingTime = json['loading_time'];
+    loadingCharge = json['loading_charge'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['location_id'] = this.locationId;
+    data['address'] = this.address;
+    data['lat'] = this.lat;
+    data['lng'] = this.lng;
+    data['distance_to_next'] = this.distanceToNext;
+    data['expected_time_to_next'] = this.expectedTimeToNext;
+    data['completion_time'] = this.completionTime;
+    data['loading_duration'] = this.loadingDuration;
+    data['loading_time'] = this.loadingTime;
+    data['loading_charge'] = this.loadingCharge;
+    return data;
+  }
+}
+
+class Dropoffs {
+  dynamic locationId;
+  dynamic address;
+  dynamic lat;
+  dynamic lng;
+  dynamic name;
+  dynamic contactNumber;
+  dynamic sequence;
+  dynamic distanceToNext;
+  dynamic expectedTimeToNext;
+  dynamic completionTime;
+  dynamic unloadingDuration;
+  dynamic unloadingTime;
+  dynamic unloadingCharge;
+
+  Dropoffs(
+      {this.locationId,
+        this.address,
+        this.lat,
+        this.lng,
+        this.name,
+        this.contactNumber,
+        this.sequence,
+        this.distanceToNext,
+        this.expectedTimeToNext,
+        this.completionTime,
+        this.unloadingDuration,
+        this.unloadingTime,
+        this.unloadingCharge});
+
+  Dropoffs.fromJson(Map<String, dynamic> json) {
+    locationId = json['location_id'];
+    address = json['address'];
+    lat = json['lat'];
+    lng = json['lng'];
+    name = json['name'];
+    contactNumber = json['contact_number'];
+    sequence = json['sequence'];
+    distanceToNext = json['distance_to_next'];
+    expectedTimeToNext = json['expected_time_to_next'];
+    completionTime = json['completion_time'];
+    unloadingDuration = json['unloading_duration'];
+    unloadingTime = json['unloading_time'];
+    unloadingCharge = json['unloading_charge'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['location_id'] = this.locationId;
+    data['address'] = this.address;
+    data['lat'] = this.lat;
+    data['lng'] = this.lng;
+    data['name'] = this.name;
+    data['contact_number'] = this.contactNumber;
+    data['sequence'] = this.sequence;
+    data['distance_to_next'] = this.distanceToNext;
+    data['expected_time_to_next'] = this.expectedTimeToNext;
+    data['completion_time'] = this.completionTime;
+    data['unloading_duration'] = this.unloadingDuration;
+    data['unloading_time'] = this.unloadingTime;
+    data['unloading_charge'] = this.unloadingCharge;
+    return data;
+  }
 }

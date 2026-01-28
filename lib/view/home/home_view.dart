@@ -52,7 +52,6 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
 
   Future<void> _getCurrentLocation() async {
-    // Check location permission
     final status = await Permission.location.request();
     if (status != PermissionStatus.granted) {
       setState(() => _isLoading = false);
@@ -68,8 +67,6 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
         _currentPosition = LatLng(position.latitude, position.longitude);
         _isLoading = false;
       });
-
-      // Move camera to current position
       mapController.animateCamera(
         CameraUpdate.newLatLngZoom(_currentPosition!, 15),
       );
@@ -100,7 +97,6 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       Get.updateLocale(const Locale('bn', 'IN'));
       authController.selectedLanguage.value = 'বাংলা';
     } else {
-      // Default fallback
       Get.updateLocale(const Locale('en', 'US'));
       authController.selectedLanguage.value = "English";
     }
@@ -131,16 +127,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       } catch (e) {
         print("Error: $e");
       }
-      return null; // no new booking
+      return null;
     });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
-  //  apiHome();
     print("calling");
 
 
@@ -162,14 +155,12 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
         );
       }
       controller = AnimationController(vsync: this);
-      // configureBackgroundGeolocation();
       Get.find<AuthController>().incomeDriver();
       Get.find<AuthController>().driverOnlineTIme();
       Get.find<AuthController>().driverOnlineTotalTIme();
       Get.find<AuthController>().getDriverFAQ();
       Get.find<AuthController>().driverInfo(context);
       Get.find<AuthController>().isShow.value = 1;
-     // Get.find<AuthController>().getBookingNotification();
       _getCurrentLocation();
       _razorpay = Razorpay();
       _razorpay2 = Razorpay();
@@ -221,9 +212,6 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-
-    // Payment success logic
-    //Get.snackbar('Success', 'Payment ID: ${response.paymentId}');
     print("✅ Payment Successful!");
     print("Payment ID: ${response.paymentId}");
     print("Order ID: ${response.orderId}");
@@ -239,15 +227,10 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     };
 
     Get.find<AuthController>().updateDriverPaymentStatus(body);
-
-    // Navigate to success screen or process booking
-    // Get.to(ReviewBooking(data: bookingData));
   }
 
   void _handlePaymentSuccess2(PaymentSuccessResponse response) {
 
-    // Payment success logic
-    //Get.snackbar('Success', 'Payment ID: ${response.paymentId}');
     print("✅ Payment Successful!");
     print("Payment ID: ${response.paymentId}");
     print("Order ID: ${response.orderId}");
@@ -263,26 +246,20 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     };
 
     Get.find<AuthController>().updateDriverPaymentStatus(body);
-
-    // Navigate to success screen or process booking
     // Get.to(ReviewBooking(data: bookingData));
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    // Payment failure logic
-      Get.snackbar('Error'.tr, 'Payment Fail'.tr);
+     Get.snackbar('Error'.tr, 'Payment Fail'.tr);
 
   }void _handlePaymentError2(PaymentFailureResponse response) {
-    // Payment failure logic
-      Get.snackbar('Error'.tr, 'Payment Fail'.tr);
+    Get.snackbar('Error'.tr, 'Payment Fail'.tr);
 
   }
   AuthController authController  = Get.find<AuthController>();
   void _handleExternalWallet(ExternalWalletResponse response) {
-    // External wallet logic
-    Get.snackbar('External Wallet'.tr, '${response.walletName}');
+     Get.snackbar('External Wallet'.tr, '${response.walletName}');
   }void _handleExternalWallet2(ExternalWalletResponse response) {
-    // External wallet logic
     Get.snackbar('External Wallet'.tr, '${response.walletName}');
   }
 
@@ -715,22 +692,6 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                       ),
                                     ),
                                 ),
-                                // Container(
-                                //   padding: const EdgeInsets.symmetric(
-                                //       horizontal: 8, vertical: 1),
-                                //   decoration: BoxDecoration(
-                                //     color: Colors.red,
-                                //     borderRadius: BorderRadius.circular(30),
-                                //   ),
-                                //   constraints: const BoxConstraints(minWidth: 15),
-                                //   child: const Text(
-                                //     "3",
-                                //     style: TextStyle(
-                                //       color: Colors.white,
-                                //       fontSize: 10,
-                                //     ),
-                                //   ),
-                                // )
                               ],
                             ),
                           ),
@@ -815,7 +776,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                           ),
                           GestureDetector(
                             onTap: (){
-                              Get.to(() => ScheduleDeliveryList());
+                              Get.to(() => ScheduleDeliveryList(isClick: true,));
                             },
                             child: Text(
                               "See All",
@@ -859,7 +820,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
                           return GestureDetector(
                             onTap: (){
-                              Get.to(() => ScheduleDeliveryList());
+                              Get.to(() => ScheduleDeliveryList(isClick: true,));
                             },
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 6),

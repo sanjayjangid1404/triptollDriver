@@ -255,7 +255,7 @@ class _MenuViewState extends State<MenuView> {
                         title: "Schedule Deliveries".tr,
                         icon: "assets/img/sm_my_vehicle.png",
                         onPressed: () {
-                            context.push(const ScheduleDeliveryList());
+                            context.push( ScheduleDeliveryList(isClick: false,));
                         }),
 
                     Container(

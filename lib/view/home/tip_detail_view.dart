@@ -12,7 +12,7 @@ import 'package:taxi_driver/model/booking_list_response.dart';
 import 'package:taxi_driver/view/home/support/faq.dart';
 
 class TipDetailsView extends StatefulWidget {
-  final BookingListResponse obj;
+  final BookingListResponseData obj;
   const TipDetailsView({super.key, required this.obj});
 
   @override
@@ -49,9 +49,9 @@ class _TipDetailsViewState extends State<TipDetailsView>{
   @override
   Widget build(BuildContext context) {
     var taxAmt = double.tryParse(widget.obj.totalAmount.toString()) ?? 0.0;
-    var tollAmt = double.tryParse(widget.obj.discount.toString()) ?? 0.0;
+    // var tollAmt = double.tryParse(widget.obj.discount.toString()) ?? 0.0;
     var payableAmt = double.tryParse(widget.obj.amount.toString()) ?? 0.0;
-    var totalAmt = payableAmt - tollAmt - taxAmt;
+    // var totalAmt = payableAmt - tollAmt - taxAmt;
 
     return Scaffold(
       backgroundColor: TColor.lightGray,
@@ -148,7 +148,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                               ),
                               Expanded(
                                 child: Text(
-                                  widget.obj.pickupAddress as String? ?? "",
+                                  widget.obj.pickup!.address ?? "",
                                   style: TextStyle(
                                     color: TColor.primaryText,
                                     fontSize: 15,
@@ -174,14 +174,28 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                                 width: 15,
                               ),
                               Expanded(
-                                child: Text(
-                                  widget.obj.dropAddress as String? ?? "",
-                                  style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 15,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: List.generate(
+                                    widget.obj.dropoffs?.length ?? 0,
+                                        (i) {
+                                      final drop = widget.obj.dropoffs![i];
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 6),
+                                        child: Text(
+                                          drop.address ?? "",
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: TColor.primaryText,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
-                              ),
+                              )
                             ],
                           ),
                         ),
@@ -357,7 +371,12 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "${"You rated".tr} \"${widget.obj.senderName as String? ?? ""}\"",
+                              '${"You rated".tr} "${widget.obj.dropoffs
+                                  ?.map((e) => e.name)
+                                  .where((e) => e != null && e.isNotEmpty)
+                                  .join(", ") ?? ""}"',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: TColor.secondaryText,
                                 fontSize: 15,

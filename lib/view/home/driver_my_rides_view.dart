@@ -42,12 +42,26 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
     });
   }
 
+  String getTotalAmount() {
+    double total = 0.0;
+
+    final list = authController.bookingListResponseData.value.data;
+
+    if (list != null) {
+      for (var item in list) {
+        total += double.tryParse(item.totalAmount ?? '0') ?? 0;
+      }
+    }
+
+    return total.toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(
       builder: (AuthController authController) =>
           DefaultTabController(
-            length: 2,
+         length: 2,
          child: Scaffold(
           appBar: AppBar(
             elevation: 0.5,
@@ -74,7 +88,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
               TextButton(
                   onPressed: () {},
                   child: Text(
-                    "${AppContants.rupessSystem} ${totalAmount.toStringAsFixed(2)}",
+                    "${AppContants.rupessSystem} ${getTotalAmount()}",
                     style: TextStyle(
                         color: TColor.primary,
                         fontSize: 18,
@@ -96,7 +110,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                 ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
                     itemBuilder: (context, index) {
-                      var rObj = authController.bookingListResponse[index];
+                      var rObj = authController.bookingListResponseData.value.data![index];
 
                       var km = 10;
                       var rideTotalAmount =
@@ -110,6 +124,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                         child: Container(
                           padding:
                           const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                          margin: EdgeInsets.only(bottom: 20),
                           decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(5),
@@ -126,25 +141,45 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                     width: 15,
                                   ),
                                   Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            rObj.receiverName ?? "",
-                                            style: TextStyle(
-                                                color: TColor.primaryText,
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.w800),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: List.generate(
+                                            rObj.dropoffs?.length ?? 0,
+                                                (i) {
+                                              final drop = rObj.dropoffs![i];
+                                              return Text(
+                                                drop.name ?? "",
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: TColor.primaryText,
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.w800,
+                                                ),
+                                              );
+                                            },
                                           ),
-                                          Text(
-                                            rObj!.addDate!=null ?  "${AppContants.changeDateFormat(rObj!.addDate!, "dd MMM yyyy")}":"",
-                                            style: TextStyle(
-                                                color: TColor.secondaryText, fontSize: 12),
-                                          )
-                                        ],
-                                      )),
+                                        ),
+
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          rObj.addDate != null
+                                              ? AppContants.changeDateFormat(
+                                              rObj.addDate!, "dd MMM yyyy")
+                                              : "",
+                                          style: TextStyle(
+                                            color: TColor.secondaryText,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   Text(
-                                    rObj!.orderStatus??"",
+                                    rObj.orderStatus??"",
                                     style: TextStyle(
                                         color:Colors.black,
                                         fontSize: 17,
@@ -170,7 +205,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      rObj.pickupAddress as String? ?? "",
+                                      rObj.pickup!.address ?? "",
                                       maxLines: 2,
                                       style: TextStyle(
                                         color: TColor.primaryText,
@@ -195,15 +230,28 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                     width: 15,
                                   ),
                                   Expanded(
-                                    child: Text(
-                                      rObj.dropAddress as String? ?? "",
-                                      maxLines: 2,
-                                      style: TextStyle(
-                                        color: TColor.primaryText,
-                                        fontSize: 15,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: List.generate(
+                                        rObj.dropoffs?.length ?? 0,
+                                            (i) {
+                                          final drop = rObj.dropoffs![i];
+                                          return Padding(
+                                            padding: const EdgeInsets.only(bottom: 6),
+                                            child: Text(
+                                              drop.address ?? "",
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: TColor.primaryText,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
-                                  ),
+                                  )
                                 ],
                               ),
                               if (rObj.orderStatus == "pickup")
@@ -296,17 +344,19 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                         ),
                                       ],
                                     ),
+                              SizedBox(height: 10,),
                                   ],
-                                )
+                                ),
                             ],
+
                           ),
                         ),
                       );
                     },
                     separatorBuilder: (context, index) => const SizedBox(
-                      height: 15,
+                      height:2,
                     ),
-                    itemCount: authController.bookingListResponse.length),
+                  itemCount: authController.bookingListResponseData.value.data?.length ?? 0),
                 ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
                     itemBuilder: (context, index) {

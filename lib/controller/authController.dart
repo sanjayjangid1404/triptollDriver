@@ -1939,14 +1939,14 @@ class AuthController extends GetxController implements GetxService {
   }
   bool getAllBookingLoading = false;
 
-  List<BookingListResponse>bookingListResponse = [];
+  Rx<BookingListResponse> bookingListResponseData = BookingListResponse().obs;
   List<MissedOrderListModel> missedOrderListModel = [];
 
   Future<void> getAllBooking(
       {String? status, String? limit, String? offset}) async {
     getAllBookingLoading = true;
 
-    update();
+    // update();
     print(getUserDeviceID());
 
 
@@ -1955,16 +1955,16 @@ class AuthController extends GetxController implements GetxService {
         status: status, limit: limit, offset: offset, userID: getUserID());
 
 
-    bookingListResponse = [];
+    // bookingListResponse = [];
     if (response.statusCode == 200 || response.statusCode == 400) {
       isShowDriver = false;
-      for (int i = 0; i < response.body.length; i++) {
-        bookingListResponse.add(BookingListResponse.fromJson(response.body[i]));
-      }
-
+      // for (int i = 0; i < response.body.length; i++) {
+      //   bookingListResponse.add(BookingListResponse.fromJson(response.body[i]));
+      // }
+      bookingListResponseData.value = BookingListResponse.fromJson(response.body);
 
       // getAllBookingLoading = false;
-      update();
+      // update();
     }
     else {
       // dynamic data = jsonDecode(response.body);
@@ -1973,7 +1973,7 @@ class AuthController extends GetxController implements GetxService {
     }
 
     getAllBookingLoading = false;
-    update();
+    // update();
   }
 
   Future<void> getMissedOrder(body) async {
