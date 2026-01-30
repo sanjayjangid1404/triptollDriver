@@ -709,12 +709,7 @@ class _SummaryViewState extends State<SummaryView>
                                       crossAxisAlignment: CrossAxisAlignment
                                           .center,
                                       children: [
-                                        Text('₹${Get
-                                            .find<AuthController>()
-                                            .lifeTimeEarnModel
-                                            .value
-                                            .totalEarnings
-                                            .toString()}',
+                                        Text('₹${Get.find<AuthController>().lifeTimeEarnModel.value.totalEarnings.toString()}',
                                           style: TextStyle(
                                               color: Colors.black,
                                               fontWeight: FontWeight.w500,

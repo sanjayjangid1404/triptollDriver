@@ -1,14 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
 import 'package:taxi_driver/common/globs.dart';
 import 'package:taxi_driver/common/service_call.dart';
-import 'package:taxi_driver/view/home/run_ride_view.dart';
 import 'package:taxi_driver/view/home/tip_detail_view.dart';
-
 import '../../controller/authController.dart';
 
 class DriverMyRidesView extends StatefulWidget {
@@ -25,14 +23,13 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
   AuthController authController  = Get.find<AuthController>();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
+      Get.find<AuthController>().getLifetimeEarningsFun();
       Get.find<AuthController>().getMissedOrder({
         "driver_id":authController.getUserID().toString(),
       });
-      Get.find<AuthController>().getAllBooking(status: "paid",limit: "100",offset: "10");
+      Get.find<AuthController>().getAllBooking(status: "success",limit: "100",offset: "10");
 
 
       setState(() {
@@ -42,19 +39,6 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
     });
   }
 
-  String getTotalAmount() {
-    double total = 0.0;
-
-    final list = authController.bookingListResponseData.value.data;
-
-    if (list != null) {
-      for (var item in list) {
-        total += double.tryParse(item.totalAmount ?? '0') ?? 0;
-      }
-    }
-
-    return total.toStringAsFixed(2);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,15 +69,17 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                   fontWeight: FontWeight.w800),
             ),
             actions: [
+              Get.find<AuthController>().lifeTimeEarnModel.value.status == true ?
               TextButton(
                   onPressed: () {},
                   child: Text(
-                    "${AppContants.rupessSystem} ${getTotalAmount()}",
+                    "${AppContants.rupessSystem} ${Get.find<AuthController>().lifeTimeEarnModel.value.totalEarnings ?? ''}",
                     style: TextStyle(
                         color: TColor.primary,
                         fontSize: 18,
                         fontWeight: FontWeight.w800),
-                  ))
+                  )) :
+                  SizedBox.shrink()
             ],
             bottom:  TabBar(
               indicatorColor: Colors.green,
@@ -107,6 +93,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
           ),
           body: TabBarView(
               children: [
+                authController.bookingListResponseData.value.data != null ?
                 ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
                     itemBuilder: (context, index) {
@@ -178,12 +165,27 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                                       ],
                                     ),
                                   ),
-                                  Text(
-                                    rObj.orderStatus??"",
-                                    style: TextStyle(
-                                        color:Colors.black,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w700),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${AppContants.rupessSystem}${rObj.totalAmount}",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: TColor.primary,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      Text(
+                                        rObj.orderStatus??"",
+                                        style: TextStyle(
+                                            color:   rObj.orderStatus == 'paid' ? Colors.black : Colors.red,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ],
                                   )
                                 ],
                               ),
@@ -356,7 +358,24 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                     separatorBuilder: (context, index) => const SizedBox(
                       height:2,
                     ),
-                  itemCount: authController.bookingListResponseData.value.data?.length ?? 0),
+                  itemCount: authController.bookingListResponseData.value.data?.length ?? 0) :
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Lottie.asset('assets/lottie/not_found.json', height: 200),
+                    Text(
+                      'Completed Orders Not Found',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+                authController.missedOrderListModel.isNotEmpty ?
                 ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
                     itemBuilder: (context, index) {
@@ -446,7 +465,23 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                     separatorBuilder: (context, index) => const SizedBox(
                       height: 15,
                     ),
-                    itemCount: authController.missedOrderListModel.length),
+                    itemCount: authController.missedOrderListModel.length) :
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Lottie.asset('assets/lottie/not_found.json', height: 200),
+                      Text(
+                        'Missed Orders Not Found',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                  ],
+                ),
               ]
           )
          ),

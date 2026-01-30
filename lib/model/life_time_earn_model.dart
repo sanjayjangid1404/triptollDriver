@@ -8,11 +8,11 @@
 class LifeTimeEarnModel {
   LifeTimeEarnModel({
       bool? status, 
-      String? message, 
-      String? driverId, 
-      String? totalEarnings, 
-      String? totalHours, 
-      num? totalTrips,}){
+      dynamic message, 
+      dynamic driverId, 
+      dynamic totalEarnings, 
+      dynamic totalHours, 
+      dynamic totalTrips,}){
     _status = status;
     _message = message;
     _driverId = driverId;
@@ -30,17 +30,17 @@ class LifeTimeEarnModel {
     _totalTrips = json['total_trips'];
   }
   bool? _status;
-  String? _message;
-  String? _driverId;
-  String? _totalEarnings;
-  String? _totalHours;
-  num? _totalTrips;
+  dynamic _message;
+  dynamic _driverId;
+  dynamic _totalEarnings;
+  dynamic _totalHours;
+  dynamic _totalTrips;
 LifeTimeEarnModel copyWith({  bool? status,
-  String? message,
-  String? driverId,
-  String? totalEarnings,
-  String? totalHours,
-  num? totalTrips,
+  dynamic message,
+  dynamic driverId,
+  dynamic totalEarnings,
+  dynamic totalHours,
+  dynamic totalTrips,
 }) => LifeTimeEarnModel(  status: status ?? _status,
   message: message ?? _message,
   driverId: driverId ?? _driverId,
@@ -49,11 +49,11 @@ LifeTimeEarnModel copyWith({  bool? status,
   totalTrips: totalTrips ?? _totalTrips,
 );
   bool? get status => _status;
-  String? get message => _message;
-  String? get driverId => _driverId;
-  String? get totalEarnings => _totalEarnings;
-  String? get totalHours => _totalHours;
-  num? get totalTrips => _totalTrips;
+  dynamic get message => _message;
+  dynamic get driverId => _driverId;
+  dynamic get totalEarnings => _totalEarnings;
+  dynamic get totalHours => _totalHours;
+  dynamic get totalTrips => _totalTrips;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

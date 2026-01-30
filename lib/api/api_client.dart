@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:get/get_connect/http/src/request/request.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
@@ -82,11 +80,11 @@ class ApiClient extends GetxService {
   Future<Response> postData(String uri, dynamic body, {Map<String, String>? headers}) async {
     try {
       if(Foundation.kDebugMode) {
-        print('====> API Call: ${appBaseUrl!+uri}\nHeader: $_mainHeaders');
+        print('====> API Call: ${appBaseUrl+uri}\nHeader: $_mainHeaders');
         print('====> API Body: ${jsonEncode(body)}');
       }
       Http.Response _response = await Http.post(
-        Uri.parse(appBaseUrl!+uri),
+        Uri.parse(appBaseUrl+uri),
         body: jsonEncode(body),
         headers: headers ?? _mainHeaders,
       ).timeout(Duration(seconds: timeoutInSeconds));
@@ -121,7 +119,7 @@ class ApiClient extends GetxService {
         print('====> API Body: $body');
       }
       Http.Response _response = await Http.put(
-        Uri.parse(appBaseUrl!+uri),
+        Uri.parse(appBaseUrl+uri),
         body: jsonEncode(body),
         headers: headers ?? _mainHeaders,
       ).timeout(Duration(seconds: timeoutInSeconds));
@@ -138,7 +136,7 @@ class ApiClient extends GetxService {
         print('====> API Body: $body');
       }
       Http.Response _response = await Http.delete(
-        Uri.parse(appBaseUrl!+uri),
+        Uri.parse(appBaseUrl+uri),
         body: jsonEncode(body),
         headers: headers ?? _mainHeaders,
       ).timeout(Duration(seconds: timeoutInSeconds));
@@ -151,10 +149,10 @@ class ApiClient extends GetxService {
   Future<Response> postMultipartData(String uri, Map<String, String> body, List<MultipartBody> multipartBody, {Map<String, String>? headers}) async {
     try {
       if(Foundation.kDebugMode) {
-        print('====> API Call: ${appBaseUrl!+uri}\nHeader: $_mainHeaders');
+        print('====> API Call: ${appBaseUrl+uri}\nHeader: $_mainHeaders');
         print('====> API Body: $body with ${multipartBody.length} picture');
       }
-      Http.MultipartRequest _request = Http.MultipartRequest('POST', Uri.parse(appBaseUrl!+uri));
+      Http.MultipartRequest _request = Http.MultipartRequest('POST', Uri.parse(appBaseUrl+uri));
       _request.headers.addAll(headers ?? _mainHeaders!);
 
       print("file => ${multipartBody.length}");

@@ -89,6 +89,7 @@ dependencies:
   quickalert: ^1.1.0
   android_intent_plus: ^6.0.0
   cloud_firestore: ^6.1.1
+  flutter_polyline_points: ^3.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

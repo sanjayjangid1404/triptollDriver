@@ -1,11 +1,4 @@
-
-
-
 import 'package:get/get.dart';
-
-import '../common/custom_snackbar.dart';
-
-
 
 
 class ApiChecker {

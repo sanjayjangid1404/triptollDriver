@@ -34,6 +34,8 @@ class Data {
   dynamic scheduleDate;
   dynamic scheduleTime;
   dynamic totalAmount;
+  dynamic senderName;
+  dynamic senderContactNumber;
   dynamic firstName;
   dynamic lastName;
   dynamic contactNumber;
@@ -48,6 +50,8 @@ class Data {
         this.scheduleDate,
         this.scheduleTime,
         this.totalAmount,
+        this.senderName,
+        this.senderContactNumber,
         this.firstName,
         this.lastName,
         this.contactNumber,
@@ -62,6 +66,8 @@ class Data {
     scheduleDate = json['schedule_date'];
     scheduleTime = json['schedule_time'];
     totalAmount = json['total_amount'];
+    senderName = json['sender_name'];
+    senderContactNumber = json['sender_contact_number'];
     firstName = json['first_name'];
     lastName = json['last_name'];
     contactNumber = json['contact_number'];
@@ -78,6 +84,8 @@ class Data {
     data['schedule_date'] = this.scheduleDate;
     data['schedule_time'] = this.scheduleTime;
     data['total_amount'] = this.totalAmount;
+    data['sender_name'] = this.senderName;
+    data['sender_contact_number'] = this.senderContactNumber;
     data['first_name'] = this.firstName;
     data['last_name'] = this.lastName;
     data['contact_number'] = this.contactNumber;

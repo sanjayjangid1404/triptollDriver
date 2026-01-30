@@ -447,7 +447,7 @@ class AuthRepo{
 
   Future<Response> getAllBooking({String? status,String? limit,String? offset,String? userID}) async {
     return await apiClient.getData(
-        "${AppContants.getAllBookingURL}?status=$status&limit=$limit&user_id=$userID&user_type=driver");
+        "${AppContants.getAllBookingURL}?payment_status=$status&limit=$limit&user_id=$userID&user_type=driver");
   }
 
   Future<Response> getBookingDetails({String? bookingID,String? userID}) async {

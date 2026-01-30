@@ -91,7 +91,7 @@ class AppContants
   static String cancelOrderURL = "Booking/cancelOrder";
   static String saveBookingURl = "Booking/saveBooking";
   static String getAllVehicle = "home/getAllCategory";
-  static String getAllBookingURL = "Booking/getAllBooking";
+  static String getAllBookingURL = "Booking/getDriverAllBooking";
   static String getBookingDetails = "Booking/getBookingDetail";
   static String driverDetailURL = "Driver/getDriverDetail";
   static String driverDetailsURL = "Driver/getDriverDetails";

@@ -709,6 +709,7 @@ class AuthController extends GetxController implements GetxService {
   // List<InactiveWalletModel>walletInactiveList = [];
   InactiveWalletModel inactiveWalletModel = InactiveWalletModel();
   Rx<GetScheduledOrderModel> getScheduledOrderModel = GetScheduledOrderModel().obs;
+  RxInt refreshInt1 = 0.obs;
   Rx<GetMyScheduleOrderModel> getMyScheduleOrderModel = GetMyScheduleOrderModel().obs;
   Future<void> changeLoginStatus(
       {String? status, BuildContext? context}) async {
@@ -746,7 +747,9 @@ class AuthController extends GetxController implements GetxService {
       catID: getCategoryID(), cityId: getCityID());
 
     if (response.statusCode == 200 || response.statusCode == 400) {
+      refreshInt1.value = DateTime.now().microsecondsSinceEpoch;
       getScheduledOrderModel.value = GetScheduledOrderModel.fromJson(response.body);
+      checkScheduledOrders();
     }
     else {
       showCustomSnackBar(response.body["message"].toString(),getXSnackBar: true,isError: true);
@@ -765,7 +768,18 @@ class AuthController extends GetxController implements GetxService {
       ApiChecker.checkApi(response);
     }
   }
+  RxBool isScheduledBannerVisible = true.obs;
+  int _lastScheduledCount = 0;
+  void checkScheduledOrders() {
+    final list = getScheduledOrderModel.value.data;
 
+    if (list != null) {
+      if (list.length != _lastScheduledCount) {
+        isScheduledBannerVisible.value = true;
+        _lastScheduledCount = list.length;
+      }
+    }
+  }
 
   String todayLoginTIme = "";
 
@@ -1639,7 +1653,7 @@ class AuthController extends GetxController implements GetxService {
         runningOrderResponse = RunningOrderResponse.fromJson(response.body);
 
         checkAndStartBookingNotification(context);
-
+        getScheduledOrderFun();
         if (response.body["status"] == false) {
           checkAndStartBookingNotification(context);
         }

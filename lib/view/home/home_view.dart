@@ -156,6 +156,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       }
       controller = AnimationController(vsync: this);
       Get.find<AuthController>().incomeDriver();
+      Get.find<AuthController>().getScheduledOrderFun();
       Get.find<AuthController>().driverOnlineTIme();
       Get.find<AuthController>().driverOnlineTotalTIme();
       Get.find<AuthController>().getDriverFAQ();
@@ -749,114 +750,203 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   ],
                 ),
               ),
-              Get.find<AuthController>().getMyScheduleOrderModel.value.data != null ?
+
               Positioned(
                 top: 150,
                 left: 16,
                 right: 16,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF0175b0),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children:  [
-                          Text(
-                            "Scheduled Delivery",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Obx(() {
+                      if(Get.find<AuthController>().refreshInt1.value > 0){}
+                      final controller = Get.find<AuthController>();
+                      final list = controller.getScheduledOrderModel.value.data;
+
+                      if (list == null || list.isEmpty) {
+                        return const SizedBox();
+                      }
+
+                      if (!controller.isScheduledBannerVisible.value) {
+                        return const SizedBox();
+                      }
+
+                      return Dismissible(
+                        key: const ValueKey('scheduled_booking_banner'),
+                        direction: DismissDirection.horizontal,
+                        onDismissed: (_) {
+                          controller.isScheduledBannerVisible.value = false;
+                        },
+                        child: InkWell(
+                          onTap: (){
+                              Get.to(() => ScheduleDeliveryList(isClick: false,));
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade600,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child:Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    "New Available Scheduled Booking",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    const Icon(
+                                      Icons.notifications,
+                                      color: Colors.white,
+                                      size: 26,
+                                    ),
+                                    Positioned(
+                                      right: -6,
+                                      top: -6,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 18,
+                                          minHeight: 18,
+                                        ),
+                                        child: Text(
+                                          "${list.length}",
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          GestureDetector(
-                            onTap: (){
-                              Get.to(() => ScheduleDeliveryList(isClick: true,));
-                            },
-                            child: Text(
-                              "See All",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                decoration: TextDecoration.underline
+                        ),
+                      );
+                    }),
+                    Get.find<AuthController>().getMyScheduleOrderModel.value.data != null ?
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF0175b0),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children:  [
+                              Text(
+                                "Scheduled Delivery",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
+                              GestureDetector(
+                                onTap: (){
+                                  Get.to(() => ScheduleDeliveryList(isClick: true,));
+                                },
+                                child: Text(
+                                  "View",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: pendingOrders == null
+                                ? 0
+                                : (pendingOrders.length > 2 ? 2 : pendingOrders.length),
+                            padding: EdgeInsets.zero,
+                            itemBuilder: (context, index) {
+                              final item = Get.find<AuthController>().getMyScheduleOrderModel.value.data![index];
+                              String formattedDate = '';
+                              if (item.scheduleDate != null && item.scheduleDate!.isNotEmpty) {
+                                DateTime date = DateTime.parse(item.scheduleDate!);
+                                formattedDate = DateFormat('dd-MM-yyyy').format(date);
+                              }
+
+                              String formattedTime = '';
+                              if (item.scheduleTime != null && item.scheduleTime!.isNotEmpty) {
+                                DateTime time =
+                                DateFormat("HH:mm:ss").parse(item.scheduleTime!);
+                                formattedTime = DateFormat('hh:mm a').format(time);
+                              }
+                              return GestureDetector(
+                                onTap: (){
+                                  Get.to(() => ScheduleDeliveryList(isClick: true,));
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color:  Color(0xFFe85900),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+
+                                      Text(
+                                        formattedDate,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 1),
+                                       Text(
+                                         formattedTime,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: pendingOrders == null
-                            ? 0
-                            : (pendingOrders.length > 2 ? 2 : pendingOrders.length),
-                        padding: EdgeInsets.zero,
-                        itemBuilder: (context, index) {
-                          final item = Get.find<AuthController>().getMyScheduleOrderModel.value.data![index];
-                          String formattedDate = '';
-                          if (item.scheduleDate != null && item.scheduleDate!.isNotEmpty) {
-                            DateTime date = DateTime.parse(item.scheduleDate!);
-                            formattedDate = DateFormat('dd-MM-yyyy').format(date);
-                          }
-
-                          String formattedTime = '';
-                          if (item.scheduleTime != null && item.scheduleTime!.isNotEmpty) {
-                            DateTime time =
-                            DateFormat("HH:mm:ss").parse(item.scheduleTime!);
-                            formattedTime = DateFormat('hh:mm a').format(time);
-                          }
-                          return GestureDetector(
-                            onTap: (){
-                              Get.to(() => ScheduleDeliveryList(isClick: true,));
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 6),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-                              decoration: BoxDecoration(
-                                color:  Color(0xFFe85900),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-
-                                  Text(
-                                    formattedDate,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 1),
-                                   Text(
-                                     formattedTime,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                    ) :
+                    SizedBox.shrink(),
+                  ],
                 ),
-              ) :
-                  SizedBox.shrink(),
+              ) ,
               authController.isPayment() ? authController.isKyc() ?(int.parse(authController.walletAmount.toString())>= -99)?   SizedBox():
               AlertDialog(
                 title: Text('Pay Wallet Amount'.tr),
