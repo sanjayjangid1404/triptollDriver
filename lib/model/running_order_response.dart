@@ -77,8 +77,10 @@ class Orders {
       String? paymentStatus, 
       String? bookingDate, 
       String? acceptTime, 
-      dynamic distance, 
-      dynamic expectedTime, 
+      String? senderContactNumber,
+      dynamic distance,
+      dynamic senderName,
+      dynamic expectedTime,
       Pickup? pickup, 
       List<Dropoffs>? dropoffs,}){
     _bookingId = bookingId;
@@ -92,6 +94,8 @@ class Orders {
     _paymentStatus = paymentStatus;
     _bookingDate = bookingDate;
     _acceptTime = acceptTime;
+    _senderContactNumber = senderContactNumber;
+    _senderName = senderName;
     _distance = distance;
     _expectedTime = expectedTime;
     _pickup = pickup;
@@ -110,6 +114,8 @@ class Orders {
     _paymentStatus = json['payment_status'];
     _bookingDate = json['booking_date'];
     _acceptTime = json['accept_time'];
+    _senderContactNumber = json['sender_contact_number'];
+    _senderName = json['sender_name'];
     _distance = json['distance'];
     _expectedTime = json['expected_time'];
     _pickup = json['pickup'] != null ? Pickup.fromJson(json['pickup']) : null;
@@ -131,6 +137,8 @@ class Orders {
   String? _paymentStatus;
   String? _bookingDate;
   String? _acceptTime;
+  String? _senderContactNumber;
+  String? _senderName;
   dynamic _distance;
   dynamic _expectedTime;
   Pickup? _pickup;
@@ -146,6 +154,8 @@ Orders copyWith({  String? bookingId,
   String? paymentStatus,
   String? bookingDate,
   String? acceptTime,
+  String? senderContactNumber,
+  String? senderName,
   dynamic distance,
   dynamic expectedTime,
   Pickup? pickup,
@@ -161,6 +171,8 @@ Orders copyWith({  String? bookingId,
   paymentStatus: paymentStatus ?? _paymentStatus,
   bookingDate: bookingDate ?? _bookingDate,
   acceptTime: acceptTime ?? _acceptTime,
+  senderContactNumber: senderContactNumber ?? _senderContactNumber,
+  senderName: senderName ?? _senderName,
   distance: distance ?? _distance,
   expectedTime: expectedTime ?? _expectedTime,
   pickup: pickup ?? _pickup,
@@ -177,6 +189,8 @@ Orders copyWith({  String? bookingId,
   String? get paymentStatus => _paymentStatus;
   String? get bookingDate => _bookingDate;
   String? get acceptTime => _acceptTime;
+  String? get senderContactNumber => _senderContactNumber;
+  String? get senderName => _senderName;
   dynamic get distance => _distance;
   dynamic get expectedTime => _expectedTime;
   Pickup? get pickup => _pickup;
@@ -195,6 +209,9 @@ Orders copyWith({  String? bookingId,
     map['payment_status'] = _paymentStatus;
     map['booking_date'] = _bookingDate;
     map['accept_time'] = _acceptTime;
+    map['sender_contact_number'] = _senderContactNumber;
+    map['sender_name'] = _senderName;
+    map['sender_contact_number'] = _senderContactNumber;
     map['distance'] = _distance;
     map['expected_time'] = _expectedTime;
     if (_pickup != null) {

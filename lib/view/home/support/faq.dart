@@ -117,14 +117,17 @@ class _HomeScreenState extends State<FaqScreen> with SingleTickerProviderStateMi
                 ),
                 SizedBox(height: 32),
                 // Submit Button
-                authController.checkTicketLimitModel.hasExceededLimit == false ?
-                _buildSubmitButton()
-                    :  Text(
-                  'You have used two tickets, which are currently awaiting approval from the Triptoll team.'.tr,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400,
-                      color: Colors.black),
-                  textAlign: TextAlign.center,
-                ),
+                Obx(() {
+                  if(authController.refreshIntTicket.value > 0){}
+                  return  authController.checkTicketLimitModel.hasExceededLimit == false ?
+                  _buildSubmitButton()
+                      :  Text(
+                    'You have used two tickets, which are currently awaiting approval from the Triptoll team.'.tr,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400,
+                        color: Colors.black),
+                    textAlign: TextAlign.center,
+                  );
+                },),
                 SizedBox(height: 40),
               ],
             ),

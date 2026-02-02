@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import '../home/show_timer.dart';
 import '../home/support/faq.dart';
 import '../home/unloading_timer.dart';
-
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 class RunningOrderScreen extends StatefulWidget {
 
@@ -21,7 +21,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   List<LatLng> _allPoints = [];
-
+  final String googleApiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk";
   @override
   void initState() {
     super.initState();
@@ -33,98 +33,122 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   // ---------------------------
   // PREPARE ALL MARKERS + LINES
   // ---------------------------
-  void _prepareMapData() async {
-    final pickup = Get.find<AuthController>().runningOrderResponse!.orders![0].pickup!;
-    final drops = Get.find<AuthController>().runningOrderResponse!.orders![0].dropoffs ?? [];
 
-    List<LatLng> routePoints = [];
+  Future<void> _prepareMapData() async {
+    final order = Get.find<AuthController>()
+        .runningOrderResponse!
+        .orders![0];
 
-    // Pickup
-    LatLng pickupPoint = LatLng(
-      double.parse(pickup.lat.toString()),
-      double.parse(pickup.lng.toString()),
+    LatLng pickup = LatLng(
+      double.parse(order.pickup!.lat!),
+      double.parse(order.pickup!.lng!),
     );
 
-    routePoints.add(pickupPoint);
+    LatLng drop = LatLng(
+      double.parse(order.dropoffs![0].lat!),
+      double.parse(order.dropoffs![0].lng!),
+    );
 
-    // Dropoffs sorted
-    List sortedDrops = List.from(drops)
-      ..sort((a, b) => int.parse(a.sequence!).compareTo(int.parse(b.sequence!)));
+    _allPoints = [pickup, drop];
 
-    for (var d in sortedDrops) {
-      routePoints.add(
-        LatLng(double.parse(d.lat.toString()), double.parse(d.lng.toString())),
-      );
-    }
-
-    _allPoints = routePoints;
-
-    _addMarkers(routePoints);
-    await _drawPolylines(routePoints);
-
+    _addMarkers(pickup, drop);
+    await _drawRouteUsingDirections(pickup, drop);
     _moveCameraToBounds();
 
     setState(() {});
   }
 
-  // Add markers A, B, C...
-  void _addMarkers(List<LatLng> points) {
-    for (int i = 0; i < points.length; i++) {
-      String letter = String.fromCharCode(65 + i); // A B C D...
+  void _addMarkers(LatLng pickup, LatLng drop) {
+    _markers.clear();
 
-      _markers.add(
-        Marker(
-          markerId: MarkerId(letter),
-          position: points[i],
-          infoWindow: InfoWindow(title: "Point $letter"),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-              i == 0 ? BitmapDescriptor.hueGreen : BitmapDescriptor.hueRed),
+    _markers.add(
+      Marker(
+        markerId: const MarkerId("pickup"),
+        position: pickup,
+        infoWindow: const InfoWindow(title: "Pickup"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueGreen,
+        ),
+      ),
+    );
+
+    _markers.add(
+      Marker(
+        markerId: const MarkerId("drop"),
+        position: drop,
+        infoWindow: const InfoWindow(title: "Drop"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueRed,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _drawRouteUsingDirections(
+      LatLng start,
+      LatLng end,
+      ) async {
+    PolylinePoints polylinePoints = PolylinePoints(
+      apiKey: "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk",
+    );
+
+    PolylineRequest request = PolylineRequest(
+      origin: PointLatLng(start.latitude, start.longitude),
+      destination: PointLatLng(end.latitude, end.longitude),
+      mode: TravelMode.driving, // ✅ REQUIRED
+    );
+
+    PolylineResult result =
+    await polylinePoints.getRouteBetweenCoordinates(
+      request: request,
+    );
+
+    if (result.points.isNotEmpty) {
+      List<LatLng> route = result.points
+          .map((p) => LatLng(p.latitude, p.longitude))
+          .toList();
+
+      _polylines.clear();
+      _polylines.add(
+        Polyline(
+          polylineId: const PolylineId("route"),
+          width: 6,
+          color: Colors.blue,
+          points: route,
         ),
       );
+
+      setState(() {});
+    } else {
+      debugPrint("❌ No route found : ${result.errorMessage}");
     }
   }
 
-  // Draw Polyline route
-  Future<void> _drawPolylines(List<LatLng> points) async {
-    Polyline polyline = Polyline(
-      polylineId: PolylineId("route"),
-      points: points,
-      width: 6,
-      color: Colors.blue,
-    );
 
-    _polylines.add(polyline);
-  }
 
-  // Fit map to all markers
+
   void _moveCameraToBounds() {
-    if (_allPoints.isEmpty) return;
+    if (_allPoints.isEmpty || _mapController == null) return;
 
-    LatLngBounds bounds = _createBounds(_allPoints);
+    double x0 = _allPoints.first.latitude;
+    double x1 = _allPoints.first.latitude;
+    double y0 = _allPoints.first.longitude;
+    double y1 = _allPoints.first.longitude;
 
-    _mapController?.animateCamera(
-      CameraUpdate.newLatLngBounds(bounds, 60),
-    );
-  }
-
-  LatLngBounds _createBounds(List<LatLng> list) {
-    double? x0, x1, y0, y1;
-
-    for (LatLng latLng in list) {
-      if (x0 == null) {
-        x0 = x1 = latLng.latitude;
-        y0 = y1 = latLng.longitude;
-      } else {
-        if (latLng.latitude > x1!) x1 = latLng.latitude;
-        if (latLng.latitude < x0) x0 = latLng.latitude;
-        if (latLng.longitude > y1!) y1 = latLng.longitude;
-        if (latLng.longitude < y0!) y0 = latLng.longitude;
-      }
+    for (LatLng p in _allPoints) {
+      if (p.latitude > x1) x1 = p.latitude;
+      if (p.latitude < x0) x0 = p.latitude;
+      if (p.longitude > y1) y1 = p.longitude;
+      if (p.longitude < y0) y0 = p.longitude;
     }
 
-    return LatLngBounds(
-      southwest: LatLng(x0!, y0!),
-      northeast: LatLng(x1!, y1!),
+    LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(x0, y0),
+      northeast: LatLng(x1, y1),
+    );
+
+    _mapController!.animateCamera(
+      CameraUpdate.newLatLngBounds(bounds, 60),
     );
   }
 
@@ -195,7 +219,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '${controller.runningOrderResponse!.orders![0].pickup!.name.toString()}',
+                                          controller.runningOrderResponse!.orders![0].pickup!.name.toString(),
                                           style: TextStyle(
                                               fontSize: 18, fontWeight: FontWeight.bold),
                                         ),
@@ -318,14 +342,14 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                       InkWell(
                                         onTap: () {
                                           AppContants.makePhoneCall(
-                                              controller.runningOrderResponse!.orders![0].pickup!.contactNumber.toString());
+                                              controller.runningOrderResponse!.orders![0].senderContactNumber.toString());
                                         },
                                         child: Row(
                                           children: [
                                             Icon(Icons.call_outlined, color: Colors.blue,
                                                 size: 16),
                                             const SizedBox(width: 5),
-                                            Text('${controller.runningOrderResponse!.orders![0].pickup!.contactNumber.toString()} , ${controller.runningOrderResponse!.orders![0].pickup!.name.toString()}'),
+                                            Text('${controller.runningOrderResponse!.orders![0].senderContactNumber.toString()} , ${controller.runningOrderResponse!.orders![0].senderName.toString()}'),
                                           ],
                                         ),
                                       ),
@@ -522,11 +546,12 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
       ) :
       Row(
         children: [
+          controller.runningOrderResponse!.orders![0].orderStatus.toString() == "unloading" ?
+          SizedBox() :
           Expanded(
             child: InkWell(
               onTap: () async {
-                if (controller.runningOrderResponse!.orders![0].orderStatus.toString()
-                    .toLowerCase() == "picked") {
+                if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked") {
                   final drops = controller.runningOrderResponse!.orders![0].dropoffs ?? [];
                   if (drops.isEmpty) return;
                   final sortedDrops = List.from(drops)

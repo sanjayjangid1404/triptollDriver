@@ -1326,6 +1326,7 @@ class AuthController extends GetxController implements GetxService {
   }
 
   CheckTicketLimitModel checkTicketLimitModel = CheckTicketLimitModel();
+  RxInt refreshIntTicket = 0.obs;
   DeviceLogoutModel deviceLogoutModel = DeviceLogoutModel();
   Rx<DailyEarningsMd> dailyEarningsMd = DailyEarningsMd().obs;
   Rx<NotificationHistoryModel> notificationHistoryModel = NotificationHistoryModel().obs;
@@ -1335,6 +1336,7 @@ class AuthController extends GetxController implements GetxService {
   Future<void> checkTicket(body) async {
     Response response = await authRepo.checkTicketLimits(body);
     if (response.statusCode == 200) {
+      refreshIntTicket.value = DateTime.now().microsecondsSinceEpoch;
       checkTicketLimitModel = CheckTicketLimitModel.fromJson(response.body);
 
     }
