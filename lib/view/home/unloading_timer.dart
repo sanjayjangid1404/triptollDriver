@@ -5,55 +5,39 @@ import 'package:lottie/lottie.dart';
 
 import '../../controller/authController.dart';
 
-class UnLoadingTimer extends StatefulWidget {
+class UnLoadingTimer extends StatelessWidget {
   final String maxLoadingTime;
   final String loadingChargePerMin;
 
-  const UnLoadingTimer({
+  UnLoadingTimer({
     Key? key,
     required this.maxLoadingTime,
     required this.loadingChargePerMin,
   }) : super(key: key);
 
-  @override
-  State<UnLoadingTimer> createState() => _UnLoadingTimerState();
-}
+  final AuthController controller = Get.find<AuthController>();
 
-class _UnLoadingTimerState extends State<UnLoadingTimer> {
-  Timer? _timer;
-  bool _isRunning = false;
-  AuthController authController  = Get.find<AuthController>();
-  void _startTimer() {
-    setState(() {
-      _isRunning = true;
-      authController.elapsedSecondsUnload = 0;
-    });
-
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        authController.elapsedSecondsUnload++;
-      });
-    });
-  }
-  @override
-  void initState() {
-    super.initState();
-    _startTimer();
-  }
-  void _stopTimer() {
-    _timer?.cancel();
-    setState(() {
-      _isRunning = false;
-    });
+  double _progressValue(int seconds) {
+    final freeSeconds = int.parse(maxLoadingTime) * 60;
+    if (seconds <= 0) return 0.0;
+    if (seconds >= freeSeconds) return 1.0;
+    return seconds / freeSeconds;
   }
 
-  /// Calculate charges based on elapsed time
-  double _calculateCharge() {
-    int elapsedMinutes = authController.elapsedSecondsUnload ~/ 60;
-    if (elapsedMinutes <= int.parse(widget.maxLoadingTime)) return 0.0;
-    int chargeableMinutes = elapsedMinutes - int.parse(widget.maxLoadingTime);
-    return chargeableMinutes * double.parse(widget.loadingChargePerMin);
+  double _calculateCharge(int seconds) {
+    int elapsedMinutes = seconds ~/ 60;
+    int freeMinutes = int.parse(maxLoadingTime);
+    if (elapsedMinutes <= freeMinutes) return 0.0;
+    return (elapsedMinutes - freeMinutes) *
+        double.parse(loadingChargePerMin);
+  }
+
+  Color _getTimerColor(int seconds) {
+    int freeSeconds = int.parse(maxLoadingTime) * 60;
+    if (seconds <= freeSeconds) return Colors.green;
+
+    double t = ((seconds - freeSeconds) / 60).clamp(0.0, 1.0);
+    return Color.lerp(Colors.green, Colors.red, t)!;
   }
 
   String _formatTime(int totalSeconds) {
@@ -61,66 +45,47 @@ class _UnLoadingTimerState extends State<UnLoadingTimer> {
     final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
     return "$minutes:$seconds";
   }
-  int getElapsedMinutesForAPI(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60;
-    if (minutes < 1) {
-      minutes = 1;
-    }
-    return minutes;
-  }
-  Color _getTimerColor() {
-    int freeSeconds = int.parse(widget.maxLoadingTime) * 60;
-    int elapsed = authController.elapsedSecondsUnload;
-
-    if (elapsed <= freeSeconds) return Colors.green;
-
-    int overSeconds = elapsed - freeSeconds;
-    double t = (overSeconds / 60).clamp(0.0, 1.0); // within 1 min turns red
-    return Color.lerp(Colors.green, Colors.red, t)!;
-  }
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    authController.chargesUnLoading = _calculateCharge();
-    int apiMinutes = getElapsedMinutesForAPI(authController.elapsedSecondsUnload);
-    authController.realUnLoadingTime = apiMinutes.toString();
-    final int freeSeconds = int.tryParse(widget.maxLoadingTime) != null
-        ? int.parse(widget.maxLoadingTime) * 60
-        : 2700;
-    return Center(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Circular progress
-          SizedBox(
-            width: 120,
-            height: 120,
-            child: CircularProgressIndicator(
-              value: double.parse(freeSeconds.toString()),
-              strokeWidth: 5,
-              valueColor: AlwaysStoppedAnimation<Color>(_getTimerColor()),
-              backgroundColor: Colors.grey.shade300,
+    return Obx(() {
+      final seconds = controller.elapsedSecondsUnload.value;
+
+      controller.chargesUnLoading = _calculateCharge(seconds);
+      controller.realUnLoadingTime =
+          ((seconds ~/ 60) < 1 ? 1 : (seconds ~/ 60)).toString();
+
+      return Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: CircularProgressIndicator(
+                strokeWidth: 5,
+                value: _progressValue(seconds), // ✅ NO ROTATION
+                valueColor: AlwaysStoppedAnimation(
+                  _getTimerColor(seconds),
+                ),
+                backgroundColor: Colors.grey.shade300,
+              ),
             ),
-          ),
-          // Timer text in the center
-          Text(
-            _formatTime(authController.elapsedSecondsUnload),
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: _getTimerColor(),
+            Text(
+              _formatTime(seconds),
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: _getTimerColor(seconds),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 }
+
 
 class LottieScreen extends StatelessWidget {
   const LottieScreen({super.key});

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/globs.dart';
@@ -52,6 +53,20 @@ class _MenuViewState extends State<MenuView> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString("app_language", gg);
   }
+  _shareReferral() async {
+    // Play Store link with referral parameter
+    const String packageName = 'service.triptoll.in'; // Apna package name daalein
+    final String shareLink = 'https://play.google.com/store/apps/details?id=$packageName&referrer=$referralCode';
+
+    final String shareText = 'Check out this amazing app! Use my referral code: $referralCode\n\n$shareLink';
+
+    // Copy to clipboard
+
+
+    // Share using device's share dialog
+    await Share.share(shareText);
+  }
+  String referralCode = "12345678";
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(
@@ -325,6 +340,15 @@ class _MenuViewState extends State<MenuView> {
                           ),
                         ),
                       ),
+                    ),
+                    MenuRow(
+                      title: "Refer & Earn",
+                      onPressed: (){
+                        setState(() {});
+                        referralCode = authController.getUserPhone()!;
+                        _shareReferral();
+                      },
+                      icon: "assets/img/refer.png",
                     ),
                     MenuRow(
                       title: "Language",

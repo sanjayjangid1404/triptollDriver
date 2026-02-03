@@ -22,9 +22,36 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   Set<Polyline> _polylines = {};
   List<LatLng> _allPoints = [];
   final String googleApiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk";
+  void _handleStatus(String status) {
+    final s = status.trim().toLowerCase();
+    final controller = Get.find<AuthController>();
+
+    print('function call $s');
+
+    if (s == "loading") {
+      controller.startLoadingTimer();
+      controller.stopUnLoadingTimer();
+      return;
+    }
+
+    if (s == "unloading") {
+      controller.startUnLoadingTimer();
+      controller.stopLoadingTimer();
+      return;
+    }
+  }
+
+
   @override
   void initState() {
     super.initState();
+    final AuthController controller = Get.find<AuthController>();
+
+    _handleStatus(controller.runningOrderStatus.value);
+
+    ever(controller.runningOrderStatus, (status) {
+      _handleStatus(status.toString());
+    });
     Future.delayed(Duration(milliseconds: 300), () {
       _prepareMapData();
     });
@@ -631,6 +658,8 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                   }
                   else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "unloading") {
                     controller.orderDelivered(orderID: controller.runningOrderResponse!.orders![0].bookingId.toString(),context: context);
+                    controller.resetLoadingTimer();
+                    controller.resetUnLoadingTimer();
                     // await clearDropIndex();
                     // checkDriverBooking(context);
                   }
@@ -658,17 +687,27 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                     }
 
                     final drop = sortedDrops[dropIndex];
-
-                    // ✅ Call unloading API
-                    await controller.startUnLoadingApi(
+                    // await controller.startUnLoadingApi(
+                    //   controller.getUserID().toString(),
+                    //   context,
+                    //   controller.runningOrderResponse!.orders![0].bookingId.toString(),
+                    //   drop.locationId.toString(),
+                    // );
+                    // await controller.nextDrop(sortedDrops.length);
+                    final isSuccess = await controller.startUnLoadingApi(
                       controller.getUserID().toString(),
                       context,
                       controller.runningOrderResponse!.orders![0].bookingId.toString(),
                       drop.locationId.toString(),
                     );
-                    await controller.nextDrop(sortedDrops.length);
-                  }
 
+                    if (isSuccess) {
+                      await controller.nextDrop(sortedDrops.length);
+                    }else {
+                      print('⛔ Unloading failed → same drop retry');
+                      // currentDropIndex same rahega
+                    }
+                  }
                 },
                 child: Container(
                     height: 40,

@@ -563,18 +563,18 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                                 width: 0.5,
                                 color: TColor.placeholder.withOpacity(0.5),
                               ),
-                              Expanded(
-                                child: IconTitleSubtitleButton(
-                                    title: "${authController.driverInResponse!=null ? double.parse(authController.driverInResponse?.driverDetails?.totalRating ??"0").toStringAsFixed(2):"0"}",
-                                    subtitle: "Rating",
-                                    icon: "assets/img/rate.png",
-                                    onPressed: () {}),
-                              ),
-                              Container(
-                                height: 100,
-                                width: 0.5,
-                                color: TColor.placeholder.withOpacity(0.5),
-                              ),
+                              // Expanded(
+                              //   child: IconTitleSubtitleButton(
+                              //       title: "${authController.driverInResponse!=null ? double.parse(authController.driverInResponse?.driverDetails?.totalRating ??"0").toStringAsFixed(2):"0"}",
+                              //       subtitle: "Rating",
+                              //       icon: "assets/img/rate.png",
+                              //       onPressed: () {}),
+                              // ),
+                              // Container(
+                              //   height: 100,
+                              //   width: 0.5,
+                              //   color: TColor.placeholder.withOpacity(0.5),
+                              // ),
                               Expanded(
                                 child: IconTitleSubtitleButton(
                                     // title: authController.todayLoginTIme+" H",

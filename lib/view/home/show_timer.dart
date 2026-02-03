@@ -4,56 +4,25 @@ import 'package:get/get.dart';
 
 import '../../controller/authController.dart';
 
-class LoadingTimer extends StatefulWidget {
-  // Pass your free time and charge rate as arguments or from API/keys
-  final String maxLoadingTime; // Free time in minutes
-  final String loadingChargePerMin; // Charge per minute after free time
+class LoadingTimer extends StatelessWidget {
+  final String maxLoadingTime;
+  final String loadingChargePerMin;
 
-  const LoadingTimer({
+  LoadingTimer({
     Key? key,
     required this.maxLoadingTime,
     required this.loadingChargePerMin,
   }) : super(key: key);
 
-  @override
-  State<LoadingTimer> createState() => _LoadingTimerState();
-}
+  final AuthController authController = Get.find<AuthController>();
 
-class _LoadingTimerState extends State<LoadingTimer> {
-  Timer? _timer;
-  bool _isRunning = false;
-  AuthController authController  = Get.find<AuthController>();
-  void _startTimer() {
-    setState(() {
-      _isRunning = true;
-      authController.elapsedSeconds = 0;
-    });
+  double _calculateCharge(int seconds) {
+    int elapsedMinutes = seconds ~/ 60;
+    int freeMinutes = int.parse(maxLoadingTime);
 
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        authController.elapsedSeconds++;
-      });
-    });
-  }
- @override
-  void initState() {
-    super.initState();
-    _startTimer();
-  }
-  void _stopTimer() {
-    _timer?.cancel();
-    setState(() {
-      _isRunning = false;
-    });
-  }
-
-  /// Calculate charges based on elapsed time
-  double _calculateCharge() {
-    int elapsedMinutes = authController.elapsedSeconds ~/ 60;
-    if (elapsedMinutes <= int.parse(widget.maxLoadingTime)) return 0.0;
-    int chargeableMinutes = elapsedMinutes - int.parse(widget.maxLoadingTime);
-    return chargeableMinutes * double.parse(widget.loadingChargePerMin);
+    if (elapsedMinutes <= freeMinutes) return 0.0;
+    return (elapsedMinutes - freeMinutes) *
+        double.parse(loadingChargePerMin);
   }
 
   String _formatTime(int totalSeconds) {
@@ -61,63 +30,59 @@ class _LoadingTimerState extends State<LoadingTimer> {
     final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
     return "$minutes:$seconds";
   }
-  int getElapsedMinutesForAPI(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60;
-    if (minutes < 1) {
-      minutes = 1;
-    }
-    return minutes;
-  }
-  Color _getTimerColor() {
-    int freeSeconds = int.parse(widget.maxLoadingTime) * 60;
-    int elapsed = authController.elapsedSeconds;
 
-    if (elapsed <= freeSeconds) return Colors.green;
+  Color _getTimerColor(int seconds) {
+    int freeSeconds = int.parse(maxLoadingTime) * 60;
+    if (seconds <= freeSeconds) return Colors.green;
 
-    int overSeconds = elapsed - freeSeconds;
-    double t = (overSeconds / 60).clamp(0.0, 1.0); // within 1 min turns red
+    double t = ((seconds - freeSeconds) / 60).clamp(0.0, 1.0);
     return Color.lerp(Colors.green, Colors.red, t)!;
   }
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  double _progressValue(int seconds) {
+    int freeSeconds = int.parse(maxLoadingTime) * 60;
+
+    if (seconds <= 0) return 0.0;
+    if (seconds >= freeSeconds) return 1.0;
+
+    return seconds / freeSeconds; // 0.0 → 1.0
   }
 
   @override
   Widget build(BuildContext context) {
-   authController.chargesLoading = _calculateCharge();
-   int apiMinutes = getElapsedMinutesForAPI(authController.elapsedSeconds);
-   authController.realLoadingTime = apiMinutes.toString();
-   final int freeSeconds = int.tryParse(widget.maxLoadingTime) != null
-       ? int.parse(widget.maxLoadingTime) * 60
-       : 2700;
-    return Center(
-     child: Stack(
-       alignment: Alignment.center,
-       children: [
-         // Circular progress
-         SizedBox(
-           width: 120,
-           height: 120,
-           child: CircularProgressIndicator(
-             value: double.parse(freeSeconds.toString()),
-             strokeWidth: 5,
-             valueColor: AlwaysStoppedAnimation<Color>(_getTimerColor()),
-             backgroundColor: Colors.grey.shade300,
-           ),
-         ),
-         // Timer text in the center
-         Text(
-           _formatTime(authController.elapsedSeconds),
-           style: TextStyle(
-             fontSize: 25,
-             fontWeight: FontWeight.bold,
-             color: _getTimerColor(),
-           ),
-         ),
-       ],
-     ),
-   );
+    return Obx(() {
+      final seconds = authController.elapsedSeconds.value;
+
+      authController.chargesLoading = _calculateCharge(seconds);
+      authController.realLoadingTime =
+          ((seconds ~/ 60) < 1 ? 1 : (seconds ~/ 60)).toString();
+
+      return Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: CircularProgressIndicator(
+                strokeWidth: 5,
+                value: _progressValue(seconds),
+                valueColor:
+                AlwaysStoppedAnimation(_getTimerColor(seconds)),
+                backgroundColor: Colors.grey.shade300,
+              ),
+            ),
+            Text(
+              _formatTime(seconds),
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: _getTimerColor(seconds),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
+

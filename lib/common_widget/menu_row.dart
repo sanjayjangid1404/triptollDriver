@@ -29,6 +29,7 @@ class MenuRow extends StatelessWidget {
               icon,
               width: 30,
               height: 30,
+              color: Colors.black,
             ),
             const SizedBox(
               width: 12.5,

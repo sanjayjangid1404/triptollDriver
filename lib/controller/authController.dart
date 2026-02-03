@@ -77,11 +77,53 @@ class AuthController extends GetxController implements GetxService {
   bool isLoading = false;
   bool isLoadingTime = false;
   RxBool loadingStart = false.obs;
-  int elapsedSeconds = 0;
+  Timer? loadingTimer;
+  RxInt elapsedSeconds = 0.obs;
+
+  void startLoadingTimer() {
+    if (loadingTimer != null) return; // already running
+
+    loadingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      elapsedSeconds.value++;
+    });
+  }
+
+  void stopLoadingTimer() {
+    loadingTimer?.cancel();
+    loadingTimer = null;
+  }
+
+  void resetLoadingTimer() {
+    stopLoadingTimer();
+    loadingTimer?.cancel();
+    loadingTimer = null;
+    elapsedSeconds.value = 0;
+  }
+  Timer? unloadingTimer;
+  RxInt elapsedSecondsUnload = 0.obs;
+
+  void startUnLoadingTimer() {
+    if (unloadingTimer != null) return;
+
+    unloadingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      elapsedSecondsUnload.value++;
+    });
+  }
+
+  void stopUnLoadingTimer() {
+    unloadingTimer?.cancel();
+    unloadingTimer = null;
+  }
+
+  void resetUnLoadingTimer() {
+    unloadingTimer?.cancel();
+    unloadingTimer = null;
+    elapsedSecondsUnload.value = 0;
+  }
+
   var currentDropIndex = 0.obs;
   RxBool isLastDropCompleted = false.obs;
   String bookingId = '';
-  int elapsedSecondsUnload = 0;
   double chargesLoading = 0.0;
   double chargesUnLoading = 0.0;
   RxBool unloadingStart = false.obs;
@@ -1633,8 +1675,11 @@ class AuthController extends GetxController implements GetxService {
   }
 
 
-  RunningOrderResponse? runningOrderResponse = RunningOrderResponse();
 
+
+
+  RunningOrderResponse? runningOrderResponse = RunningOrderResponse();
+  RxString runningOrderStatus = "".obs;
   Future<void> checkDriverBooking(BuildContext context) async {
     update();
     print(getUserDeviceID());
@@ -1656,6 +1701,9 @@ class AuthController extends GetxController implements GetxService {
 
         checkAndStartBookingNotification(context);
         getScheduledOrderFun();
+
+          runningOrderStatus.value =
+              runningOrderResponse!.orders![0].orderStatus.toString();
         if (response.body["status"] == false) {
           checkAndStartBookingNotification(context);
         }
@@ -1746,32 +1794,52 @@ class AuthController extends GetxController implements GetxService {
     Globs.hideHUD();
     update();
   }
-  Future<void> startUnLoadingApi(String id, BuildContext context, String orderID,String locationID) async
-  {
+  Future<bool> startUnLoadingApi(
+      String id,
+      BuildContext context,
+      String orderID,
+      String locationID,
+      ) async {
     isLoading = true;
     Globs.showHUD();
-
     update();
-    print(getUserDeviceID());
 
+    try {
+      print(getUserDeviceID());
 
-    Response response = await authRepo.startUnLoading(bookingId: orderID,userID: id,locationID: locationID);
+      Response response = await authRepo.startUnLoading(
+        bookingId: orderID,
+        userID: id,
+        locationID: locationID,
+      );
 
-    //  LoginResponse? loginResponse;
+      /// ✅ SUCCESS CASE
+      if (response.statusCode == 200) {
+        hasShownSheet = false;
+        checkDriverBooking(context);
+        return true;
+      }
 
-    if (response.statusCode == 200 || response.statusCode == 400) {
-      hasShownSheet = false;
-      checkDriverBooking(context);
-      // Get.offAll(HomeView());
+      /// ❌ API returned error (400, etc.)
+      if (response.statusCode == 400) {
+        ApiChecker.checkApi(response);
+        return false;
+      }
+
+      /// ❌ Other errors
+      ApiChecker.checkApi(response);
+      return false;
+
+    } catch (e) {
+      print('❌ startUnLoadingApi error: $e');
+      return false;
+    } finally {
+      isLoading = false;
+      Globs.hideHUD();
       update();
     }
-    else {
-      ApiChecker.checkApi(response);
-    }
-    isLoading = false;
-    Globs.hideHUD();
-    update();
   }
+
 
   void checkAndShowBottomSheet(BuildContext context) {
     if (runningOrderResponse != null && runningOrderResponse!.orders != null &&
