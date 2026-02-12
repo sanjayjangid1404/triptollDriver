@@ -384,10 +384,13 @@ class ScheduledOrderCardMy extends StatelessWidget {
     }
 
     String formattedTime = '';
+    String formattedTimeMinus10 = '';
     if (item.scheduleTime != null && item.scheduleTime!.isNotEmpty) {
       DateTime time =
       DateFormat("HH:mm:ss").parse(item.scheduleTime!);
       formattedTime = DateFormat('hh:mm a').format(time);
+      DateTime minus10Time = time.subtract(const Duration(minutes: 30));
+      formattedTimeMinus10 = DateFormat('hh:mm a').format(minus10Time);
     }
 
     return Container(
@@ -451,8 +454,9 @@ class ScheduledOrderCardMy extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.location_on_outlined,
-                    size: 20, color: Colors.grey),
+                Text(
+                 'Pickup Address :',
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -460,6 +464,8 @@ class ScheduledOrderCardMy extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline
                     ),
                   ),
                 ),
@@ -576,7 +582,16 @@ class ScheduledOrderCardMy extends StatelessWidget {
             ),
           ),
 
-
+          if (isAccepted) ...[
+            const SizedBox(height: 16),
+            Text(
+              'Order details will be shown after ${formattedTimeMinus10.toString()}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          ],
           if (!isAccepted) ...[
             const SizedBox(height: 16),
             Row(

@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -49,7 +50,19 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   bool isSheetOpen = false;
    AnimationController? controller;
 
+  Future<void> checkForUpdate() async {
+    try {
+      final info = await InAppUpdate.checkForUpdate();
 
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+
+        await InAppUpdate.performImmediateUpdate();
+      }
+
+    } catch (e) {
+      // await logUpdateError(e.toString());
+    }
+  }
 
   Future<void> _getCurrentLocation() async {
     final status = await Permission.location.request();
@@ -135,10 +148,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   void initState() {
     super.initState();
     print("calling");
-
-
+    checkForUpdate();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
       checkLanguage();
       if( Get.find<AuthController>().isShow.value == 0) {
         Get.snackbar(
