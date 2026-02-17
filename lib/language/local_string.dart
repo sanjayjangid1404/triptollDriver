@@ -3,6 +3,7 @@ class LocaleString extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en_US': {
+          "Refer & Earn": "Refer & Earn",
           "Upcoming Scheduled": "Upcoming Scheduled",
           "Accepted Deliveries": "Accepted Deliveries",
           "Scheduled Orders": "Scheduled Orders",
@@ -279,6 +280,7 @@ class LocaleString extends Translations {
           "Pickup Address :": "Pickup Address :"
         },
         'ta_IN': {
+          "Refer & Earn": "பரிந்துரைத்து சம்பாதிக்கவும்",
           "Scheduled Orders": "திட்டமிடப்பட்ட ஆர்டர்கள்",
           "Upcoming Scheduled": "வரவிருக்கும் திட்டமிடப்பட்டவை",
           "Accepted Deliveries": "ஏற்கப்பட்ட டெலிவரிகள்",
@@ -539,6 +541,7 @@ class LocaleString extends Translations {
               "உங்கள் தவறிய ஆர்டர்களைச் சரிபார்க்க இங்கே கிளிக் செய்யவும்.",
         },
         'bn_IN': {
+          "Refer & Earn": "রেফার করুন এবং উপার্জন করুন",
           "Scheduled Orders": "নির্ধারিত অর্ডার",
           "Upcoming Scheduled": "আসন্ন নির্ধারিত",
           "Accepted Deliveries": "গৃহীত ডেলিভারি",
@@ -749,6 +752,7 @@ class LocaleString extends Translations {
               "আপনার মিস হওয়া অর্ডারগুলি দেখতে এখানে ক্লিক করুন।",
         },
         'te_IN': {
+          "Refer & Earn": "సిఫార్సు చేసి సంపాదించండి",
           "Scheduled Orders": "షెడ్యూల్ చేసిన ఆర్డర్లు",
           "Upcoming Scheduled": "రాబోయే షెడ్యూల్ చేసినవి",
           "Accepted Deliveries": "అంగీకరించిన డెలివరీలు",
@@ -959,6 +963,7 @@ class LocaleString extends Translations {
               "మీ మిస్ అయిన ఆర్డర్‌లను చూడటానికి ఇక్కడ క్లిక్ చేయండి.",
         },
         'hi_IN': {
+          "Refer & Earn": "रेफर करें और कमाएं",
           "Upcoming Scheduled": "आगामी निर्धारित",
           "Accepted Deliveries": "स्वीकृत डिलीवरी",
           "Schedule Deliveries": "शेड्यूल डिलीवरी",

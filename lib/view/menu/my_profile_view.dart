@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:taxi_driver/common/color_extension.dart';
@@ -6,6 +7,8 @@ import 'package:taxi_driver/common_widget/title_subtitle_cell.dart';
 import 'package:taxi_driver/controller/authController.dart';
 import 'package:taxi_driver/view/menu/edit_profile_view.dart';
 import 'package:taxi_driver/view/menu/ratings_view.dart';
+
+import '../../common/appContants.dart';
 
 class MyProfileView extends StatefulWidget {
   const MyProfileView({super.key});
@@ -139,42 +142,65 @@ class _MyProfileViewState extends State<MyProfileView> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(50),
-                                child: Image.asset(
+                                child:
+                                authController.driverInResponse !=
+                                    null &&
+                                    authController.driverInResponse?.driverDetails?.file_name != null &&
+                                    authController
+                                        .driverInResponse!.driverDetails!
+                                        .file_name!
+                                        .isNotEmpty
+                                    ? CachedNetworkImage(
+                                  imageUrl:
+                                  "${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}",
+                                  width: 90,
+                                  height: 90,
+                                  fit: BoxFit.cover,
+                                  errorWidget:
+                                      (context, url, error) {
+                                    return Image.asset(
+                                      "assets/img/u1.png",
+                                      width: 90,
+                                      height: 90,
+                                    );
+                                  },
+                                )
+                                    : Image.asset(
                                   "assets/img/u1.png",
-                                  width: 100,
-                                  height: 100,
+                                  width: 90,
+                                  height: 90,
                                 ),
                               ),
-                              InkWell(
-                                onTap: () {
-                                  // context.push(const RatingsView());
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  color: Colors.white,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Image.asset(
-                                        "assets/img/rate_profile.png",
-                                        width: 15,
-                                        height: 15,
-                                      ),
-                                      const SizedBox(
-                                        width: 4,
-                                      ),
-                                      Text(
-                                        "4.89",
-                                        style: TextStyle(
-                                          color: TColor.primaryText,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              // InkWell(
+                              //   onTap: () {
+                              //     // context.push(const RatingsView());
+                              //   },
+                              //   child: Container(
+                              //     padding: const EdgeInsets.symmetric(
+                              //         horizontal: 8, vertical: 2),
+                              //     color: Colors.white,
+                              //     child: Row(
+                              //       mainAxisSize: MainAxisSize.min,
+                              //       children: [
+                              //         Image.asset(
+                              //           "assets/img/rate_profile.png",
+                              //           width: 15,
+                              //           height: 15,
+                              //         ),
+                              //         const SizedBox(
+                              //           width: 4,
+                              //         ),
+                              //         Text(
+                              //           "4.89",
+                              //           style: TextStyle(
+                              //             color: TColor.primaryText,
+                              //             fontSize: 13,
+                              //           ),
+                              //         ),
+                              //       ],
+                              //     ),
+                              //   ),
+                              // ),
                             ],
                           ),
                         ],

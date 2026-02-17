@@ -1705,7 +1705,6 @@ class AuthController extends GetxController implements GetxService {
           checkAndStartBookingNotification(context);
         }
         else {
-          // checkAndShowBottomSheet(context);
           checkAndShowPage(context);
         }
 

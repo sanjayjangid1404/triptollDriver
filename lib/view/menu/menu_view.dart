@@ -342,7 +342,7 @@ class _MenuViewState extends State<MenuView> {
                       ),
                     ),
                     MenuRow(
-                      title: "Refer & Earn",
+                      title: "Refer & Earn".tr,
                       onPressed: (){
                         setState(() {});
                         referralCode = authController.getUserPhone()!;

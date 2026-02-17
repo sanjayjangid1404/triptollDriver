@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/common_extension.dart';
@@ -45,7 +46,20 @@ class _TipDetailsViewState extends State<TipDetailsView>{
     super.dispose();
 
   }
+  String formatDateTime(String? dateString) {
+    if (dateString == null || dateString.isEmpty) {
+      return '';
+    }
 
+    try {
+      DateTime dateTime =
+      DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
+
+      return DateFormat("dd MMM yyyy, hh:mm a").format(dateTime);
+    } catch (e) {
+      return '';
+    }
+  }
   @override
   Widget build(BuildContext context) {
     var taxAmt = double.tryParse(widget.obj.totalAmount.toString()) ?? 0.0;
@@ -298,8 +312,6 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      // bookingObj["duration"] as String? ??
-                                      //     "00:00",
                                       widget.obj.closeTime ?? '00:00',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -356,7 +368,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                             children: [
                               TitleSubtitleRow(
                                 title: "Date & Time".tr,
-                                subtitle: widget.obj.pickup!.completionTime??""
+                                subtitle:formatDateTime( widget.obj.acceptTime ??"")
 
                                 /* (widget.obj.closeTime??"")
                                     .toString()
@@ -479,11 +491,11 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                                 subtitle: "${AppContants.rupessSystem}${0}",
                                 color: TColor.secondaryText,
                               ),
-                              TitleSubtitleRow(
-                                title: "+Tolls".tr,
-                                subtitle: "${AppContants.rupessSystem}${widget.obj.totalAmount}",
-                                color: TColor.secondaryText,
-                              ),
+                              // TitleSubtitleRow(
+                              //   title: "+Tolls".tr,
+                              //   subtitle: "${AppContants.rupessSystem}${widget.obj.totalAmount}",
+                              //   color: TColor.secondaryText,
+                              // ),
                               // TitleSubtitleRow(
                               //   title: "Discount",
                               //   subtitle: "\$00.25",
