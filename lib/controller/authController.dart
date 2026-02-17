@@ -1701,9 +1701,6 @@ class AuthController extends GetxController implements GetxService {
 
         checkAndStartBookingNotification(context);
         getScheduledOrderFun();
-
-          runningOrderStatus.value =
-              runningOrderResponse!.orders![0].orderStatus.toString();
         if (response.body["status"] == false) {
           checkAndStartBookingNotification(context);
         }
@@ -1712,7 +1709,14 @@ class AuthController extends GetxController implements GetxService {
           checkAndShowPage(context);
         }
 
+        update();
+        if (runningOrderResponse != null &&
+            runningOrderResponse!.orders != null &&
+            runningOrderResponse!.orders!.isNotEmpty) {
 
+          runningOrderStatus.value =
+              runningOrderResponse!.orders![0].orderStatus?.toString() ?? '';
+        }
         update();
       }
       else {

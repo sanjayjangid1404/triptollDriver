@@ -42,8 +42,8 @@ class _SummaryViewState extends State<SummaryView>
     DateTime today = DateTime.now();
     startDate = today.subtract(Duration(days: 6)); // last 7 days
     endDate = today;
-    Get.find<AuthController>().getDailyEarningsFun(_focusedDay.toString());
-    Get.find<AuthController>().getBookingsBydateAndDriverFun(_focusedDay.toString());
+    Get.find<AuthController>().getDailyEarningsFun(formattedDate.toString());
+    Get.find<AuthController>().getBookingsBydateAndDriverFun(formattedDate.toString());
     Get.find<AuthController>().getLifetimeEarningsFun();
     Get.find<AuthController>().getDateRangeEarningsFun(
       stateDate: startDate.toString().split(' ')[0],
@@ -57,8 +57,7 @@ class _SummaryViewState extends State<SummaryView>
       endDate: endOfMonth.toString().split(' ')[0],
     );
   }
-
-  DateTime _focusedDay = DateTime.now();
+  String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   DateTime? _selectedDay;
 
   @override

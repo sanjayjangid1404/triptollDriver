@@ -130,6 +130,14 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                         const SizedBox(
                           height: 15,
                         ),
+                        widget.obj.orderStatus == 'cancelled' ?
+                            Text('Cancelled',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.red
+                            ),
+                            ) : SizedBox.shrink(),
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
@@ -266,6 +274,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                             ),
                           ),
                         ),
+                        widget.obj.orderStatus == 'paid' ?
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
@@ -277,7 +286,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                               fontSize: 18,
                             ),
                           ),
-                        ),
+                        ) : SizedBox.shrink(),
                         const Divider(),
                         SizedBox(
                           height: 70,
@@ -289,8 +298,9 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      bookingObj["duration"] as String? ??
-                                          "00:00",
+                                      // bookingObj["duration"] as String? ??
+                                      //     "00:00",
+                                      widget.obj.closeTime ?? '00:00',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           color: TColor.primaryText,
@@ -318,7 +328,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "${(double.tryParse("10") ?? 0.0).toStringAsFixed(2)} KM",
+                                    "${(double.tryParse(widget.obj.distance.toString()) ?? 0.0).toStringAsFixed(2)} KM",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         color: TColor.primaryText,
@@ -346,7 +356,7 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                             children: [
                               TitleSubtitleRow(
                                 title: "Date & Time".tr,
-                                subtitle: widget.obj.closeTime??""
+                                subtitle: widget.obj.pickup!.completionTime??""
 
                                 /* (widget.obj.closeTime??"")
                                     .toString()
@@ -367,58 +377,58 @@ class _TipDetailsViewState extends State<TipDetailsView>{
                           ),
                         ),
                         const Divider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${"You rated".tr} "${widget.obj.dropoffs
-                                  ?.map((e) => e.name)
-                                  .where((e) => e != null && e.isNotEmpty)
-                                  .join(", ") ?? ""}"',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: TColor.secondaryText,
-                                fontSize: 15,
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 15,
-                            ),
-                            Image.asset(
-                              "assets/img/ride_user_profile.png",
-                              width: 35,
-                              height: 35,
-                            ),
-                            const SizedBox(
-                              width: 15,
-                            ),
-                            IgnorePointer(
-                              ignoring: true,
-                              child: RatingBar.builder(
-                                initialRating: double.tryParse(widget.obj.rate??"0") ??
-                                    1,
-                                minRating: 1,
-                                direction: Axis.horizontal,
-                                allowHalfRating: true,
-                                itemCount: 5,
-                                itemSize: 20,
-                                itemPadding:
-                                    const EdgeInsets.symmetric(horizontal: 1.0),
-                                itemBuilder: (context, _) => Icon(
-                                  Icons.star,
-                                  color: TColor.primary,
-                                ),
-                                onRatingUpdate: (rating) {
-                                  print(rating);
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
+                        // Row(
+                        //   mainAxisAlignment: MainAxisAlignment.center,
+                        //   children: [
+                        //     Text(
+                        //       '${"You rated".tr} "${widget.obj.dropoffs
+                        //           ?.map((e) => e.name)
+                        //           .where((e) => e != null && e.isNotEmpty)
+                        //           .join(", ") ?? ""}"',
+                        //       maxLines: 2,
+                        //       overflow: TextOverflow.ellipsis,
+                        //       style: TextStyle(
+                        //         color: TColor.secondaryText,
+                        //         fontSize: 15,
+                        //       ),
+                        //     ),
+                        //     const SizedBox(
+                        //       width: 15,
+                        //     ),
+                        //     Image.asset(
+                        //       "assets/img/ride_user_profile.png",
+                        //       width: 35,
+                        //       height: 35,
+                        //     ),
+                        //     const SizedBox(
+                        //       width: 15,
+                        //     ),
+                        //     IgnorePointer(
+                        //       ignoring: true,
+                        //       child: RatingBar.builder(
+                        //         initialRating: double.tryParse(widget.obj.rate??"0") ??
+                        //             1,
+                        //         minRating: 1,
+                        //         direction: Axis.horizontal,
+                        //         allowHalfRating: true,
+                        //         itemCount: 5,
+                        //         itemSize: 20,
+                        //         itemPadding:
+                        //             const EdgeInsets.symmetric(horizontal: 1.0),
+                        //         itemBuilder: (context, _) => Icon(
+                        //           Icons.star,
+                        //           color: TColor.primary,
+                        //         ),
+                        //         onRatingUpdate: (rating) {
+                        //           print(rating);
+                        //         },
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        // const SizedBox(
+                        //   height: 15,
+                        // ),
                       ],
                     ),
                   ),

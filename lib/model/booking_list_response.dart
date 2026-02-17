@@ -41,6 +41,7 @@ class BookingListResponseData {
   dynamic trnId;
   dynamic startTrip;
   dynamic addDate;
+  dynamic distance;
   Pickup? pickup;
   List<Dropoffs>? dropoffs;
 
@@ -58,6 +59,7 @@ class BookingListResponseData {
         this.acceptTime,
         this.closeTime,
         this.paymentType,
+        this.distance,
         this.trnId,
         this.startTrip,
         this.addDate,
@@ -76,6 +78,7 @@ class BookingListResponseData {
     bookingDate = json['booking_date'];
     orderStatus = json['order_status'];
     acceptTime = json['accept_time'];
+    distance = json['distance'];
     closeTime = json['close_time'];
     paymentType = json['payment_type'];
     trnId = json['trn_id'];
@@ -100,6 +103,7 @@ class BookingListResponseData {
     data['category_id'] = this.categoryId;
     data['rate'] = this.rate;
     data['amount'] = this.amount;
+    data['distance'] = this.distance;
     data['total_amount'] = this.totalAmount;
     data['booking_date'] = this.bookingDate;
     data['order_status'] = this.orderStatus;

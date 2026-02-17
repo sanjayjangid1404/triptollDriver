@@ -119,12 +119,16 @@ class _SignUpViewState extends State<SignUpView> {
           print(OTP);
         });
       } else {
+        final data = jsonDecode(response.body);
+      String  message = data["message"].toString();
+        showCustomSnackBar(message.toString(),isError: true);
         setState(() {
           apiResponse = "Error: ${response.statusCode}";
           isSHowOTP = true;
         });
       }
     } catch (e) {
+
       setState(() {
         apiResponse = "Exception: $e";
       });

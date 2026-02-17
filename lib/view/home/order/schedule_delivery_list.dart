@@ -59,8 +59,8 @@ class _ScheduleDeliveryListState extends State<ScheduleDeliveryList>
           child: const Icon(Icons.arrow_back, color: Colors.black),
         ),
         centerTitle: true,
-        title: const Text(
-          'Scheduled Orders',
+        title:  Text(
+          'Scheduled Orders'.tr,
           style: TextStyle(color: Colors.black),
         ),
         bottom: TabBar(
@@ -68,9 +68,9 @@ class _ScheduleDeliveryListState extends State<ScheduleDeliveryList>
           labelColor: Colors.orange,
           unselectedLabelColor: Colors.grey,
           indicatorColor: Colors.orange,
-          tabs: const [
-            Tab(text: "Upcoming Scheduled"),
-            Tab(text: "Accepted Deliveries"),
+          tabs:  [
+            Tab(text: "Upcoming Scheduled".tr),
+            Tab(text: "Accepted Deliveries".tr),
           ],
         ),
       ),
@@ -389,7 +389,8 @@ class ScheduledOrderCardMy extends StatelessWidget {
       DateTime time =
       DateFormat("HH:mm:ss").parse(item.scheduleTime!);
       formattedTime = DateFormat('hh:mm a').format(time);
-      DateTime minus10Time = time.subtract(const Duration(minutes: 30));
+      print('object ${formattedTime}');
+      DateTime minus10Time = time.subtract(const Duration(minutes: 10));
       formattedTimeMinus10 = DateFormat('hh:mm a').format(minus10Time);
     }
 
@@ -455,7 +456,12 @@ class ScheduledOrderCardMy extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                 'Pickup Address :',
+                 'Pickup Address :'.tr,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -492,7 +498,7 @@ class ScheduledOrderCardMy extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Text('Sender Name :'),
+              Text('Sender Name :'.tr),
               const SizedBox(width: 6),
               Expanded(child: Text(item.senderName ?? '',
               style: TextStyle(
@@ -505,7 +511,7 @@ class ScheduledOrderCardMy extends StatelessWidget {
           ),
           Row(
             children: [
-              Text('Sender Phone No. :'),
+              Text('Sender Phone No. :'.tr),
               const SizedBox(width: 6),
               Expanded(
                   child: InkWell(
@@ -532,7 +538,7 @@ class ScheduledOrderCardMy extends StatelessWidget {
           ),
           Row(
             children: [
-              Text('Customer Name :'),
+              Text('Customer Name :'.tr),
               const SizedBox(width: 6),
               Expanded(child: Text(item.firstName ?? '',
                 style: TextStyle(
@@ -545,7 +551,7 @@ class ScheduledOrderCardMy extends StatelessWidget {
           ),
           Row(
             children: [
-              Text('Customer Phone No. :'),
+              Text('Customer Phone No. :'.tr),
               const SizedBox(width: 6),
               Expanded(
                   child: InkWell(
@@ -584,13 +590,57 @@ class ScheduledOrderCardMy extends StatelessWidget {
 
           if (isAccepted) ...[
             const SizedBox(height: 16),
-            Text(
-              'Order details will be shown after ${formattedTimeMinus10.toString()}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            GestureDetector(
+              onTap: (){
+                Get.find<AuthController>().openGoogleMap(double.parse(
+                    item.lat.toString()), double
+                    .parse(item.lng.toString()));
+              },
+              child: Container(
+                width: Get.width,
+                padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Center(
+                  child: Text('PickUp Address'.tr,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15
+                  ),),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05), // very light shadow
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  '${'Order details will be shown after'.tr} $formattedTimeMinus10',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             )
+
           ],
           if (!isAccepted) ...[
             const SizedBox(height: 16),
@@ -619,8 +669,8 @@ class ScheduledOrderCardMy extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      "Accept",
+                    child: Text(
+                      "Accept".tr,
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
