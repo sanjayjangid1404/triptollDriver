@@ -727,7 +727,7 @@ class AuthController extends GetxController implements GetxService {
     if (isLoggedIn()) {
       Response response = await authRepo.updateDriverLocation(
           userID: getUserID(), long: long, lat: lat,locationTimer: locationTime,
-        driverStatus: driverInResponse!.driverDetails!.loginStatus.toString()
+        driverStatus: driverInResponse!.driverDetails?.loginStatus.toString()
       );
 
       //  LoginResponse? loginResponse;
@@ -1128,11 +1128,17 @@ class AuthController extends GetxController implements GetxService {
     print(response.body);
 
     if (response.statusCode == 200 || response.statusCode == 400) {
+      if (response.body["status"].toString() == "false") {
+        showCustomSnackBar(
+            response.body["message"], getXSnackBar: false, isError: true);
+      }
       update();
       isRegistration = false;
       return response.body;
     }
     else {
+      showCustomSnackBar(
+          response.body["message"], getXSnackBar: false, isError: true);
       ApiChecker.checkApi(response);
       isRegistration = false;
       update();
@@ -1995,7 +2001,7 @@ class AuthController extends GetxController implements GetxService {
 
     if (response.statusCode == 200 || response.statusCode == 400) {
       driverInResponse = DriverInResponse.fromJson(response.body);
-
+      print('all driver details api');
       if (driverInResponse != null) {
         if (driverInResponse!.driverDetails!.paymentStatus.toString() == "paid") {
           authRepo.saveUserPayment(true);

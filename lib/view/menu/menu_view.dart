@@ -5,7 +5,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/color_extension.dart';
 import 'package:taxi_driver/common/globs.dart';
-import 'package:taxi_driver/common/service_call.dart';
 import 'package:taxi_driver/common_widget/icon_title_cell.dart';
 import 'package:taxi_driver/common_widget/menu_row.dart';
 import 'package:taxi_driver/controller/authController.dart';
@@ -54,16 +53,9 @@ class _MenuViewState extends State<MenuView> {
     sharedPreferences.setString("app_language", gg);
   }
   _shareReferral() async {
-    // Play Store link with referral parameter
     const String packageName = 'service.triptoll.in'; // Apna package name daalein
     final String shareLink = 'https://play.google.com/store/apps/details?id=$packageName&referrer=$referralCode';
-
     final String shareText = 'Check out this amazing app! Use my referral code: $referralCode\n\n$shareLink';
-
-    // Copy to clipboard
-
-
-    // Share using device's share dialog
     await Share.share(shareText);
   }
   String referralCode = "12345678";
@@ -168,36 +160,6 @@ class _MenuViewState extends State<MenuView> {
                                       ),
 
                                     ),
-                                   // InkWell(
-                                   //          onTap: (){
-                                   //            // context.push(const RatingsView() );
-                                   //          },
-                                   //          child: Container(
-                                   //    padding: const EdgeInsets.symmetric(
-                                   //        horizontal: 8, vertical: 2),
-                                   //    color: Colors.white,
-                                   //    child: Row(
-                                   //      mainAxisSize: MainAxisSize.min,
-                                   //      children: [
-                                   //        Image.asset(
-                                   //          "assets/img/rate_profile.png",
-                                   //          width: 15,
-                                   //          height: 15,
-                                   //        ),
-                                   //        const SizedBox(
-                                   //          width: 4,
-                                   //        ),
-                                   //         Text(
-                                   //           authController.driverInResponse!=null && authController.driverInResponse!.driverDetails!.ratings!=null && authController.driverInResponse!.driverDetails!.ratings!.isNotEmpty ?"${authController.driverInResponse!.driverDetails!.ratings!}":"",
-                                   //            style: TextStyle(
-                                   //              color: TColor.primaryText,
-                                   //              fontSize: 13,
-                                   //            ),
-                                   //          ),
-                                   //
-                                   //      ],
-                                   //    ),
-                                   //  ),),
                                   ],
                                 ),
                                 const SizedBox(
@@ -258,12 +220,12 @@ class _MenuViewState extends State<MenuView> {
                         title: "My Rides",
                         icon: "assets/img/summary.png",
                         onPressed: () {
-
-                          // if(ServiceCall.userType == 1) {
-                          //   context.push(const UserMyRidesView());
-                          // }else{
                             context.push(const DriverMyRidesView());
-                          // }
+                            Get.find<AuthController>().getLifetimeEarningsFun();
+                            Get.find<AuthController>().getMissedOrder({
+                              "driver_id":authController.getUserID().toString(),
+                            });
+                            Get.find<AuthController>().getAllBooking(status: "success",limit: "100",offset: "10");
 
                         }),
                     MenuRow(
@@ -545,13 +507,6 @@ class _MenuViewState extends State<MenuView> {
                         onPressed: () {
                           context.push(const SettingsView());
                         }),
-                    // MenuRow(
-                    //     title: "Notifications",
-                    //     icon: "assets/img/notification.png",
-                    //     onPressed: () {
-                    //
-                    //     }),
-
                     MenuRow(
                         title: "Logout",
                         icon: "assets/img/logout.png",

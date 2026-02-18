@@ -193,15 +193,12 @@ Future<void> _sendLocationToServer(String? userID,double lat, double lng,String?
 
 
     print('${AppContants.baseURl}${AppContants.updateDriverLocation}');
-    print(jsonEncode({
+    print('location update backGround:${jsonEncode({
       'lat': lat.toStringAsFixed(14),
       'long': lng.toStringAsFixed(14),
       "user_id": userID,
       "booking_id": bookingID??"0",
-      "location_time":DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-
-
-    }));
+      "location_time":DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),})}');
     final response = await http.post(
       Uri.parse('${AppContants.baseURl}${AppContants.updateDriverLocation}'),
       headers: {
