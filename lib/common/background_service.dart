@@ -182,7 +182,10 @@ void onStart(ServiceInstance service) async {
     }
   });
 }
-
+Future<String?> getDriverStatus() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('driver_status');
+}
 Future<void> _sendLocationToServer(String? userID,double lat, double lng,String? bookingID) async {
 
   debugPrint("callingLocation");
@@ -198,6 +201,7 @@ Future<void> _sendLocationToServer(String? userID,double lat, double lng,String?
       'long': lng.toStringAsFixed(14),
       "user_id": userID,
       "booking_id": bookingID??"0",
+      "driver_status": getDriverStatus(),
       "location_time":DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),})}');
     final response = await http.post(
       Uri.parse('${AppContants.baseURl}${AppContants.updateDriverLocation}'),
@@ -211,6 +215,7 @@ Future<void> _sendLocationToServer(String? userID,double lat, double lng,String?
         'long': lng.toStringAsFixed(14),
         'user_id': userID,
         "booking_id": bookingID??"0",
+        "driver_status": getDriverStatus(),
         "location_time": DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       }),
 

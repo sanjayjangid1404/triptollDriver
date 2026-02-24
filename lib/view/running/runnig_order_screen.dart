@@ -627,7 +627,10 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                     SizedBox(width: 10,),
                     Text(
                       controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked"
-                          ? "Drop Location".tr :  "Direction".tr,
+                          ? "Drop Location".tr :
+                      controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted" ?
+                      "Pickup Direction".tr :
+                      "Direction".tr,
                       style: TextStyle(
                         color: TColor.primaryTextW,
                         fontSize: 14,
@@ -657,11 +660,42 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                     // checkDriverBooking(context);
                   }
                   else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "unloading") {
-                    controller.orderDelivered(orderID: controller.runningOrderResponse!.orders![0].bookingId.toString(),context: context);
-                    controller.resetLoadingTimer();
-                    controller.resetUnLoadingTimer();
-                    // await clearDropIndex();
-                    // checkDriverBooking(context);
+
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content:  Text("Are you sure you want to complete this ride?".tr,
+                          style: TextStyle(
+                            fontFamily: "NunitoSans",
+                            fontWeight: FontWeight.w500,
+                            fontSize: 19
+                          ),),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child:  Text("No".tr),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                controller.orderDelivered(
+                                  orderID: controller.runningOrderResponse!.orders![0].bookingId.toString(),
+                                  context: context,
+                                );
+
+                                controller.resetLoadingTimer();
+                                controller.resetUnLoadingTimer();
+                              },
+                              child:  Text("Yes".tr),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   }
                   else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked") {
                     print('🚚 Order Picked — Starting unloading logic');

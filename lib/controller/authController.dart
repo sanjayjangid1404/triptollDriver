@@ -6,10 +6,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -58,16 +56,14 @@ import '../repo/auth_repo.dart';
 import '../view/home/order/category_list_page.dart';
 import '../view/home/show_timer.dart';
 import '../view/home/support/faq.dart';
-import '../view/home/tip_request_view.dart';
 import '../view/home/unloading_timer.dart';
 import '../view/login/document_upload_view.dart';
 import 'package:http/http.dart' as http;
-
 import '../view/running/runnig_order_screen.dart';
 
+
+
 class AuthController extends GetxController implements GetxService {
-
-
 
   DateTime? onlineStartTime;
   Duration totalOnlineDuration = Duration.zero;
@@ -2016,6 +2012,8 @@ class AuthController extends GetxController implements GetxService {
         else {
           authRepo.saveUserKyc(false);
         }
+        String status = driverInResponse!.driverDetails!.loginStatus ?? "offline";
+        await authRepo.saveDriverStatus(status);
       }
 
       checkDriverBooking(context);
@@ -2586,13 +2584,7 @@ class AuthController extends GetxController implements GetxService {
         runningOrderResponse!.orders!.isNotEmpty) {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RunningOrderScreen(
-              // order: runningOrderResponse!.orders![0],
-            ),
-          ),
+       Get.to(() =>RunningOrderScreen(),
         );
       });
     }

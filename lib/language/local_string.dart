@@ -3,7 +3,12 @@ class LocaleString extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en_US': {
+          "Pickup Direction" : "Pickup Direction",
+          "Drop Location" : "Drop Location",
           "Refer & Earn": "Refer & Earn",
+          "Yes": "Yes",
+          "No": "No",
+          "Are you sure you want to complete this ride?": "Are you sure you want to complete this ride?",
           "Upcoming Scheduled": "Upcoming Scheduled",
           "Accepted Deliveries": "Accepted Deliveries",
           "Scheduled Orders": "Scheduled Orders",
@@ -280,6 +285,11 @@ class LocaleString extends Translations {
           "Pickup Address :": "Pickup Address :"
         },
         'ta_IN': {
+          "Drop Location" : "டிராப் இடம்",
+          "Pickup Direction" : "பிக்கப் திசை",
+          "Yes": "ஆம்",
+          "No": "இல்லை",
+          "Are you sure you want to complete this ride?" : "இந்த பயணத்தை முடிக்க விரும்புகிறீர்களா?",
           "Refer & Earn": "பரிந்துரைத்து சம்பாதிக்கவும்",
           "Scheduled Orders": "திட்டமிடப்பட்ட ஆர்டர்கள்",
           "Upcoming Scheduled": "வரவிருக்கும் திட்டமிடப்பட்டவை",
@@ -541,6 +551,11 @@ class LocaleString extends Translations {
               "உங்கள் தவறிய ஆர்டர்களைச் சரிபார்க்க இங்கே கிளிக் செய்யவும்.",
         },
         'bn_IN': {
+          "Drop Location" : "ড্রপ লোকেশন",
+          "Pickup Direction" : "পিকআপ দিকনির্দেশ",
+          "Yes": "হ্যাঁ",
+          "No": "না",
+          "Are you sure you want to complete this ride?": "আপনি কি নিশ্চিত যে আপনি এই রাইডটি সম্পূর্ণ করতে চান?",
           "Refer & Earn": "রেফার করুন এবং উপার্জন করুন",
           "Scheduled Orders": "নির্ধারিত অর্ডার",
           "Upcoming Scheduled": "আসন্ন নির্ধারিত",
@@ -752,7 +767,12 @@ class LocaleString extends Translations {
               "আপনার মিস হওয়া অর্ডারগুলি দেখতে এখানে ক্লিক করুন।",
         },
         'te_IN': {
+          "Drop Location" : "డ్రాప్ స్థానం",
+          "Pickup Direction" : "పికప్ దిశ",
+          "Yes": "అవును",
+          "No": "కాదు",
           "Refer & Earn": "సిఫార్సు చేసి సంపాదించండి",
+          "Are you sure you want to complete this ride?": "మీరు ఈ రైడ్‌ను పూర్తి చేయాలని ఖచ్చితంగా అనుకుంటున్నారా?",
           "Scheduled Orders": "షెడ్యూల్ చేసిన ఆర్డర్లు",
           "Upcoming Scheduled": "రాబోయే షెడ్యూల్ చేసినవి",
           "Accepted Deliveries": "అంగీకరించిన డెలివరీలు",
@@ -963,6 +983,9 @@ class LocaleString extends Translations {
               "మీ మిస్ అయిన ఆర్డర్‌లను చూడటానికి ఇక్కడ క్లిక్ చేయండి.",
         },
         'hi_IN': {
+          "Drop Location" : "ड्रॉप स्थान",
+          "Yes": "हाँ",
+          "No": "नहीं",
           "Refer & Earn": "रेफर करें और कमाएं",
           "Upcoming Scheduled": "आगामी निर्धारित",
           "Accepted Deliveries": "स्वीकृत डिलीवरी",
@@ -1237,7 +1260,9 @@ class LocaleString extends Translations {
           "Missed orders": "छूटे हुए ऑर्डर",
           "Click here to check your missed orders.":
               "अपने छूटे हुए ऑर्डर देखने के लिए यहाँ क्लिक करें।",
-          "Scheduled Orders": "निर्धारित ऑर्डर"
+          "Scheduled Orders": "निर्धारित ऑर्डर",
+          "Pickup Direction": "पिकअप दिशा",
+          "Are you sure you want to complete this ride?":  "क्या आप वाकई इस राइड को पूरा करना चाहते हैं?",
         },
       };
 }

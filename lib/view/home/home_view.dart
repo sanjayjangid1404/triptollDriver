@@ -195,24 +195,6 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
         setState(() {});
       }
     });
-    // if (ServiceCall.userType == 2) {
-    //   LocationHelper.shared().startInit();
-    //
-    //   // Received Message In Socket On Event
-    //   SocketManager.shared.socket?.on("new_ride_request", (data) async {
-    //     print("new_ride_request socket get :${data.toString()} ");
-    //     if (data[KKey.status] == "1") {
-    //       var bArr = data[KKey.payload] as List? ?? [];
-    //
-    //
-    //       if(mounted && bArr.isNotEmpty){
-    //        await  context.push( TipRequestView(bObj: bArr[0]) );
-    //        // apiHome();
-    //       }
-    //     }
-    //   });
-    //
-    // }
   }
 
 
@@ -2274,21 +2256,19 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        _maxSlideDistance = constraints.maxWidth - 160; // 🔥 CHANGED: smoother thumb range
+        _maxSlideDistance = constraints.maxWidth - 160;
 
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
-
-          // 🔥 CHANGED: simplified gestures
           onTap: () {
-            _toggleStatus(!_isOnline); // Tap se toggle ho jaaye
+            _toggleStatus(!_isOnline);
           },
           onHorizontalDragEnd: (details) {
             if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-              _toggleStatus(true); // Right slide → Online
+              _toggleStatus(true);
             } else if (details.primaryVelocity != null &&
                 details.primaryVelocity! < 0) {
-              _toggleStatus(false); // Left slide → Offline
+              _toggleStatus(false);
             }
           },
 

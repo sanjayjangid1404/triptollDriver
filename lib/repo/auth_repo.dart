@@ -583,7 +583,15 @@ class AuthRepo{
   async{
     return await sharedPreferences.setBool(AppContants.userPayment, name);
   }
+  Future<void> saveDriverStatus(String status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('driver_status', status);
+  }
 
+  Future<String?> getDriverStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('driver_status');
+  }
   Future<bool>saveUserFee(String name)
   async{
     return await sharedPreferences.setString(AppContants.userFee, name);
