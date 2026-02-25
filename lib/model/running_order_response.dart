@@ -78,6 +78,7 @@ class Orders {
       String? bookingDate, 
       String? acceptTime, 
       String? senderContactNumber,
+      dynamic totalAmount,
       dynamic distance,
       dynamic senderName,
       dynamic expectedTime,
@@ -95,6 +96,7 @@ class Orders {
     _bookingDate = bookingDate;
     _acceptTime = acceptTime;
     _senderContactNumber = senderContactNumber;
+    _totalAmount = totalAmount;
     _senderName = senderName;
     _distance = distance;
     _expectedTime = expectedTime;
@@ -115,6 +117,7 @@ class Orders {
     _bookingDate = json['booking_date'];
     _acceptTime = json['accept_time'];
     _senderContactNumber = json['sender_contact_number'];
+    _totalAmount = json['total_amount'];
     _senderName = json['sender_name'];
     _distance = json['distance'];
     _expectedTime = json['expected_time'];
@@ -138,6 +141,7 @@ class Orders {
   String? _bookingDate;
   String? _acceptTime;
   String? _senderContactNumber;
+  dynamic _totalAmount;
   String? _senderName;
   dynamic _distance;
   dynamic _expectedTime;
@@ -155,6 +159,7 @@ Orders copyWith({  String? bookingId,
   String? bookingDate,
   String? acceptTime,
   String? senderContactNumber,
+  dynamic totalAmount,
   String? senderName,
   dynamic distance,
   dynamic expectedTime,
@@ -172,6 +177,7 @@ Orders copyWith({  String? bookingId,
   bookingDate: bookingDate ?? _bookingDate,
   acceptTime: acceptTime ?? _acceptTime,
   senderContactNumber: senderContactNumber ?? _senderContactNumber,
+  totalAmount: totalAmount ?? _totalAmount,
   senderName: senderName ?? _senderName,
   distance: distance ?? _distance,
   expectedTime: expectedTime ?? _expectedTime,
@@ -192,6 +198,7 @@ Orders copyWith({  String? bookingId,
   String? get senderContactNumber => _senderContactNumber;
   String? get senderName => _senderName;
   dynamic get distance => _distance;
+  dynamic get totalAmount => _totalAmount;
   dynamic get expectedTime => _expectedTime;
   Pickup? get pickup => _pickup;
   List<Dropoffs>? get dropoffs => _dropoffs;
@@ -210,6 +217,7 @@ Orders copyWith({  String? bookingId,
     map['booking_date'] = _bookingDate;
     map['accept_time'] = _acceptTime;
     map['sender_contact_number'] = _senderContactNumber;
+    map['total_amount'] = _totalAmount;
     map['sender_name'] = _senderName;
     map['sender_contact_number'] = _senderContactNumber;
     map['distance'] = _distance;

@@ -1,30 +1,22 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
-// import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/controller/authController.dart';
-// import 'package:workmanager/workmanager.dart';
 import 'common/background_service.dart';
 import 'common/driver_notification_service.dart';
 import 'common/get_di.dart' as di;
@@ -34,8 +26,6 @@ import 'package:taxi_driver/common/db_helper.dart';
 import 'package:taxi_driver/common/globs.dart';
 import 'package:taxi_driver/common/my_http_overrides.dart';
 import 'package:taxi_driver/common/service_call.dart';
-import 'package:taxi_driver/common/socket_manager.dart';
-import 'package:taxi_driver/cubit/login_cubit.dart';
 import 'package:taxi_driver/view/login/splash_view.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'common/route_helper.dart';
@@ -63,8 +53,7 @@ class OverlayHelper {
 SharedPreferences? prefs;
 final AudioPlayer player = AudioPlayer();
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> showNotification() async {
   const AndroidNotificationDetails androidPlatformChannelSpecifics =

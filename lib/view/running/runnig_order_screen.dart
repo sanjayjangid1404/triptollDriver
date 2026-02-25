@@ -291,7 +291,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    "${AppContants.rupessSystem} ${controller.runningOrderResponse!.orders![0].amount ?? ""}",
+                                    "${AppContants.rupessSystem} ${controller.runningOrderResponse!.orders![0].totalAmount ?? ""}",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: TColor.secondaryText,
@@ -516,7 +516,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                     fontWeight: FontWeight.bold),),
                 Flexible(
                   child: Text(
-                    "${AppContants.rupessSystem} ${controller.runningOrderResponse!.orders![0].amount ?? ""}",
+                    "${AppContants.rupessSystem} ${controller.runningOrderResponse!.orders![0].totalAmount ?? ""}",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: TColor.secondaryText,
