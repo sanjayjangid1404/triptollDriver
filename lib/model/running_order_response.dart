@@ -70,7 +70,8 @@ class Orders {
       String? orderId, 
       String? amount, 
       String? driverId, 
-      String? categoryId, 
+      String? pickupOtp,
+      String? categoryId,
       String? cusId, 
       String? startTrip, 
       String? orderStatus, 
@@ -88,6 +89,7 @@ class Orders {
     _orderId = orderId;
     _amount = amount;
     _driverId = driverId;
+    _pickupOtp = pickupOtp;
     _categoryId = categoryId;
     _cusId = cusId;
     _startTrip = startTrip;
@@ -109,6 +111,7 @@ class Orders {
     _orderId = json['order_id'];
     _amount = json['amount'];
     _driverId = json['driver_id'];
+    _pickupOtp = json['pickup_otp'];
     _categoryId = json['category_id'];
     _cusId = json['cus_id'];
     _startTrip = json['start_trip'];
@@ -133,6 +136,7 @@ class Orders {
   String? _orderId;
   String? _amount;
   String? _driverId;
+  dynamic _pickupOtp;
   String? _categoryId;
   String? _cusId;
   String? _startTrip;
@@ -151,6 +155,7 @@ Orders copyWith({  String? bookingId,
   String? orderId,
   String? amount,
   String? driverId,
+  dynamic pickupOtp,
   String? categoryId,
   String? cusId,
   String? startTrip,
@@ -169,6 +174,7 @@ Orders copyWith({  String? bookingId,
   orderId: orderId ?? _orderId,
   amount: amount ?? _amount,
   driverId: driverId ?? _driverId,
+  pickupOtp: pickupOtp ?? _pickupOtp,
   categoryId: categoryId ?? _categoryId,
   cusId: cusId ?? _cusId,
   startTrip: startTrip ?? _startTrip,
@@ -188,6 +194,7 @@ Orders copyWith({  String? bookingId,
   String? get orderId => _orderId;
   String? get amount => _amount;
   String? get driverId => _driverId;
+  dynamic get pickupOtp => _pickupOtp;
   String? get categoryId => _categoryId;
   String? get cusId => _cusId;
   String? get startTrip => _startTrip;
@@ -209,6 +216,7 @@ Orders copyWith({  String? bookingId,
     map['order_id'] = _orderId;
     map['amount'] = _amount;
     map['driver_id'] = _driverId;
+    map['pickup_otp'] = _pickupOtp;
     map['category_id'] = _categoryId;
     map['cus_id'] = _cusId;
     map['start_trip'] = _startTrip;

@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:taxi_driver/common/custom_snackbar.dart';
 import '../../common/appContants.dart';
 import '../../common/color_extension.dart';
 import '../../controller/authController.dart';
@@ -8,6 +9,7 @@ import '../home/show_timer.dart';
 import '../home/support/faq.dart';
 import '../home/unloading_timer.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 class RunningOrderScreen extends StatefulWidget {
 
@@ -18,6 +20,7 @@ class RunningOrderScreen extends StatefulWidget {
 
 class _RunningOrderScreenState extends State<RunningOrderScreen> {
   GoogleMapController? _mapController;
+  TextEditingController otpController = TextEditingController();
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   List<LatLng> _allPoints = [];
@@ -56,10 +59,6 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
       _prepareMapData();
     });
   }
-
-  // ---------------------------
-  // PREPARE ALL MARKERS + LINES
-  // ---------------------------
 
   Future<void> _prepareMapData() async {
     final order = Get.find<AuthController>()
@@ -179,9 +178,6 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
     );
   }
 
-  // ---------------------------
-  // UI
-  // ---------------------------
   @override
   Widget build(BuildContext context) {
     final AuthController controller = Get.find<AuthController>();
@@ -396,10 +392,10 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                               itemCount: controller.runningOrderResponse!.orders![0].dropoffs?.length ?? 0,
                               itemBuilder: (context, index) {
                                 final dropoff = controller.runningOrderResponse!.orders![0].dropoffs![index];
-                            
+
                                 // bool isCompleted = index < currentDropIndex.value ||
                                 //    (isLastDropCompleted.value && index == currentDropIndex.value);
-                            
+
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Row(
@@ -476,7 +472,77 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                             maxLoadingTime: controller.maxTime.toString(),
                           )
                               : SizedBox.shrink(),
-                          // : SizedBox.shrink(),
+                          controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted" ?
+                           Padding(
+                             padding: const EdgeInsets.only(bottom: 8.0),
+                             child: Align(
+                               alignment: Alignment.centerLeft,
+                               child: Text('Enter Pickup Pin Here',
+                               style: TextStyle(
+                                   color: TColor.primaryText,
+                                   fontSize: 18,
+                                   fontWeight: FontWeight.w600
+                               ),
+                               ),
+                             ),
+                           ) : SizedBox.shrink(),
+                          controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted" ?
+                          PinCodeTextField(
+                            appContext: context,
+                            length: 4,
+                            controller: otpController,
+                            keyboardType: TextInputType.number,
+                            autoDisposeControllers: false,
+                            animationType: AnimationType.fade,
+                            enableActiveFill: true,
+                            cursorColor: Colors.black,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            pinTheme: PinTheme(
+                              shape: PinCodeFieldShape.box,
+                              borderRadius: BorderRadius.circular(8),
+                              fieldHeight: 55,
+                              fieldWidth: 50,
+
+                              // 👇 Border colors
+                              inactiveColor: Colors.black,
+                              activeColor: Colors.black,
+                              selectedColor: Colors.black,
+
+                              // 👇 Background colors
+                              activeFillColor: Colors.white,
+                              selectedFillColor: Colors.white,
+                              inactiveFillColor: Colors.grey.shade50,
+
+                              disabledColor: Colors.black,
+                            ),
+
+                            onCompleted: (enteredOtp) {
+
+                              String apiOtp = controller
+                                  .runningOrderResponse!
+                                  .orders![0]
+                                  .pickupOtp
+                                  .toString();
+
+                              if (enteredOtp == apiOtp) {
+
+                                // ✅ Correct OTP → Auto API Call
+                                controller.startLoadingApi(
+                                  controller.getUserID().toString(),
+                                  context,
+                                  controller.runningOrderResponse!.orders![0].bookingId.toString(),
+                                  controller.runningOrderResponse!.orders![0].pickup!.locationId.toString(),
+                                );
+
+                              } else {
+
+                                showCustomSnackBar("Wrong Pickup Pin",isError: true,getXSnackBar: true);
+                                otpController.clear();
+                              }
+                            },
+
+                            onChanged: (value) {},
+                          ) : SizedBox.shrink(),
                           const SizedBox(height: 25),
                         ],
                       ),
@@ -593,14 +659,6 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                       double.parse(drop.lat.toString()),
                       double.parse(drop.lng.toString()),
                     );
-                    // final firestore = FirebaseFirestore.instance;
-                    // await firestore.collection('location_id_direction').add({
-                    //   'bookingId': bookingResponse.bookingId.toString(),
-                    //   'locationId': drop.locationId.toString(),
-                    //   'timestamp': DateTime.now(),
-                    // });
-                    // print("🗺️ Opening map for sequence ${drop.sequence} "
-                    //     "| Location ID: ${drop.locationId}");
                   } else {
                     print("✅ All drops completed");
                   }
@@ -649,12 +707,35 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
           Expanded(
               child:  InkWell(
                 onTap: () async {
-                  // final status = bookingResponse.orderStatus.toString().toLowerCase();
-
                   if ( controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted") {
-                    controller.startLoadingApi(controller.getUserID().toString(), context, controller.runningOrderResponse!.orders![0].bookingId.toString(),controller.runningOrderResponse!.orders![0].pickup!.locationId.toString());
-                    // checkDriverBooking(context);
-                  }
+
+                    String enteredOtp = otpController.text.trim();
+                    String apiOtp = controller
+                        .runningOrderResponse!
+                        .orders![0]
+                        .pickupOtp
+                        .toString();
+
+                    if (enteredOtp.length != 4) {
+                      showCustomSnackBar("Please enter 4 digit Pin for continue ride",getXSnackBar: true,isError: true);
+                      return;
+                    }
+
+                    if (enteredOtp == apiOtp) {
+
+                      // ✅ Correct OTP → Call API
+                      controller.startLoadingApi(
+                        controller.getUserID().toString(),
+                        context,
+                        controller.runningOrderResponse!.orders![0].bookingId.toString(),
+                        controller.runningOrderResponse!.orders![0].pickup!.locationId.toString(),
+                      );
+
+                    } else {
+                      showCustomSnackBar("Wrong OTP",isError: true,getXSnackBar: true);
+
+                    }
+                    }
                   else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "loading") {
                     controller.orderPicked(orderID: controller.runningOrderResponse!.orders![0].bookingId.toString(),locationID: controller.runningOrderResponse!.orders![0].pickup!.locationId.toString(),context: context);
                     // checkDriverBooking(context);
@@ -697,52 +778,45 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                       },
                     );
                   }
-                  else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked") {
-                    print('🚚 Order Picked — Starting unloading logic');
+                  else if (controller.runningOrderResponse!.orders![0].orderStatus
+                      .toString()
+                      .toLowerCase() ==
+                      "picked") {
 
-                    final drops = controller.runningOrderResponse!.orders![0].dropoffs ?? [];
+                    final drops =
+                        controller.runningOrderResponse!.orders![0].dropoffs ?? [];
 
-                    if (drops.isEmpty) {
-                      print('⚠️ No dropoff found.');
-                      return;
-                    }
+                    if (drops.isEmpty) return;
 
-                    // Sort drops by sequence (if not already sorted)
                     final sortedDrops = List.from(drops)
                       ..sort((a, b) => int.parse(a.sequence.toString())
                           .compareTo(int.parse(b.sequence.toString())));
 
-                    int dropIndex = controller.currentDropIndex.value;
+                    // 🔥 Always find FIRST pending drop
+                    final nextPendingDrop = sortedDrops.firstWhere(
+                          (d) => d.status.toString().toLowerCase() == "pending",
+                      orElse: () => null,
+                    );
 
-                    // 🧠 Safety: If dropIndex is out of range, reset it to 0
-                    if (dropIndex >= sortedDrops.length) {
-                      dropIndex = 0;
-                      controller.currentDropIndex.value = 0;
+                    if (nextPendingDrop == null) {
+                      print("🎉 All drops completed");
+                      return;
                     }
 
-                    final drop = sortedDrops[dropIndex];
-                    // await controller.startUnLoadingApi(
-                    //   controller.getUserID().toString(),
-                    //   context,
-                    //   controller.runningOrderResponse!.orders![0].bookingId.toString(),
-                    //   drop.locationId.toString(),
-                    // );
-                    // await controller.nextDrop(sortedDrops.length);
+                    print("👉 Working on Drop ID: ${nextPendingDrop.locationId}");
+
                     final isSuccess = await controller.startUnLoadingApi(
                       controller.getUserID().toString(),
                       context,
                       controller.runningOrderResponse!.orders![0].bookingId.toString(),
-                      drop.locationId.toString(),
+                      nextPendingDrop.locationId.toString(),
                     );
 
-                    if (isSuccess) {
-                      await controller.nextDrop(sortedDrops.length);
-                    }else {
-                      print('⛔ Unloading failed → same drop retry');
-                      // currentDropIndex same rahega
+                    if (!isSuccess) {
+                      print("⛔ Failed — retry same drop");
                     }
                   }
-                },
+                  },
                 child: Container(
                     height: 40,
                     margin: const EdgeInsets.symmetric(horizontal: 10),

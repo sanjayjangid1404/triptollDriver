@@ -1635,9 +1635,9 @@ class AuthController extends GetxController implements GetxService {
     if (response.statusCode == 200 || response.statusCode == 400) {
       hasShownSheet = false;
       authRepo.saveUserBooking("0");
-      startJourneyToNext(  cus_id: getUserID(), orderID: orderID);
-      // Get.offAll(HomeView());
       checkDriverBooking(context);
+      startJourneyToNext(cus_id: getUserID(), orderID: orderID);
+      update();
     }
     else {
       ApiChecker.checkApi(response);
@@ -1688,19 +1688,10 @@ class AuthController extends GetxController implements GetxService {
 
     if (isKyc() && isPayment()) {
       isLoading = true;
-      // Globs.showHUD();
-      Response response = await authRepo.checkDriverBooking(
-          userID: getUserID());
-
-      //  LoginResponse? loginResponse;
-
-
+      Response response = await authRepo.checkDriverBooking(userID: getUserID());
       if (response.statusCode == 200 || response.statusCode == 400) {
         runningOrderResponse = null;
-
-
         runningOrderResponse = RunningOrderResponse.fromJson(response.body);
-
         checkAndStartBookingNotification(context);
         getScheduledOrderFun();
         if (response.body["status"] == false) {
@@ -1725,7 +1716,6 @@ class AuthController extends GetxController implements GetxService {
       }
 
       isLoading = false;
-      // Globs.hideHUD();
       update();
     }
   }
@@ -2584,7 +2574,13 @@ class AuthController extends GetxController implements GetxService {
         runningOrderResponse!.orders!.isNotEmpty) {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-       Get.to(() =>RunningOrderScreen(),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RunningOrderScreen(
+              // order: runningOrderResponse!.orders![0],
+            ),
+          ),
         );
       });
     }
