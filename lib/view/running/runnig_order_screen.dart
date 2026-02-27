@@ -12,13 +12,12 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class RunningOrderScreen extends StatefulWidget {
-
-
   @override
   State<RunningOrderScreen> createState() => _RunningOrderScreenState();
 }
 
 class _RunningOrderScreenState extends State<RunningOrderScreen> {
+
   GoogleMapController? _mapController;
   TextEditingController otpController = TextEditingController();
   Set<Marker> _markers = {};
@@ -186,7 +185,6 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
       onWillPop: () async => false,
       child: Scaffold(
         bottomNavigationBar: bottomButtons(context, controller),
-
         body: Column(
           children: [
             SizedBox(
