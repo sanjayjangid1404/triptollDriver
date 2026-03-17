@@ -26,6 +26,7 @@ import 'package:taxi_driver/view/menu/menu_view.dart';
 import '../../controller/authController.dart';
 import '../../main.dart';
 import '../../model/booking_notification_response.dart';
+import '../../socket/socket_connect_file.dart';
 import '../login/document_upload_view.dart';
 import 'driver_my_rides_view.dart';
 import 'notification_screen.dart';
@@ -149,6 +150,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     super.initState();
     print("calling");
     checkForUpdate();
+    Get.put(ChatController(), permanent: true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkLanguage();
       if( Get.find<AuthController>().isShow.value == 0) {
@@ -2125,6 +2127,7 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
     super.initState();
     loadStoredData().then((_) {
       _loadPrefs();
+      if (!mounted) return;
       setState(() {
         widget.authController.time = _formatDuration();
       });
@@ -2177,14 +2180,14 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
       // ✅ नया दिन → reset
       await prefs.setInt('online_seconds', 0);
       await prefs.setString('last_saved_date', today);
-
+      if (!mounted) return;
       setState(() {
         widget.authController.totalOnlineDuration = Duration.zero;
         widget.authController.onlineStartTime = null;
         widget.authController.time = "0 h 0 m";
       });
     } else {
-      // ✅ पुराना दिन → continue
+      if (!mounted) return;
       setState(() {
         widget.authController.totalOnlineDuration = Duration(seconds: seconds);
         if (startMillis != null) {

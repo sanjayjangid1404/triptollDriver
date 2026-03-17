@@ -17,6 +17,7 @@ import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:taxi_driver/controller/authController.dart';
+import 'package:taxi_driver/socket/socket_connect_file.dart';
 import 'common/background_service.dart';
 import 'common/driver_notification_service.dart';
 import 'common/get_di.dart' as di;
@@ -273,6 +274,7 @@ void main() async {
       FlutterOverlayWindow.showOverlay();
     }
   });
+  Get.put(ChatController(), permanent: true);
   runApp(const MyApp());
   configLoading();
   ServiceCall.getStaticDateApi();

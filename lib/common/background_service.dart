@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -7,10 +6,12 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'package:taxi_driver/common/appContants.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
+
+io.Socket? socket;
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -79,9 +80,29 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
 
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString(AppContants.token) ?? '';
+
+  socket = io.io('ws://triptoll.in:3000', {
+    "transports": ["websocket"],
+    "autoConnect": false,
+    "reconnection": true,
+    "reconnectionAttempts": 10,
+    "reconnectionDelay": 2000,
+    "extraHeaders": {"authorization": token}
+  });
+
+  socket!.connect();
+
+  socket!.onConnect((_) {
+    print("✅ BG Socket Connected");
+  });
+
+  socket!.onDisconnect((_) {
+    print("❌ BG Socket Disconnected");
+  });
   final GeolocatorPlatform geolocator = GeolocatorPlatform.instance;
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   // Check and request location permissions
   bool serviceEnabled = await geolocator.isLocationServiceEnabled();
@@ -108,6 +129,8 @@ void onStart(ServiceInstance service) async {
   }
 
   service.on('stopService').listen((event) {
+    socket?.disconnect();   // ✅ add
+    socket?.dispose();
     service.stopSelf();
   });
 
@@ -123,15 +146,11 @@ void onStart(ServiceInstance service) async {
   InitializationSettings(android: initialzationSettingsAndroid,iOS: initialzationSettingsIOS);
   flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-
-  // Location tracking every 3 seconds
   Timer.periodic(const Duration(seconds: 6), (timer) async {
     try {
       if (service is AndroidServiceInstance && !await service.isForegroundService()) {
         return;
       }
-
-      // Get current position
       Position position = await geolocator.getCurrentPosition(
         locationSettings: LocationSettings(accuracy: LocationAccuracy.bestForNavigation),
 
@@ -139,16 +158,64 @@ void onStart(ServiceInstance service) async {
 
       debugPrint("callingLocation");
       print("callingLocation");
-
-      final prefs = await SharedPreferences.getInstance();
       String? userId = prefs.getString(AppContants.userID);
       String? bookingID = prefs.getString(AppContants.bookingID);
 
-
-
-      // Only call API if userId is available
       if (userId != null && userId.isNotEmpty) {
-        await _sendLocationToServer(userId,position.latitude, position.longitude,bookingID);
+        // await _sendLocationToServer(userId,position.latitude, position.longitude,bookingID);
+        String? driverStatus = await getDriverStatus();
+        if (socket?.connected == true) {
+          socket?.emitWithAck(
+            "driverLocation",
+            {
+              "driver_id": userId,
+              "lat": position.latitude,
+              "lng": position.longitude
+            },
+            ack: (response) {
+              print("Server response background: $response");
+
+              if (response == null) {
+                print("❌ No response from server");
+                return;
+              }
+
+              if (response["status"] == "success") {
+                print("✅ Success: ${response["message"]}");
+              } else {
+                print("❌ Error: ${response["message"]}");
+
+                // 👉 Show to user
+                // Example:
+                // showSnackbar(response["message"]);
+              }
+            },
+          );
+          // socket!.emit("driverLocation", {
+          //   "lat": position.latitude,
+          //   "lng": position.longitude,
+          //   "driver_id": userId,
+          //   // "booking_id": bookingID ?? "0",
+          //   // "driver_status": driverStatus ?? "online",
+          //   // "location_time": DateTime.now().toIso8601String(),
+          // });
+          // final payload = {
+          //   "lat": position.latitude,
+          //   "lng": position.longitude,
+          //   "driver_id": userId,
+          //   // "booking_id": bookingID ?? "0",
+          //   // "driver_status": driverStatus ?? "online",
+          //   // "location_time": DateTime.now().toIso8601String(),
+          // };
+
+          // print("📤 DRIVER LOCATION PAYLOAD: $payload");
+          print("📤 DRIVER LOCATION PAYLOAD:");
+        }
+        else {
+          print("❌ Socket not connected");
+        }
+
+        print("📤 BG Location Sent: ${position.latitude}, ${position.longitude},${userId.toString()}");
       }
       // Send to server
 
@@ -186,47 +253,51 @@ Future<String?> getDriverStatus() async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getString('driver_status');
 }
-Future<void> _sendLocationToServer(String? userID,double lat, double lng,String? bookingID) async {
-
-  debugPrint("callingLocation");
-  print("callingLocation");
-  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-  String? token = sharedPreferences.getString(AppContants.token);
-  try {
 
 
-    print('${AppContants.baseURl}${AppContants.updateDriverLocation}');
-    print('location update backGround:${jsonEncode({
-      'lat': lat.toStringAsFixed(14),
-      'long': lng.toStringAsFixed(14),
-      "user_id": userID,
-      "booking_id": bookingID??"0",
-      "driver_status": getDriverStatus(),
-      "location_time":DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),})}');
-    final response = await http.post(
-      Uri.parse('${AppContants.baseURl}${AppContants.updateDriverLocation}'),
-      headers: {
-        'Content-Type': 'application/json',
-        "Authorization":"$token"
 
-      },
-      body: jsonEncode({
-        'lat': lat.toStringAsFixed(14),
-        'long': lng.toStringAsFixed(14),
-        'user_id': userID,
-        "booking_id": bookingID??"0",
-        "driver_status": getDriverStatus(),
-        "location_time": DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-      }),
-
-    );
-    print("Location Response${response.body}");
-
-    if (response.statusCode != 200) {
-      debugPrint('Failed to send location: ${response.statusCode}');
-    }
-  } catch (e) {
-    debugPrint('Error sending location: $e');
-  }
-}
+// api code comment by him for socket code
+// Future<void> _sendLocationToServer(String? userID,double lat, double lng,String? bookingID) async {
+//
+//   debugPrint("callingLocation");
+//   print("callingLocation");
+//   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+//   String? token = sharedPreferences.getString(AppContants.token);
+//   try {
+//
+//
+//     print('${AppContants.baseURl}${AppContants.updateDriverLocation}');
+//     print('location update backGround:${jsonEncode({
+//       'lat': lat.toStringAsFixed(14),
+//       'long': lng.toStringAsFixed(14),
+//       "user_id": userID,
+//       "booking_id": bookingID??"0",
+//       "driver_status": getDriverStatus(),
+//       "location_time":DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),})}');
+//     final response = await http.post(
+//       Uri.parse('${AppContants.baseURl}${AppContants.updateDriverLocation}'),
+//       headers: {
+//         'Content-Type': 'application/json',
+//         "Authorization":"$token"
+//
+//       },
+//       body: jsonEncode({
+//         'lat': lat.toStringAsFixed(14),
+//         'long': lng.toStringAsFixed(14),
+//         'user_id': userID,
+//         "booking_id": bookingID??"0",
+//         "driver_status": getDriverStatus(),
+//         "location_time": DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+//       }),
+//
+//     );
+//     print("Location Response${response.body}");
+//
+//     if (response.statusCode != 200) {
+//       debugPrint('Failed to send location: ${response.statusCode}');
+//     }
+//   } catch (e) {
+//     debugPrint('Error sending location: $e');
+//   }
+// }
 

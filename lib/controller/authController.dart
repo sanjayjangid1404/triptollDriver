@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -53,6 +54,7 @@ import '../model/vehicle_data.dart' hide Data;
 import '../model/wallet_response.dart';
 import '../model/weekly_earn.dart';
 import '../repo/auth_repo.dart';
+import '../socket/socket_connect_file.dart';
 import '../view/home/order/category_list_page.dart';
 import '../view/home/show_timer.dart';
 import '../view/home/support/faq.dart';
@@ -296,7 +298,10 @@ class AuthController extends GetxController implements GetxService {
 
     _startLocationUpdates();
   }
-
+  Future<String?> getDriverStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('driver_status');
+  }
   void _startLocationUpdates() {
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
@@ -307,15 +312,106 @@ class AuthController extends GetxController implements GetxService {
 
     _positionStreamSubscription = Geolocator.getPositionStream(
       locationSettings: locationSettings,
-    ).listen((Position position) {
+    ).listen((Position position) async {
       print("📍 New Position: ${position.latitude}, ${position.longitude}");
 
       if (_locationUpdateTimer == null || !_locationUpdateTimer!.isActive) {
-        _updateDriverLocationOnServer(position.latitude, position.longitude);
+        // _updateDriverLocationOnServer(position.latitude, position.longitude);
+        String? driverStatus = await getDriverStatus();
+        final socketController = Get.find<ChatController>();
+        if (socketController.socket?.connected == true) {
 
-        _locationUpdateTimer = Timer(const Duration(seconds: 10), () {
-          // Timer khatam hone par next call allow hoga
-          _updateDriverLocationOnServer(position.latitude, position.longitude);
+          socketController.socket?.emitWithAck(
+            "driverLocation",
+            {
+              "driver_id": getUserID(),
+              "lat": position.latitude,
+              "lng": position.longitude
+            },
+            ack: (response) {
+              if (kDebugMode) {
+                print("Server response: $response");
+              }
+
+              if (response == null) {
+                if (kDebugMode) {
+                  print("❌ No response from server");
+                }
+                return;
+              }
+
+              if (response["status"] == "success") {
+                if (kDebugMode) {
+                  print("✅ Success: ${response["message"]}");
+                }
+              } else {
+                if (kDebugMode) {
+                  print("❌ Error: ${response["message"]}");
+                }
+
+                // 👉 Show to user
+                // Example:
+                // showSnackbar(response["message"]);
+              }
+            },
+          );
+          // socketController.socket!.emit("driverLocation", {
+          //   "lat": position.latitude,
+          //   "lng": position.longitude,
+          //   "driver_id": getUserID(),
+          //   // "driver_status": driverStatus ?? "online",
+          //   // "location_time": DateTime.now().toIso8601String(),
+          // });
+
+          print("📤 Location Sent (App Running)");
+        } else {
+          print("❌ Socket not connected");
+        }
+
+        _locationUpdateTimer = Timer(const Duration(seconds: 10), () async {
+          // _updateDriverLocationOnServer(position.latitude, position.longitude);
+
+          String? driverStatus = await getDriverStatus();
+          final socketController = Get.find<ChatController>();
+          if (socketController.socket?.connected == true) {
+            socketController.socket?.emitWithAck(
+              "driverLocation",
+              {
+                "driver_id": getUserID(),
+                "lat": position.latitude,
+                "lng": position.longitude
+              },
+              ack: (response) {
+                print("Server response: $response");
+
+                if (response == null) {
+                  print("❌ No response from server");
+                  return;
+                }
+
+                if (response["status"] == "success") {
+                  print("✅ Success: ${response["message"]}");
+                } else {
+                  print("❌ Error: ${response["message"]}");
+
+                  // 👉 Show to user
+                  // Example:
+                  // showSnackbar(response["message"]);
+                }
+              },
+            );
+            // socketController.socket!.emit("driverLocation", {
+            //   "lat": position.latitude,
+            //   "lng": position.longitude,
+            //   "driver_id": getUserID(),
+            //   // "driver_status": driverStatus ?? "online",
+            //   // "location_time": DateTime.now().toIso8601String(),
+            // });
+
+            print("📤 Location Sent (App Running)");
+          } else {
+            print("❌ Socket not connected");
+          }
         });
       }
     });
@@ -434,8 +530,7 @@ class AuthController extends GetxController implements GetxService {
 
     if (response.statusCode == 200 || response.statusCode == 400) {
       if (response.body["status"].toString() == "false") {
-        showCustomSnackBar(
-            response.body["message"], getXSnackBar: false, isError: true);
+        showCustomSnackBar(response.body["message"], getXSnackBar: false, isError: true);
         driverInfo(context);
       }
       else {
@@ -458,7 +553,8 @@ class AuthController extends GetxController implements GetxService {
         authRepo.saveUserCityId(response.body['city_id']);
         authRepo.setMaxTime(response.body['max_loading_time'].toString());
         authRepo.setPricePerMinute(response.body['loading_charge_per_min'].toString());
-
+        final chatController = Get.find<ChatController>();
+        chatController.reconnectWithNewToken();
         if (response.body['is_loading_time'].toString() == "true") {
           authRepo.saveIsLoadingTime(true);
         }
