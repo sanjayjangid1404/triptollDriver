@@ -5,7 +5,7 @@
 class BookingNotificationResponse {
   BookingNotificationResponse({
       dynamic status, 
-      String? message, 
+      dynamic message, 
       List<Data>? data,}){
     _status = status;
     _message = message;
@@ -23,17 +23,17 @@ class BookingNotificationResponse {
     }
   }
   dynamic _status;
-  String? _message;
+  dynamic _message;
   List<Data>? _data;
 BookingNotificationResponse copyWith({  dynamic status,
-  String? message,
+  dynamic message,
   List<Data>? data,
 }) => BookingNotificationResponse(  status: status ?? _status,
   message: message ?? _message,
   data: data ?? _data,
 );
   dynamic get status => _status;
-  String? get message => _message;
+  dynamic get message => _message;
   List<Data>? get data => _data;
 
   Map<String, dynamic> toJson() {
@@ -60,18 +60,18 @@ BookingNotificationResponse copyWith({  dynamic status,
 
 class Data {
   Data({
-      String? bookingId, 
-      String? orderId, 
-      String? amount, 
+      dynamic bookingId, 
+      dynamic orderId, 
+      dynamic amount, 
       dynamic vehicleId, 
       dynamic orderStatus,
       dynamic scheduleTime,
       dynamic scheduleDate,
-      String? cusId,
+      dynamic cusId,
       dynamic isFake, 
       Pickup? pickup, 
       List<Dropoffs>? dropoffs, 
-      num? distance,}){
+      dynamic distance,}){
     _bookingId = bookingId;
     _orderId = orderId;
     _amount = amount;
@@ -105,30 +105,30 @@ class Data {
     }
     _distance = json['distance'];
   }
-  String? _bookingId;
-  String? _orderId;
-  String? _amount;
+  dynamic _bookingId;
+  dynamic _orderId;
+  dynamic _amount;
   dynamic _vehicleId;
   dynamic _orderStatus;
   dynamic _scheduleTime;
   dynamic _scheduleDate;
-  String? _cusId;
+  dynamic _cusId;
   dynamic _isFake;
   Pickup? _pickup;
   List<Dropoffs>? _dropoffs;
-  num? _distance;
-Data copyWith({  String? bookingId,
-  String? orderId,
-  String? amount,
+  dynamic _distance;
+Data copyWith({  dynamic bookingId,
+  dynamic orderId,
+  dynamic amount,
   dynamic vehicleId,
   dynamic orderStatus,
   dynamic scheduleTime,
   dynamic scheduleDate,
-  String? cusId,
+  dynamic cusId,
   dynamic isFake,
   Pickup? pickup,
   List<Dropoffs>? dropoffs,
-  num? distance,
+  dynamic distance,
 }) => Data(  bookingId: bookingId ?? _bookingId,
   orderId: orderId ?? _orderId,
   amount: amount ?? _amount,
@@ -142,18 +142,18 @@ Data copyWith({  String? bookingId,
   dropoffs: dropoffs ?? _dropoffs,
   distance: distance ?? _distance,
 );
-  String? get bookingId => _bookingId;
-  String? get orderId => _orderId;
-  String? get amount => _amount;
+  dynamic get bookingId => _bookingId;
+  dynamic get orderId => _orderId;
+  dynamic get amount => _amount;
   dynamic get vehicleId => _vehicleId;
   dynamic get scheduleTime => _scheduleTime;
   dynamic get scheduleDate => _scheduleDate;
   dynamic get orderStatus => _orderStatus;
-  String? get cusId => _cusId;
+  dynamic get cusId => _cusId;
   dynamic get isFake => _isFake;
   Pickup? get pickup => _pickup;
   List<Dropoffs>? get dropoffs => _dropoffs;
-  num? get distance => _distance;
+  dynamic get distance => _distance;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -187,12 +187,12 @@ Data copyWith({  String? bookingId,
 
 class Dropoffs {
   Dropoffs({
-      String? address, 
-      String? lat, 
-      String? lng, 
-      String? name, 
-      String? contactNumber, 
-      String? sequence,}){
+      dynamic address, 
+      dynamic lat, 
+      dynamic lng, 
+      dynamic name, 
+      dynamic contactNumber, 
+      dynamic sequence,}){
     _address = address;
     _lat = lat;
     _lng = lng;
@@ -209,18 +209,18 @@ class Dropoffs {
     _contactNumber = json['contact_number'];
     _sequence = json['sequence'];
   }
-  String? _address;
-  String? _lat;
-  String? _lng;
-  String? _name;
-  String? _contactNumber;
-  String? _sequence;
-Dropoffs copyWith({  String? address,
-  String? lat,
-  String? lng,
-  String? name,
-  String? contactNumber,
-  String? sequence,
+  dynamic _address;
+  dynamic _lat;
+  dynamic _lng;
+  dynamic _name;
+  dynamic _contactNumber;
+  dynamic _sequence;
+Dropoffs copyWith({  dynamic address,
+  dynamic lat,
+  dynamic lng,
+  dynamic name,
+  dynamic contactNumber,
+  dynamic sequence,
 }) => Dropoffs(  address: address ?? _address,
   lat: lat ?? _lat,
   lng: lng ?? _lng,
@@ -228,12 +228,12 @@ Dropoffs copyWith({  String? address,
   contactNumber: contactNumber ?? _contactNumber,
   sequence: sequence ?? _sequence,
 );
-  String? get address => _address;
-  String? get lat => _lat;
-  String? get lng => _lng;
-  String? get name => _name;
-  String? get contactNumber => _contactNumber;
-  String? get sequence => _sequence;
+  dynamic get address => _address;
+  dynamic get lat => _lat;
+  dynamic get lng => _lng;
+  dynamic get name => _name;
+  dynamic get contactNumber => _contactNumber;
+  dynamic get sequence => _sequence;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -254,9 +254,9 @@ Dropoffs copyWith({  String? address,
 
 class Pickup {
   Pickup({
-      String? address, 
-      String? lat, 
-      String? lng,}){
+      dynamic address, 
+      dynamic lat, 
+      dynamic lng,}){
     _address = address;
     _lat = lat;
     _lng = lng;
@@ -267,19 +267,19 @@ class Pickup {
     _lat = json['lat'];
     _lng = json['lng'];
   }
-  String? _address;
-  String? _lat;
-  String? _lng;
-Pickup copyWith({  String? address,
-  String? lat,
-  String? lng,
+  dynamic _address;
+  dynamic _lat;
+  dynamic _lng;
+Pickup copyWith({  dynamic address,
+  dynamic lat,
+  dynamic lng,
 }) => Pickup(  address: address ?? _address,
   lat: lat ?? _lat,
   lng: lng ?? _lng,
 );
-  String? get address => _address;
-  String? get lat => _lat;
-  String? get lng => _lng;
+  dynamic get address => _address;
+  dynamic get lat => _lat;
+  dynamic get lng => _lng;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

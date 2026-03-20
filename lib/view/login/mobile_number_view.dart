@@ -559,9 +559,9 @@ class _MobileNumberViewState extends State<MobileNumberView> {
                     }
                     else {
                       authController.loginFunction(txtMobile.text, passwordMobile.text,authController.deviceId,context);
-                      Future.delayed(Duration(seconds: 5),() {
-                        authController.checkDriverDevice(authController.deviceId);
-                      },);
+                      // Future.delayed(Duration(seconds: 5),() {
+                      //   authController.checkDriverDevice(authController.deviceId);
+                      // },);
 
                     }
 

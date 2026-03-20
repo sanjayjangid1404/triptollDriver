@@ -539,7 +539,7 @@ class _MyApp extends State<MyApp>  with WidgetsBindingObserver{
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Taxi Driver',
+      title: 'Triptoll',
       translations: LocaleString(),
       locale: const Locale('en','US'),
       navigatorKey: Get.key,

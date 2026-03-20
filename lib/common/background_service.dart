@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/appContants.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -164,33 +164,50 @@ void onStart(ServiceInstance service) async {
       if (userId != null && userId.isNotEmpty) {
         // await _sendLocationToServer(userId,position.latitude, position.longitude,bookingID);
         String? driverStatus = await getDriverStatus();
-        if (socket?.connected == true) {
+        if (socket?.connected == true &&
+            userId.toString().trim().isNotEmpty) {
           socket?.emitWithAck(
             "driverLocation",
             {
               "driver_id": userId,
               "lat": position.latitude,
-              "lng": position.longitude
+              "lng": position.longitude,
+              "booking_id" : bookingID ?? "0"
             },
             ack: (response) {
-              print("Server response background: $response");
+              if (kDebugMode) {
+                print("Server response background: $response");
+              }
 
               if (response == null) {
-                print("❌ No response from server");
+                if (kDebugMode) {
+                  print("❌ No response from server");
+                }
                 return;
               }
 
               if (response["status"] == "success") {
-                print("✅ Success: ${response["message"]}");
+                if (kDebugMode) {
+                  print("✅ Success: ${response["message"]}");
+                }
               } else {
-                print("❌ Error: ${response["message"]}");
-
-                // 👉 Show to user
-                // Example:
-                // showSnackbar(response["message"]);
+                if (kDebugMode) {
+                  print("❌ Error: ${response["message"]}");
+                }
               }
             },
           );
+          final payload = {
+            "lat": position.latitude,
+            "lng": position.longitude,
+            "driver_id": userId,
+            "booking_id": bookingID ?? "0",
+            // "driver_status": driverStatus ?? "online",
+            // "location_time": DateTime.now().toIso8601String(),
+          };
+          if (kDebugMode) {
+            print("📤 DRIVER LOCATION PAYLOAD: $payload");
+          }
           // socket!.emit("driverLocation", {
           //   "lat": position.latitude,
           //   "lng": position.longitude,
@@ -207,15 +224,12 @@ void onStart(ServiceInstance service) async {
           //   // "driver_status": driverStatus ?? "online",
           //   // "location_time": DateTime.now().toIso8601String(),
           // };
+          print("📤 BG Location Sent: ${position.latitude}, ${position.longitude},${userId.toString()}");
 
-          // print("📤 DRIVER LOCATION PAYLOAD: $payload");
-          print("📤 DRIVER LOCATION PAYLOAD:");
         }
         else {
-          print("❌ Socket not connected");
+          print("❌ Socket not connected background");
         }
-
-        print("📤 BG Location Sent: ${position.latitude}, ${position.longitude},${userId.toString()}");
       }
       // Send to server
 

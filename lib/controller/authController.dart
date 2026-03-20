@@ -79,7 +79,7 @@ class AuthController extends GetxController implements GetxService {
   RxInt elapsedSeconds = 0.obs;
 
   void startLoadingTimer() {
-    if (loadingTimer != null) return; // already running
+    if (loadingTimer != null) return;
 
     loadingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       elapsedSeconds.value++;
@@ -194,9 +194,9 @@ class AuthController extends GetxController implements GetxService {
    // if(isLoggedIn()) {
     getDeviceId();
     _loadSavedDropIndex();
-      Stream.periodic(const Duration(seconds: 15)).listen((_) {
-        checkDriverDevice(deviceId);
-      });
+      // Stream.periodic(const Duration(seconds: 15)).listen((_) {
+      //   checkDriverDevice(deviceId);
+      // });
     //}
     _checkLocationPermission();
   }
@@ -319,6 +319,7 @@ class AuthController extends GetxController implements GetxService {
         // _updateDriverLocationOnServer(position.latitude, position.longitude);
         String? driverStatus = await getDriverStatus();
         final socketController = Get.find<ChatController>();
+        String? bookingID = prefs?.getString(AppContants.bookingID);
         if (socketController.socket?.connected == true) {
 
           socketController.socket?.emitWithAck(
@@ -326,7 +327,8 @@ class AuthController extends GetxController implements GetxService {
             {
               "driver_id": getUserID(),
               "lat": position.latitude,
-              "lng": position.longitude
+              "lng": position.longitude,
+              "booking_id" : bookingID ?? "0",
             },
             ack: (response) {
               if (kDebugMode) {
@@ -348,30 +350,18 @@ class AuthController extends GetxController implements GetxService {
                 if (kDebugMode) {
                   print("❌ Error: ${response["message"]}");
                 }
-
-                // 👉 Show to user
-                // Example:
-                // showSnackbar(response["message"]);
               }
             },
           );
-          // socketController.socket!.emit("driverLocation", {
-          //   "lat": position.latitude,
-          //   "lng": position.longitude,
-          //   "driver_id": getUserID(),
-          //   // "driver_status": driverStatus ?? "online",
-          //   // "location_time": DateTime.now().toIso8601String(),
-          // });
-
-          print("📤 Location Sent (App Running)");
         } else {
-          print("❌ Socket not connected");
+          print("❌ Socket not connected authController");
         }
 
         _locationUpdateTimer = Timer(const Duration(seconds: 10), () async {
           // _updateDriverLocationOnServer(position.latitude, position.longitude);
 
           String? driverStatus = await getDriverStatus();
+          String? bookingID = prefs?.getString(AppContants.bookingID);
           final socketController = Get.find<ChatController>();
           if (socketController.socket?.connected == true) {
             socketController.socket?.emitWithAck(
@@ -379,7 +369,8 @@ class AuthController extends GetxController implements GetxService {
               {
                 "driver_id": getUserID(),
                 "lat": position.latitude,
-                "lng": position.longitude
+                "lng": position.longitude,
+                "booking_id" :bookingID ?? "0",
               },
               ack: (response) {
                 print("Server response: $response");
@@ -393,24 +384,12 @@ class AuthController extends GetxController implements GetxService {
                   print("✅ Success: ${response["message"]}");
                 } else {
                   print("❌ Error: ${response["message"]}");
-
-                  // 👉 Show to user
-                  // Example:
-                  // showSnackbar(response["message"]);
                 }
               },
             );
-            // socketController.socket!.emit("driverLocation", {
-            //   "lat": position.latitude,
-            //   "lng": position.longitude,
-            //   "driver_id": getUserID(),
-            //   // "driver_status": driverStatus ?? "online",
-            //   // "location_time": DateTime.now().toIso8601String(),
-            // });
 
-            print("📤 Location Sent (App Running)");
           } else {
-            print("❌ Socket not connected");
+            print("❌ Socket not connected authController");
           }
         });
       }
@@ -536,9 +515,9 @@ class AuthController extends GetxController implements GetxService {
       else {
         showCustomSnackBar(
             response.body["message"], getXSnackBar: false, isError: false);
-        // loginResponse = LoginResponse.fromJson(response.body);
-        // _lResponse = LoginResponse.fromJson(response.body);
+        final chatController = Get.find<ChatController>();
         authRepo.saveUserToken(response.body['token']);
+        chatController.reconnectWithNewToken();
         if (response.body["category_id"] != null &&
             response.body["category_id"].isNotEmpty &&
             response.body["category_id"].toString() != "0") {
@@ -553,8 +532,74 @@ class AuthController extends GetxController implements GetxService {
         authRepo.saveUserCityId(response.body['city_id']);
         authRepo.setMaxTime(response.body['max_loading_time'].toString());
         authRepo.setPricePerMinute(response.body['loading_charge_per_min'].toString());
-        final chatController = Get.find<ChatController>();
-        chatController.reconnectWithNewToken();
+
+        if (chatController.socket?.connected == true) {
+          chatController.socket?.emitWithAck(
+            "registerDriverDevice",
+            {
+              "driver_id": response.body['id'].toString(),
+              "device_token" : deviceId
+            },
+            ack: (response) {
+              if (kDebugMode) {
+                print("Server response driver device: $response");
+              }
+
+              if (response == null) {
+                if (kDebugMode) {
+                  print("❌ No response from server");
+                }
+                return;
+              }
+
+              if (response["status"] == "success") {
+                if (kDebugMode) {
+                  print("✅ Success: ${response["message"]}");
+                }
+              } else {
+                if (kDebugMode) {
+                  print("❌ Error: ${response["message"]}");
+                }
+              }
+            },
+          );
+          print("🔥 first emit fired");
+          chatController.socket?.emitWithAck(
+              "startDeviceMonitor",
+              {
+            "driver_id": response.body['id'].toString(),
+            "device_token": Get.find<AuthController>().deviceId.toString()
+          },
+            ack: (response) {
+              if (kDebugMode) {
+                print("Server response driver device startDeviceMonitor: $response");
+              }
+
+              if (response == null) {
+                if (kDebugMode) {
+                  print("❌ No response from server");
+                }
+                return;
+              }
+
+              if (response["status"] == "success") {
+                if (kDebugMode) {
+                  print("✅ Success: ${response["message"]}");
+                }
+              } else {
+                if (kDebugMode) {
+                  print("❌ Error: ${response["message"]}");
+                }
+              }
+            },
+          );
+
+          print("🔥 Second emit fired${Get.find<AuthController>().deviceId.toString()}");
+          print("🔥 Second emit fired");
+        }
+        else {
+          print("❌ Socket not connected authController");
+        }
         if (response.body['is_loading_time'].toString() == "true") {
           authRepo.saveIsLoadingTime(true);
         }

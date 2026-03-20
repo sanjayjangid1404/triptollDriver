@@ -116,41 +116,64 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     }
   }
 
-  Stream<Data?> bookingStream() {
-    return Stream.periodic(const Duration(seconds: 5)).asyncMap((_) async {
-      try {
-        print({
-          "driver_id":Get.find<AuthController>().getUserID()
-        });
-        final response = await http.post(
-          Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
-          body: jsonEncode({
-            "driver_id":Get.find<AuthController>().getUserID()
-          })
-        );
-
-        print("respnse=>findNewBookings${response.body}");
-
-
-        if (response.statusCode == 200) {
-          final json = jsonDecode(response.body);
-          if (json["status"] == true && json["data"] != null) {
-            return Data.fromJson(json["data"][0]);
-          }
-        }
-      } catch (e) {
-        print("Error: $e");
-      }
-      return null;
-    });
-  }
-
+  // Stream<Data?> bookingStream() {
+  //   return Stream.periodic(const Duration(seconds: 5)).asyncMap((_) async {
+  //     try {
+  //       print({
+  //         "driver_id":Get.find<AuthController>().getUserID()
+  //       });
+  //       final response = await http.post(
+  //         Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
+  //         body: jsonEncode({
+  //           "driver_id":Get.find<AuthController>().getUserID()
+  //         })
+  //       );
+  //
+  //       print("respnse=>findNewBookings${response.body}");
+  //
+  //
+  //       if (response.statusCode == 200) {
+  //         final json = jsonDecode(response.body);
+  //         if (json["status"] == true && json["data"] != null) {
+  //           return Data.fromJson(json["data"][0]);
+  //         }
+  //       }
+  //     } catch (e) {
+  //       print("Error: $e");
+  //     }
+  //     return null;
+  //   });
+  // }
+  Worker? bookingWorker;
   @override
   void initState() {
     super.initState();
     print("calling");
     checkForUpdate();
-    Get.put(ChatController(), permanent: true);
+    if (!Get.isRegistered<ChatController>()) {
+      Get.put(ChatController(), permanent: true);
+    }
+    final chatController = Get.find<ChatController>();
+    bookingWorker = ever(chatController.newBookingSocket, (Data? booking) {
+      if (booking != null) {
+
+        if (!isSheetOpen &&
+            authController.isPayment() &&
+            authController.isKyc() &&
+            (int.tryParse(authController.walletAmount.toString()) ?? 0) >= -99) {
+
+          isSheetOpen = true;
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+
+            showRideDetailsSheet(booking).then((_) {
+              isSheetOpen = false;
+            });
+          });
+        }
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkLanguage();
       if( Get.find<AuthController>().isShow.value == 0) {
@@ -203,6 +226,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   Timer? _timer;
   @override
   void dispose() {
+    bookingWorker?.dispose();
     controller!.dispose();
     super.dispose();
   }
@@ -1066,23 +1090,22 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 ],
               ),
 
-              authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?
-              StreamBuilder<Data?>(
-                stream: bookingStream(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data != null && !isSheetOpen) {
-                    printSavedIds();
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      isSheetOpen = true;
-                      showRideDetailsSheet(snapshot.data!).then((_) {
-                        // reset so agle booking pe dobara open ho jaye
-                        isSheetOpen = false;
-                      });
-                    });
-                  }
-                  return const SizedBox.shrink();
-                },
-              ):SizedBox(),
+              // authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?
+              // StreamBuilder<Data?>(
+              //   stream: bookingStream(),
+              //   builder: (context, snapshot) {
+              //     if (snapshot.hasData && snapshot.data != null && !isSheetOpen) {
+              //       printSavedIds();
+              //       WidgetsBinding.instance.addPostFrameCallback((_) {
+              //         isSheetOpen = true;
+              //         showRideDetailsSheet(snapshot.data!).then((_) {
+              //           isSheetOpen = false;
+              //         });
+              //       });
+              //     }
+              //     return const SizedBox.shrink();
+              //   },
+              // ):SizedBox(),
             ],
           ),
                ),
