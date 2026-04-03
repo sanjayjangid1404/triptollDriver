@@ -649,13 +649,15 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                     ..sort((a, b) => int.parse(a.sequence.toString())
                         .compareTo(int.parse(b.sequence.toString())));
 
-                  final dropIndex = controller.currentDropIndex.value;
-                  if (dropIndex < sortedDrops.length) {
-                    final drop = sortedDrops[dropIndex];
+                  final nextPendingDrop = sortedDrops.firstWhere(
+                        (d) => d.status.toString().toLowerCase() == "pending",
+                    orElse: () => null,
+                  );
 
+                  if (nextPendingDrop != null) {
                     controller.openGoogleMap(
-                      double.parse(drop.lat.toString()),
-                      double.parse(drop.lng.toString()),
+                      double.parse(nextPendingDrop.lat.toString()),
+                      double.parse(nextPendingDrop.lng.toString()),
                     );
                   } else {
                     print("✅ All drops completed");
@@ -701,7 +703,6 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
           SizedBox(
             width: 10,
           ),
-          // isLoadingTime == false ?
           Expanded(
               child:  InkWell(
                 onTap: () async {
