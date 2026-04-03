@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -39,7 +40,7 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
+class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   bool isOpen = true;
 
   bool isDriverOnline = false;
@@ -49,17 +50,15 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   late Razorpay _razorpay;
   late Razorpay _razorpay2;
   bool isSheetOpen = false;
-   AnimationController? controller;
+  AnimationController? controller;
 
   Future<void> checkForUpdate() async {
     try {
       final info = await InAppUpdate.checkForUpdate();
 
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
-
         await InAppUpdate.performImmediateUpdate();
       }
-
     } catch (e) {
       // await logUpdateError(e.toString());
     }
@@ -100,7 +99,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     } else if (lang == "தமிழ்" || lang == "Tamil") {
       Get.updateLocale(const Locale('ta', 'IN'));
       authController.selectedLanguage.value = 'தமிழ்';
-    }  else if (lang == "हिन्दी" ||lang == "Hindi") {
+    } else if (lang == "हिन्दी" || lang == "Hindi") {
       Get.updateLocale(const Locale('hi', 'IN'));
       authController.selectedLanguage.value = "Hindi";
     }
@@ -145,6 +144,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   //   });
   // }
   Worker? bookingWorker;
+
   @override
   void initState() {
     super.initState();
@@ -154,14 +154,50 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       Get.put(ChatController(), permanent: true);
     }
     final chatController = Get.find<ChatController>();
+    chatController.socket!.on("bookingTaken", (data) async {
+      if (kDebugMode) {
+        print("📡 bookingTaken status: $data");
+      }
+
+      if (data != null && data["booking_id"] != null) {
+        if (isSheetOpen) {
+          if (Get.isBottomSheetOpen ?? false) {
+            Get.back(); // bottom sheet close
+          } else if (Get.isDialogOpen ?? false) {
+            Get.back(); // dialog close
+          } else {
+            Navigator.of(Get.context!).pop(); // fallback
+          }
+
+          isSheetOpen = false;
+        }
+      }
+    });
+    chatController.socket!.on("bookingCancelled", (data) {
+      final bookingId = data["booking_id"];
+
+      print("Booking cancelled: $bookingId");
+      if (data != null && data["booking_id"] != null) {
+        if (isSheetOpen) {
+          if (Get.isBottomSheetOpen ?? false) {
+            Get.back(); // bottom sheet close
+          } else if (Get.isDialogOpen ?? false) {
+            Get.back(); // dialog close
+          } else {
+            Navigator.of(Get.context!).pop(); // fallback
+          }
+
+          isSheetOpen = false;
+        }
+      }
+    });
     bookingWorker = ever(chatController.newBookingSocket, (Data? booking) {
       if (booking != null) {
-
         if (!isSheetOpen &&
             authController.isPayment() &&
             authController.isKyc() &&
-            (int.tryParse(authController.walletAmount.toString()) ?? 0) >= -99) {
-
+            (int.tryParse(authController.walletAmount.toString()) ?? 0) >=
+                -99) {
           isSheetOpen = true;
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -176,7 +212,10 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkLanguage();
-      if( Get.find<AuthController>().isShow.value == 0) {
+      if (Get
+          .find<AuthController>()
+          .isShow
+          .value == 0) {
         Get.snackbar(
           "Missed orders".tr,
           "Click here to check your missed orders.".tr,
@@ -197,7 +236,10 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       Get.find<AuthController>().driverOnlineTotalTIme();
       Get.find<AuthController>().getDriverFAQ();
       Get.find<AuthController>().driverInfo(context);
-      Get.find<AuthController>().isShow.value = 1;
+      Get
+          .find<AuthController>()
+          .isShow
+          .value = 1;
       _getCurrentLocation();
       _razorpay = Razorpay();
       _razorpay2 = Razorpay();
@@ -212,7 +254,6 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       setState(() {
 
       });
-
     });
     isDriverOnline = Globs.udValueBool("is_online");
     _timer = Timer.periodic(const Duration(seconds: 10), (_) {
@@ -224,6 +265,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
 
   Timer? _timer;
+
   @override
   void dispose() {
     bookingWorker?.dispose();
@@ -239,18 +281,17 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     print("Signature: ${response.signature}");
 
     var body = {
-      "driver_id":Get.find<AuthController>().getUserID().toString(),
-      "amount":Get.find<AuthController>().getRegistrationFee().toString(),
-      "transaction_id":response.paymentId.toString(),
-      "payment_status":"success",
-      "type":"registration",
+      "driver_id": Get.find<AuthController>().getUserID().toString(),
+      "amount": Get.find<AuthController>().getRegistrationFee().toString(),
+      "transaction_id": response.paymentId.toString(),
+      "payment_status": "success",
+      "type": "registration",
     };
 
     Get.find<AuthController>().updateDriverPaymentStatus(body);
   }
 
   void _handlePaymentSuccess2(PaymentSuccessResponse response) {
-
     print("✅ Payment Successful!");
     print("Payment ID: ${response.paymentId}");
     print("Order ID: ${response.orderId}");
@@ -258,11 +299,14 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     print("Signature: ${response.signature}");
 
     var body = {
-      "driver_id":Get.find<AuthController>().getUserID().toString(),
-      "amount":Get.find<AuthController>().walletAmount.toString(),
-      "transaction_id":response.paymentId.toString(),
-      "payment_status":"success",
-      "type":"wallet",
+      "driver_id": Get.find<AuthController>().getUserID().toString(),
+      "amount": Get
+          .find<AuthController>()
+          .walletAmount
+          .toString(),
+      "transaction_id": response.paymentId.toString(),
+      "payment_status": "success",
+      "type": "wallet",
     };
 
     Get.find<AuthController>().updateDriverPaymentStatus(body);
@@ -270,37 +314,44 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-     Get.snackbar('Error'.tr, 'Payment Fail'.tr);
-
-  }void _handlePaymentError2(PaymentFailureResponse response) {
     Get.snackbar('Error'.tr, 'Payment Fail'.tr);
-
   }
-  AuthController authController  = Get.find<AuthController>();
+
+  void _handlePaymentError2(PaymentFailureResponse response) {
+    Get.snackbar('Error'.tr, 'Payment Fail'.tr);
+  }
+
+  AuthController authController = Get.find<AuthController>();
+
   void _handleExternalWallet(ExternalWalletResponse response) {
-     Get.snackbar('External Wallet'.tr, '${response.walletName}');
-  }void _handleExternalWallet2(ExternalWalletResponse response) {
+    Get.snackbar('External Wallet'.tr, '${response.walletName}');
+  }
+
+  void _handleExternalWallet2(ExternalWalletResponse response) {
     Get.snackbar('External Wallet'.tr, '${response.walletName}');
   }
 
   String generateOrderId() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var random = Random();
-    String randomString = List.generate(14, (index) => chars[random.nextInt(chars.length)]).join();
+    String randomString = List.generate(
+        14, (index) => chars[random.nextInt(chars.length)]).join();
 
     return "order_$randomString";
   }
 
-  void _openRazorpayPayment(String id,amount) {
+  void _openRazorpayPayment(String id, amount) {
     String customOrderId = generateOrderId();
     print(customOrderId);
-    print(Get.find<AuthController>().getRegistrationFee()??"0");
+    print(Get.find<AuthController>().getRegistrationFee() ?? "0");
     var options = {
       'key': 'rzp_live_RAJBCQWCkgqpEb',
-      'amount': (double.parse((Get.find<AuthController>().getRegistrationFee()??"0").toString()) * 100).round(), // Convert to paise
+      'amount': (double.parse(
+          (Get.find<AuthController>().getRegistrationFee() ?? "0").toString()) *
+          100).round(), // Convert to paise
       'name': 'Triptoll',
       'description': 'Booking Payment',
-     'order_id': id, // custom 8 digit order id
+      'order_id': id, // custom 8 digit order id
       'prefill': {
         'contact': '${Get.find<AuthController>().getUserPhone().toString()}',
         'email': 'tritoll@gmail.com'
@@ -316,19 +367,20 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
     try {
       _razorpay.open(options);
-
     } catch (e) {
       debugPrint('Error: $e');
     }
   }
 
-  void _openRazorpayWallet(String id,amount) {
+  void _openRazorpayWallet(String id, amount) {
     String customOrderId = generateOrderId();
     print(customOrderId);
-    print(Get.find<AuthController>().getRegistrationFee()??"0");
+    print(Get.find<AuthController>().getRegistrationFee() ?? "0");
     var options = {
       'key': 'rzp_live_RAJBCQWCkgqpEb',
-      'amount': (double.parse((calculateRequiredPayment(Get.find<AuthController>().walletAmount)??"0").toString()) * 100).round(), // Convert to paise
+      'amount': (double.parse((calculateRequiredPayment(Get
+          .find<AuthController>()
+          .walletAmount) ?? "0").toString()) * 100).round(), // Convert to paise
       'name': 'Triptoll',
       'description': 'Booking Payment',
       'order_id': id, // custom 8 digit order id
@@ -343,17 +395,17 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
     try {
       _razorpay2.open(options);
-
     } catch (e) {
       debugPrint('Error: $e');
     }
   }
 
   Future<String?> createRazorpayOrderId({required int amount}) async {
-    const String keyId = 'rzp_live_RAJBCQWCkgqpEb';      // 🔑 Your Key ID
-    const String keySecret = 'DfWgvxPob2CSxM147onlshnF';  // 🔒 Your Key Secret (⚠️ sensitive!)
+    const String keyId = 'rzp_live_RAJBCQWCkgqpEb'; // 🔑 Your Key ID
+    const String keySecret = 'DfWgvxPob2CSxM147onlshnF'; // 🔒 Your Key Secret (⚠️ sensitive!)
 
-    final String basicAuth = 'Basic ' + base64Encode(utf8.encode('$keyId:$keySecret'));
+    final String basicAuth = 'Basic ' +
+        base64Encode(utf8.encode('$keyId:$keySecret'));
 
     final url = Uri.parse('https://api.razorpay.com/v1/orders');
 
@@ -364,9 +416,11 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
         'authorization': basicAuth,
       },
       body: jsonEncode({
-        "amount": amount,     // amount in paise (₹500 = 50000)
+        "amount": amount, // amount in paise (₹500 = 50000)
         "currency": "INR",
-        "receipt": "receipt_${DateTime.now().millisecondsSinceEpoch}"
+        "receipt": "receipt_${DateTime
+            .now()
+            .millisecondsSinceEpoch}"
       }),
     );
 
@@ -374,8 +428,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       final data = jsonDecode(response.body);
       print("data=>$data");
 
-      if(data["id"]!=null){
-        _openRazorpayPayment(data['id'].toString(),amount);
+      if (data["id"] != null) {
+        _openRazorpayPayment(data['id'].toString(), amount);
       }
       return data['id']; // <-- This is the order_id
     } else {
@@ -385,10 +439,11 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   }
 
   Future<String?> createWalletOrderID({required int amount}) async {
-    const String keyId = 'rzp_live_RAJBCQWCkgqpEb';      // 🔑 Your Key ID
-    const String keySecret = 'DfWgvxPob2CSxM147onlshnF';  // 🔒 Your Key Secret (⚠️ sensitive!)
+    const String keyId = 'rzp_live_RAJBCQWCkgqpEb'; // 🔑 Your Key ID
+    const String keySecret = 'DfWgvxPob2CSxM147onlshnF'; // 🔒 Your Key Secret (⚠️ sensitive!)
 
-    final String basicAuth = 'Basic ' + base64Encode(utf8.encode('$keyId:$keySecret'));
+    final String basicAuth = 'Basic ' +
+        base64Encode(utf8.encode('$keyId:$keySecret'));
 
     final url = Uri.parse('https://api.razorpay.com/v1/orders');
 
@@ -399,9 +454,11 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
         'authorization': basicAuth,
       },
       body: jsonEncode({
-        "amount": amount,     // amount in paise (₹500 = 50000)
+        "amount": amount, // amount in paise (₹500 = 50000)
         "currency": "INR",
-        "receipt": "receipt_${DateTime.now().millisecondsSinceEpoch}"
+        "receipt": "receipt_${DateTime
+            .now()
+            .millisecondsSinceEpoch}"
       }),
     );
 
@@ -409,8 +466,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       final data = jsonDecode(response.body);
       print(data);
 
-      if(data["id"]!=null){
-        _openRazorpayWallet(data['id'].toString(),amount);
+      if (data["id"] != null) {
+        _openRazorpayWallet(data['id'].toString(), amount);
       }
       return data['id']; // <-- This is the order_id
     } else {
@@ -418,329 +475,365 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       return null;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(
       builder: (AuthController authController) {
         final allOrders =
-            Get.find<AuthController>().getMyScheduleOrderModel.value.data;
+            Get
+                .find<AuthController>()
+                .getMyScheduleOrderModel
+                .value
+                .data;
 
         final pendingOrders = allOrders
             ?.where((e) => e.orderStatus?.toLowerCase() != "delivered")
             .toList();
 
-        print((int.parse(authController.walletAmount.toString())<= -99) );
+        print((int.parse(authController.walletAmount.toString()) <= -99));
         return PopScope(
-         canPop: false,
-         child: Scaffold(
-          body: Stack(
-            children: [
-              _isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : _currentPosition == null
-                  ?Text("No Location Get"):
-              Stack(
-                children: [
-                  GoogleMap(
-                    onMapCreated: (controller) => mapController = controller,
-                    initialCameraPosition: CameraPosition(
-                      target: _currentPosition!,
-                      zoom: 15,
-                    ),
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: true,
-                    markers: {
-                      if (_currentPosition != null)
-                        Marker(
-                          markerId: MarkerId('currentLocation'),
-                          position: _currentPosition!,
-                          icon: BitmapDescriptor.defaultMarkerWithHue(
-                            BitmapDescriptor.hueRed,
-                          ),
-                        ),
-                    },
-                  ),
-                  Positioned(
-                    bottom: 260,
-                    right: 10,
-                    child: FloatingActionButton(
-                      mini: true,
-                      backgroundColor: Colors.white,
-                      onPressed: () {
-                        mapController.animateCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: _currentPosition!,
-                              zoom: 16,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Icon(Icons.my_location, color: Colors.green),
-                    ),
-                  ),
-
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  authController.driverInResponse!=null && authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: FullWidthDriverStatusSwitch(authController: authController),
-                  ):SizedBox(),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 10,
-                            offset: Offset(0, -5),
-                          ),
-                        ]),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 18.0),
-                          child: Align(
-                            alignment: Alignment.topLeft,
-                            child: InkWell(
-                              onTap: () {
-                                setState(() {
-                                  isOpen = !isOpen;
-                                });
-                              },
-                              child: Image.asset(
-                                isOpen
-                                    ? "assets/img/open_btn.png"
-                                    : "assets/img/close_btn.png",
-                                width: 15,
-                                height: 15,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            authController.driverInResponse!=null && authController.driverInResponse?.driverDetails?.loginStatus.toString() != "online" ?
-                             Icon(Icons.arrow_upward, color: Colors.red,)   : SizedBox.shrink(),
-                            // authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() != "online" ?
-                            SizedBox(
-                              width: 40,
-                            ),
-                                // : SizedBox.shrink(),
-                            Text(
-                              authController.driverInResponse!=null && authController.driverInResponse != null && authController.driverInResponse?.driverDetails?.loginStatus.toString() == "online" ? "You're online".tr : "You're offline".tr,
-                              style: TextStyle(
-                                  color:authController.driverInResponse!=null && authController.driverInResponse?.driverDetails?.loginStatus.toString() == "online" ?  TColor.primary:TColor.red,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800),
-                            ),
-                            // authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() == "online" ?
-                            SizedBox(
-                              width: 40,
-                            ),
-                                // : SizedBox.shrink(),
-                            authController.driverInResponse!=null && authController.driverInResponse?.driverDetails?.loginStatus.toString() == "online" ?
-                            Icon(Icons.arrow_upward, color: Colors.green,)   : SizedBox.shrink(),
-                            const SizedBox(
-                              // width: 50,
-                              height: 50,
-                            ),
-                          ],
-                        ),
-                        if (isOpen)
-                          Container(
-                            height: 0.5,
-                            width: double.maxFinite,
-                            color: TColor.placeholder.withOpacity(0.5),
-                          ),
-                        if (isOpen)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: IconTitleSubtitleButton(
-                                    title: authController.totalLoginTIme+" H",
-                                    subtitle: "Total Online",
-                                    icon: "assets/img/acceptance.png",
-                                    onPressed: () {}),
-                              ),
-                              Container(
-                                height: 100,
-                                width: 0.5,
-                                color: TColor.placeholder.withOpacity(0.5),
-                              ),
-                              // Expanded(
-                              //   child: IconTitleSubtitleButton(
-                              //       title: "${authController.driverInResponse!=null ? double.parse(authController.driverInResponse?.driverDetails?.totalRating ??"0").toStringAsFixed(2):"0"}",
-                              //       subtitle: "Rating",
-                              //       icon: "assets/img/rate.png",
-                              //       onPressed: () {}),
-                              // ),
-                              // Container(
-                              //   height: 100,
-                              //   width: 0.5,
-                              //   color: TColor.placeholder.withOpacity(0.5),
-                              // ),
-                              Expanded(
-                                child: IconTitleSubtitleButton(
-                                    // title: authController.todayLoginTIme+" H",
-                                    title: authController.time.toString(),
-                                    subtitle: "Today Online",
-                                    icon: "assets/img/cancelleation.png",
-                                    onPressed: () {}),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-              SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
+          canPop: false,
+          child: Scaffold(
+            body: Stack(
+              children: [
+                _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : _currentPosition == null
+                    ? Text("No Location Get") :
+                Stack(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: (){
-                              context.push(const NotificationScreen());
-                            },
-                            child: Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.green)
+                    GoogleMap(
+                      onMapCreated: (controller) => mapController = controller,
+                      initialCameraPosition: CameraPosition(
+                        target: _currentPosition!,
+                        zoom: 15,
+                      ),
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
+                      zoomControlsEnabled: true,
+                      markers: {
+                        if (_currentPosition != null)
+                          Marker(
+                            markerId: MarkerId('currentLocation'),
+                            position: _currentPosition!,
+                            icon: BitmapDescriptor.defaultMarkerWithHue(
+                              BitmapDescriptor.hueRed,
+                            ),
+                          ),
+                      },
+                    ),
+                    Positioned(
+                      bottom: 260,
+                      right: 10,
+                      child: FloatingActionButton(
+                        mini: true,
+                        backgroundColor: Colors.white,
+                        onPressed: () {
+                          mapController.animateCamera(
+                            CameraUpdate.newCameraPosition(
+                              CameraPosition(
+                                target: _currentPosition!,
+                                zoom: 16,
                               ),
-                              padding: EdgeInsets.all(6),
-                              child: Icon(Icons.notifications_active),
                             ),
-                          ),
-                          // const SizedBox(
-                          //   width: 60,
-                          // ),
-                          Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 25),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(30),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 10,
-                                    ),
-                                  ]),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-
-                                  Text(
-                                    "${AppContants.rupessSystem}"+authController.walletAmount,
-                                    style: TextStyle(
-                                        color: TColor.primaryText,
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w800),
-                                  ),
-                                ],
-                              )),
-                          SizedBox(
-                            width: 60,
-                            child: Stack(
-                              alignment: Alignment.bottomLeft,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    context.push(const MenuView());
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.only(left: 10),
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child:
-                                            authController.driverInResponse !=
-                                                        null &&
-                                                    authController.driverInResponse?.driverDetails?.file_name != null &&
-                                                    authController
-                                                        .driverInResponse!.driverDetails!
-                                                        .file_name!
-                                                        .isNotEmpty
-                                                ? CachedNetworkImage(
-                                                    imageUrl:
-                                                        "${AppContants.imageURL}uploaded_files/user_img/${authController.driverInResponse!.driverDetails!.file_name!}",
-                                                    width: 40,
-                                                    height: 40,
-                                                    fit: BoxFit.cover,
-                                                    errorWidget:
-                                                        (context, url, error) {
-                                                      return Image.asset(
-                                                        "assets/img/u1.png",
-                                                        width: 40,
-                                                        height: 40,
-                                                      );
-                                                    },
-                                                  )
-                                                : Image.asset(
-                                                    "assets/img/u1.png",
-                                                    width: 40,
-                                                    height: 40,
-                                                  ),
-                                      ),
-                                    ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          );
+                        },
+                        child: Icon(Icons.my_location, color: Colors.green),
                       ),
                     ),
 
-                    InkWell(
-                      onTap: (){
-                        setState(() {});
-                        referralCode = authController.getUserPhone()!;
-                        _shareReferral();
-                      },
-                      child: Container(
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    authController.driverInResponse != null &&
+                        authController.isPayment() && authController.isKyc() &&
+                        (int.parse(authController.walletAmount.toString()) >=
+                            -99) ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: FullWidthDriverStatusSwitch(
+                          authController: authController),
+                    ) : SizedBox(),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, -5),
+                            ),
+                          ]),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 18.0),
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    isOpen = !isOpen;
+                                  });
+                                },
+                                child: Image.asset(
+                                  isOpen
+                                      ? "assets/img/open_btn.png"
+                                      : "assets/img/close_btn.png",
+                                  width: 15,
+                                  height: 15,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              authController.driverInResponse != null &&
+                                  authController.driverInResponse?.driverDetails
+                                      ?.loginStatus.toString() != "online"
+                                  ?
+                              Icon(Icons.arrow_upward, color: Colors.red,)
+                                  : SizedBox.shrink(),
+                              // authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() != "online" ?
+                              SizedBox(
+                                width: 40,
+                              ),
+                              // : SizedBox.shrink(),
+                              Text(
+                                authController.driverInResponse != null &&
+                                    authController.driverInResponse != null &&
+                                    authController.driverInResponse
+                                        ?.driverDetails?.loginStatus
+                                        .toString() == "online"
+                                    ? "You're online".tr
+                                    : "You're offline".tr,
+                                style: TextStyle(
+                                    color: authController.driverInResponse !=
+                                        null && authController.driverInResponse
+                                        ?.driverDetails?.loginStatus
+                                        .toString() == "online"
+                                        ? TColor.primary
+                                        : TColor.red,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800),
+                              ),
+                              // authController.driverInResponse!=null && authController.driverInResponse!.loginStatus.toString() == "online" ?
+                              SizedBox(
+                                width: 40,
+                              ),
+                              // : SizedBox.shrink(),
+                              authController.driverInResponse != null &&
+                                  authController.driverInResponse?.driverDetails
+                                      ?.loginStatus.toString() == "online"
+                                  ?
+                              Icon(Icons.arrow_upward, color: Colors.green,)
+                                  : SizedBox.shrink(),
+                              const SizedBox(
+                                // width: 50,
+                                height: 50,
+                              ),
+                            ],
+                          ),
+                          if (isOpen)
+                            Container(
+                              height: 0.5,
+                              width: double.maxFinite,
+                              color: TColor.placeholder.withOpacity(0.5),
+                            ),
+                          if (isOpen)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: IconTitleSubtitleButton(
+                                      title: authController.totalLoginTIme +
+                                          " H",
+                                      subtitle: "Total Online",
+                                      icon: "assets/img/acceptance.png",
+                                      onPressed: () {}),
+                                ),
+                                Container(
+                                  height: 100,
+                                  width: 0.5,
+                                  color: TColor.placeholder.withOpacity(0.5),
+                                ),
+                                // Expanded(
+                                //   child: IconTitleSubtitleButton(
+                                //       title: "${authController.driverInResponse!=null ? double.parse(authController.driverInResponse?.driverDetails?.totalRating ??"0").toStringAsFixed(2):"0"}",
+                                //       subtitle: "Rating",
+                                //       icon: "assets/img/rate.png",
+                                //       onPressed: () {}),
+                                // ),
+                                // Container(
+                                //   height: 100,
+                                //   width: 0.5,
+                                //   color: TColor.placeholder.withOpacity(0.5),
+                                // ),
+                                Expanded(
+                                  child: IconTitleSubtitleButton(
+                                    // title: authController.todayLoginTIme+" H",
+                                      title: authController.time.toString(),
+                                      subtitle: "Today Online",
+                                      icon: "assets/img/cancelleation.png",
+                                      onPressed: () {}),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                SafeArea(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                context.push(const NotificationScreen());
+                              },
+                              child: Container(
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.green)
+                                ),
+                                padding: EdgeInsets.all(6),
+                                child: Icon(Icons.notifications_active),
+                              ),
+                            ),
+                            // const SizedBox(
+                            //   width: 60,
+                            // ),
+                            Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 25),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(30),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 10,
+                                      ),
+                                    ]),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
 
-                        margin: EdgeInsets.symmetric(horizontal: 15),
-
-                        decoration: BoxDecoration(
-
-                          borderRadius: BorderRadius.circular(15),
-
-
+                                    Text(
+                                      "${AppContants.rupessSystem}" +
+                                          authController.walletAmount,
+                                      style: TextStyle(
+                                          color: TColor.primaryText,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w800),
+                                    ),
+                                  ],
+                                )),
+                            SizedBox(
+                              width: 60,
+                              child: Stack(
+                                alignment: Alignment.bottomLeft,
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      context.push(const MenuView());
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.only(left: 10),
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(20),
+                                        child:
+                                        authController.driverInResponse !=
+                                            null &&
+                                            authController.driverInResponse
+                                                ?.driverDetails?.file_name !=
+                                                null &&
+                                            authController
+                                                .driverInResponse!
+                                                .driverDetails!
+                                                .file_name!
+                                                .isNotEmpty
+                                            ? CachedNetworkImage(
+                                          imageUrl:
+                                          "${AppContants
+                                              .imageURL}uploaded_files/user_img/${authController
+                                              .driverInResponse!.driverDetails!
+                                              .file_name!}",
+                                          width: 40,
+                                          height: 40,
+                                          fit: BoxFit.cover,
+                                          errorWidget:
+                                              (context, url, error) {
+                                            return Image.asset(
+                                              "assets/img/u1.png",
+                                              width: 40,
+                                              height: 40,
+                                            );
+                                          },
+                                        )
+                                            : Image.asset(
+                                          "assets/img/u1.png",
+                                          width: 40,
+                                          height: 40,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Image.asset("assets/img/refergif.gif"),
-                        )
+                      ),
 
-                        /*Row(
+                      InkWell(
+                        onTap: () {
+                          setState(() {});
+                          referralCode = authController.getUserPhone()!;
+                          _shareReferral();
+                        },
+                        child: Container(
+
+                            margin: EdgeInsets.symmetric(horizontal: 15),
+
+                            decoration: BoxDecoration(
+
+                              borderRadius: BorderRadius.circular(15),
+
+
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.asset("assets/img/refergif.gif"),
+                            )
+
+                          /*Row(
                           children: [
                             Expanded(
                               child: ls.Lottie.asset(
@@ -762,354 +855,440 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                             Text("Refer And\nEarn",style: TextStyle(fontSize: 30,color: Colors.black,fontWeight: FontWeight.w800),textAlign: TextAlign.center,)
                           ],
                         ),*/
-                      ),
-                    ),
-
-                  //  Text(authController.todayLoginTIme+" Hour Today Login Time",style: TextStyle(fontSize: 14,color: Colors.black.withOpacity(0.7),fontWeight: FontWeight.bold),)
-                  ],
-                ),
-              ),
-
-              Positioned(
-                top: 150,
-                left: 16,
-                right: 16,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Obx(() {
-                      if(Get.find<AuthController>().refreshInt1.value > 0){}
-                      final controller = Get.find<AuthController>();
-                      final list = controller.getScheduledOrderModel.value.data;
-
-                      if (list == null || list.isEmpty) {
-                        return const SizedBox();
-                      }
-
-                      if (!controller.isScheduledBannerVisible.value) {
-                        return const SizedBox();
-                      }
-
-                      return Dismissible(
-                        key: const ValueKey('scheduled_booking_banner'),
-                        direction: DismissDirection.horizontal,
-                        onDismissed: (_) {
-                          controller.isScheduledBannerVisible.value = false;
-                        },
-                        child: InkWell(
-                          onTap: (){
-                              Get.to(() => ScheduleDeliveryList(isClick: false,));
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade600,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child:Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    "New Available Scheduled Booking",
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    const Icon(
-                                      Icons.notifications,
-                                      color: Colors.white,
-                                      size: 26,
-                                    ),
-                                    Positioned(
-                                      right: -6,
-                                      top: -6,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.orange,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        constraints: const BoxConstraints(
-                                          minWidth: 18,
-                                          minHeight: 18,
-                                        ),
-                                        child: Text(
-                                          "${list.length}",
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
                         ),
-                      );
-                    }),
-                    Get.find<AuthController>().getMyScheduleOrderModel.value.data != null ?
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF0175b0),
-                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children:  [
-                              Text(
-                                "Scheduled Delivery",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: (){
-                                  Get.to(() => ScheduleDeliveryList(isClick: true,));
-                                },
-                                child: Text(
-                                  "View",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: pendingOrders == null
-                                ? 0
-                                : (pendingOrders.length > 2 ? 2 : pendingOrders.length),
-                            padding: EdgeInsets.zero,
-                            itemBuilder: (context, index) {
-                              final item = Get.find<AuthController>().getMyScheduleOrderModel.value.data![index];
-                              String formattedDate = '';
-                              if (item.scheduleDate != null && item.scheduleDate!.isNotEmpty) {
-                                DateTime date = DateTime.parse(item.scheduleDate!);
-                                formattedDate = DateFormat('dd-MM-yyyy').format(date);
-                              }
 
-                              String formattedTime = '';
-                              if (item.scheduleTime != null && item.scheduleTime!.isNotEmpty) {
-                                DateTime time =
-                                DateFormat("HH:mm:ss").parse(item.scheduleTime!);
-                                formattedTime = DateFormat('hh:mm a').format(time);
-                              }
-                              return GestureDetector(
-                                onTap: (){
-                                  Get.to(() => ScheduleDeliveryList(isClick: true,));
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(bottom: 6),
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color:  Color(0xFFe85900),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
+                      //  Text(authController.todayLoginTIme+" Hour Today Login Time",style: TextStyle(fontSize: 14,color: Colors.black.withOpacity(0.7),fontWeight: FontWeight.bold),)
+                    ],
+                  ),
+                ),
 
-                                      Text(
-                                        formattedDate,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w400,
-                                        ),
+                Positioned(
+                  top: 150,
+                  left: 16,
+                  right: 16,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Obx(() {
+                        if (Get
+                            .find<AuthController>()
+                            .refreshInt1
+                            .value > 0) {}
+                        final controller = Get.find<AuthController>();
+                        final list = controller.getScheduledOrderModel.value
+                            .data;
+
+                        if (list == null || list.isEmpty) {
+                          return const SizedBox();
+                        }
+
+                        if (!controller.isScheduledBannerVisible.value) {
+                          return const SizedBox();
+                        }
+
+                        return Dismissible(
+                          key: const ValueKey('scheduled_booking_banner'),
+                          direction: DismissDirection.horizontal,
+                          onDismissed: (_) {
+                            controller.isScheduledBannerVisible.value = false;
+                          },
+                          child: InkWell(
+                            onTap: () {
+                              Get.to(() =>
+                                  ScheduleDeliveryList(isClick: false,));
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 8),
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade600,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment
+                                    .spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "New Available Scheduled Booking",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      const SizedBox(height: 1),
-                                       Text(
-                                         formattedTime,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      const Icon(
+                                        Icons.notifications,
+                                        color: Colors.white,
+                                        size: 26,
+                                      ),
+                                      Positioned(
+                                        right: -6,
+                                        top: -6,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange,
+                                            borderRadius: BorderRadius.circular(
+                                                12),
+                                          ),
+                                          constraints: const BoxConstraints(
+                                            minWidth: 18,
+                                            minHeight: 18,
+                                          ),
+                                          child: Text(
+                                            "${list.length}",
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ) :
-                    SizedBox.shrink(),
-                  ],
-                ),
-              ) ,
-              authController.isPayment() ? authController.isKyc() ?(int.parse(authController.walletAmount.toString())>= -99)?   SizedBox():
-              AlertDialog(
-                title: Text('Pay Wallet Amount'.tr),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${"Wallet Fee:".tr} ${AppContants.rupessSystem} ${authController.walletAmount}'),
-                    SizedBox(height: 10),
-                    Text('Please proceed to payment to complete your Wallet fee.'.tr),
-                  ],
-                ),
-                actions: <Widget>[
-
-                  ElevatedButton(
-                    child: Text('Pay Now'.tr),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Background color
-                    ),
-                    onPressed: () {
-
-                      createWalletOrderID(amount: (double.parse((calculateRequiredPayment(Get.find<AuthController>().walletAmount)??"0").toString()) * 100).round());
-                      // Handle payment logic here
-                     // _openRazorpayWallet();
-
-                    },
-                  ),
-                ],
-              ): AlertDialog(
-                title: Row(
-                  children: [
-                    Icon(Icons.warning, color: Colors.orange),
-                    SizedBox(width: 10),
-                    Text('KYC Pending'.tr),
-                  ],
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Triptoll में आपका स्वागत है! ऑर्डर प्राप्त करने के लिए कृपया अपनी KYC डॉक्यूमेंट्स अपलोड करें। KYC पूरी होने के बाद ही आप ऑर्डर ले पाएंगे।'.tr),
-                    SizedBox(height: 8),
-                    RichText(
-                      text: TextSpan(
-                        style: DefaultTextStyle.of(context).style,
-                        children: [
-                          TextSpan(text: 'किसी भी सहायता के लिए हमसे संपर्क करें: '.tr),
-                          TextSpan(
-                            text: '📞 8818003344',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
+                                ],
+                              ),
                             ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => AppContants.makePhoneCall('8818003344'),
                           ),
-                          TextSpan(text: ' | '),
-                          TextSpan(
-                            text: '011-69269598',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => AppContants.makePhoneCall('01169269598'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    InkWell(
-                      onTap: (){
-                        context.push(
-                            DocumentUploadView(title: "Personal Document",id: authController.getUserID()??"",isEdit: true,));
-                      },
-                      child: Container(
-                        height: 30,
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.symmetric(horizontal: 20),
+                        );
+                      }),
+                      Get
+                          .find<AuthController>()
+                          .getMyScheduleOrderModel
+                          .value
+                          .data != null ?
+                      Container(
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),color: TColor.primary
+                          color: Color(0xFF0175b0),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text("Complete Now".tr,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
-                      ),
-                    )
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Scheduled Delivery",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Get.to(() =>
+                                        ScheduleDeliveryList(isClick: true,));
+                                  },
+                                  child: Text(
+                                    "View",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: pendingOrders == null
+                                  ? 0
+                                  : (pendingOrders.length > 2
+                                  ? 2
+                                  : pendingOrders.length),
+                              padding: EdgeInsets.zero,
+                              itemBuilder: (context, index) {
+                                final item = Get
+                                    .find<AuthController>()
+                                    .getMyScheduleOrderModel
+                                    .value
+                                    .data![index];
+                                String formattedDate = '';
+                                if (item.scheduleDate != null &&
+                                    item.scheduleDate!.isNotEmpty) {
+                                  DateTime date = DateTime.parse(
+                                      item.scheduleDate!);
+                                  formattedDate =
+                                      DateFormat('dd-MM-yyyy').format(date);
+                                }
 
-                  ],
-                ),
+                                String formattedTime = '';
+                                if (item.scheduleTime != null &&
+                                    item.scheduleTime!.isNotEmpty) {
+                                  DateTime time =
+                                  DateFormat("HH:mm:ss").parse(
+                                      item.scheduleTime!);
+                                  formattedTime =
+                                      DateFormat('hh:mm a').format(time);
+                                }
+                                return Obx(() {
+                                  bool isMatched =
+                                      Get.find<AuthController>().bookingIdForSocket.value.toString() == item.id.toString();
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Get.to(() =>
+                                          ScheduleDeliveryList(isClick: true,));
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.only(bottom: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 14, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFe85900),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment
+                                                .start,
+                                            mainAxisAlignment: MainAxisAlignment
+                                                .spaceBetween,
+                                            children: [
 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-              ):
-              AlertDialog(
-                title: Text('Pay Registration Fee'.tr),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${"Registration Fee:".tr} ${AppContants.rupessSystem} ${authController.getRegistrationFee()}'),
-                    SizedBox(height: 10),
-                    Text('Please proceed to payment to complete your registration.'.tr),
-                  ],
-                ),
-                actions: <Widget>[
-
-                  ElevatedButton(
-                    child: Text('Pay Now'.tr),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Background color
-                    ),
-                    onPressed: () {
-
-
-                      // Handle payment logic here
-                      createRazorpayOrderId(amount: (double.parse((Get.find<AuthController>().getRegistrationFee()??"0").toString()) * 100).round());
-
-
-                    },
+                                              Text(
+                                                formattedDate,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 1),
+                                              Text(
+                                                formattedTime,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          if (isMatched)
+                                            Align(
+                                              alignment: Alignment.topRight,
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  Get.find<AuthController>().getBookingDetails(context: context,bookingID: item.id.toString());
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.white,
+                                                  padding: const EdgeInsets.symmetric(
+                                                      horizontal: 40, vertical: 6),
+                                                  minimumSize: Size(0, 30),
+                                                ),
+                                                child: const Text(
+                                                  "Start Trip",
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ) :
+                      SizedBox.shrink(),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                authController.isPayment() ? authController.isKyc() ? (int
+                    .parse(authController.walletAmount.toString()) >= -99)
+                    ? SizedBox()
+                    :
+                AlertDialog(
+                  title: Text('Pay Wallet Amount'.tr),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${"Wallet Fee:".tr} ${AppContants
+                          .rupessSystem} ${authController.walletAmount}'),
+                      SizedBox(height: 10),
+                      Text(
+                          'Please proceed to payment to complete your Wallet fee.'
+                              .tr),
+                    ],
+                  ),
+                  actions: <Widget>[
 
-              // authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?
-              // StreamBuilder<Data?>(
-              //   stream: bookingStream(),
-              //   builder: (context, snapshot) {
-              //     if (snapshot.hasData && snapshot.data != null && !isSheetOpen) {
-              //       printSavedIds();
-              //       WidgetsBinding.instance.addPostFrameCallback((_) {
-              //         isSheetOpen = true;
-              //         showRideDetailsSheet(snapshot.data!).then((_) {
-              //           isSheetOpen = false;
-              //         });
-              //       });
-              //     }
-              //     return const SizedBox.shrink();
-              //   },
-              // ):SizedBox(),
-            ],
+                    ElevatedButton(
+                      child: Text('Pay Now'.tr),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green, // Background color
+                      ),
+                      onPressed: () {
+                        createWalletOrderID(amount: (double.parse(
+                            (calculateRequiredPayment(Get
+                                .find<AuthController>()
+                                .walletAmount) ?? "0").toString()) * 100)
+                            .round());
+                        // Handle payment logic here
+                        // _openRazorpayWallet();
+
+                      },
+                    ),
+                  ],
+                ) : AlertDialog(
+                  title: Row(
+                    children: [
+                      Icon(Icons.warning, color: Colors.orange),
+                      SizedBox(width: 10),
+                      Text('KYC Pending'.tr),
+                    ],
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          'Triptoll में आपका स्वागत है! ऑर्डर प्राप्त करने के लिए कृपया अपनी KYC डॉक्यूमेंट्स अपलोड करें। KYC पूरी होने के बाद ही आप ऑर्डर ले पाएंगे।'
+                              .tr),
+                      SizedBox(height: 8),
+                      RichText(
+                        text: TextSpan(
+                          style: DefaultTextStyle
+                              .of(context)
+                              .style,
+                          children: [
+                            TextSpan(
+                                text: 'किसी भी सहायता के लिए हमसे संपर्क करें: '
+                                    .tr),
+                            TextSpan(
+                              text: '📞 8818003344',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () =>
+                                    AppContants.makePhoneCall('8818003344'),
+                            ),
+                            TextSpan(text: ' | '),
+                            TextSpan(
+                              text: '011-69269598',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () =>
+                                    AppContants.makePhoneCall('01169269598'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      InkWell(
+                        onTap: () {
+                          context.push(
+                              DocumentUploadView(title: "Personal Document",
+                                id: authController.getUserID() ?? "",
+                                isEdit: true,));
+                        },
+                        child: Container(
+                          height: 30,
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.symmetric(horizontal: 20),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: TColor.primary
+                          ),
+                          child: Text("Complete Now".tr, style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),),
+                        ),
+                      )
+
+                    ],
+                  ),
+
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                ) :
+                AlertDialog(
+                  title: Text('Pay Registration Fee'.tr),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${"Registration Fee:".tr} ${AppContants
+                          .rupessSystem} ${authController
+                          .getRegistrationFee()}'),
+                      SizedBox(height: 10),
+                      Text(
+                          'Please proceed to payment to complete your registration.'
+                              .tr),
+                    ],
+                  ),
+                  actions: <Widget>[
+
+                    ElevatedButton(
+                      child: Text('Pay Now'.tr),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green, // Background color
+                      ),
+                      onPressed: () {
+                        // Handle payment logic here
+                        createRazorpayOrderId(amount: (double.parse(
+                            (Get.find<AuthController>().getRegistrationFee() ??
+                                "0").toString()) * 100).round());
+                      },
+                    ),
+                  ],
+                ),
+
+                // authController.isPayment() && authController.isKyc()  && (int.parse(authController.walletAmount.toString())>= -99) ?
+                // StreamBuilder<Data?>(
+                //   stream: bookingStream(),
+                //   builder: (context, snapshot) {
+                //     if (snapshot.hasData && snapshot.data != null && !isSheetOpen) {
+                //       printSavedIds();
+                //       WidgetsBinding.instance.addPostFrameCallback((_) {
+                //         isSheetOpen = true;
+                //         showRideDetailsSheet(snapshot.data!).then((_) {
+                //           isSheetOpen = false;
+                //         });
+                //       });
+                //     }
+                //     return const SizedBox.shrink();
+                //   },
+                // ):SizedBox(),
+              ],
+            ),
           ),
-               ),
-       );},
+        );
+      },
     );
   }
 
@@ -1130,9 +1309,12 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     final bool shouldSave = isFake == true;
 
     if (shouldSave) {
-      final now = DateTime.now().millisecondsSinceEpoch;
+      final now = DateTime
+          .now()
+          .millisecondsSinceEpoch;
       List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
-      Map<String, int> timestamps = _decodeTimestamps(prefs.getString('fake_ids_time'));
+      Map<String, int> timestamps = _decodeTimestamps(
+          prefs.getString('fake_ids_time'));
 
       if (!savedIds.contains(id)) {
         savedIds.add(id);
@@ -1145,6 +1327,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       });
     }
   }
+
   Future<void> printSavedIds() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
@@ -1158,12 +1341,16 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
       }
     }
   }
+
   Future<void> clearExpiredFakeIds() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
-    Map<String, int> timestamps = _decodeTimestamps(prefs.getString('fake_ids_time'));
+    Map<String, int> timestamps = _decodeTimestamps(
+        prefs.getString('fake_ids_time'));
 
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = DateTime
+        .now()
+        .millisecondsSinceEpoch;
     const int expiry = 10 * 60 * 1000; // 10 minutes in ms
 
     savedIds.removeWhere((id) {
@@ -1191,7 +1378,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     return map;
   }
 
-  Future<void> showRideDetailsSheet(Data notificationResponse) async{
+  Future<void> showRideDetailsSheet(Data notificationResponse) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
     final currentId = notificationResponse.bookingId.toString();
@@ -1199,172 +1386,189 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     showModalBottomSheet(
       context: context,
       isDismissible: false,
-      isScrollControlled: true, // Allows the sheet to take up more space
-      backgroundColor: Colors.transparent, // Makes the rounded corners visible
-      builder: (context) => Container(
-        padding: const EdgeInsets.only(top: 20), // Space for the drag handle
-        decoration:  BoxDecoration(
-          color: notificationResponse.orderStatus == 'scheduled' ?
-             Color(0xFFcfecf7): Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: DraggableScrollableSheet(
-          expand: false,
-          shouldCloseOnMinExtent: false,
-          initialChildSize: 0.5, // Initial height (40% of screen)
-          minChildSize: 0.3, // Minimum height when dragged down
-          maxChildSize: 0.7, // Maximum height when dragged up
-          builder: (context, scrollController) {
-            return  WillPopScope(
-              onWillPop: () async {
-                // ❌ back button से बंद नहीं होने देना
-                return false;
+      isScrollControlled: true,
+      // Allows the sheet to take up more space
+      backgroundColor: Colors.transparent,
+      // Makes the rounded corners visible
+      builder: (context) =>
+          Container(
+            padding: const EdgeInsets.only(top: 20),
+            // Space for the drag handle
+            decoration: BoxDecoration(
+              color: notificationResponse.orderStatus == 'scheduled' ?
+              Color(0xFFcfecf7) : Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: DraggableScrollableSheet(
+              expand: false,
+              shouldCloseOnMinExtent: false,
+              initialChildSize: 0.5,
+              // Initial height (40% of screen)
+              minChildSize: 0.3,
+              // Minimum height when dragged down
+              maxChildSize: 0.7,
+              // Maximum height when dragged up
+              builder: (context, scrollController) {
+                return WillPopScope(
+                    onWillPop: () async {
+                      // ❌ back button से बंद नहीं होने देना
+                      return false;
+                    },
+                    child:
+                    // notificationResponse.isFake == 0 || notificationResponse.isFake == '0' ?
+                    SingleChildScrollView(
+                      controller: scrollController,
+                      child: _buildRideDetailsContent(notificationResponse),
+                    )
+                  // :
+                  // SingleChildScrollView(
+                  //   controller: scrollController,
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.center,
+                  //     mainAxisSize: MainAxisSize.min,
+                  //     children: [
+                  //       Align(
+                  //         alignment: Alignment.topRight,
+                  //         child:   InkWell(
+                  //           onTap: () {
+                  //             stopRingtone();
+                  //             saveFakeId(notificationResponse.id.toString(),notificationResponse.isFake);
+                  //             Navigator.pop(context);
+                  //           },
+                  //           child: Container(
+                  //
+                  //             margin: const EdgeInsets.only(left: 20),
+                  //             padding: const EdgeInsets.all(6),
+                  //             decoration: BoxDecoration(
+                  //               color: TColor.red,
+                  //               shape: BoxShape.circle,
+                  //
+                  //             ),
+                  //             child: Icon(Icons.close,color: Colors.white,),
+                  //           ),
+                  //         ),
+                  //       ).paddingSymmetric(horizontal: 20),
+                  //       Text('Order already taken.',
+                  //         style: TextStyle(
+                  //             fontSize: 20,
+                  //             fontWeight: FontWeight.w500,
+                  //             color: Colors.red
+                  //         ),),
+                  //       Text('Order #${notificationResponse.id.toString()}',
+                  //         style: TextStyle(
+                  //             fontSize: 20,
+                  //             fontWeight: FontWeight.w500,
+                  //             color: Colors.red
+                  //         ),),
+                  //       Text('Click fast next time',
+                  //         style: TextStyle(
+                  //             fontSize: 16,
+                  //             fontWeight: FontWeight.w500,
+                  //             color: Colors.black
+                  //         ),),
+                  //       LottieScreen()
+                  //     ],
+                  //   ),
+                  // ),
+                );
               },
-              child:
-              // notificationResponse.isFake == 0 || notificationResponse.isFake == '0' ?
-              SingleChildScrollView(
-                controller: scrollController,
-                child: _buildRideDetailsContent(notificationResponse),
-              )
-                    // :
-              // SingleChildScrollView(
-              //   controller: scrollController,
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.center,
-              //     mainAxisSize: MainAxisSize.min,
-              //     children: [
-              //       Align(
-              //         alignment: Alignment.topRight,
-              //         child:   InkWell(
-              //           onTap: () {
-              //             stopRingtone();
-              //             saveFakeId(notificationResponse.id.toString(),notificationResponse.isFake);
-              //             Navigator.pop(context);
-              //           },
-              //           child: Container(
-              //
-              //             margin: const EdgeInsets.only(left: 20),
-              //             padding: const EdgeInsets.all(6),
-              //             decoration: BoxDecoration(
-              //               color: TColor.red,
-              //               shape: BoxShape.circle,
-              //
-              //             ),
-              //             child: Icon(Icons.close,color: Colors.white,),
-              //           ),
-              //         ),
-              //       ).paddingSymmetric(horizontal: 20),
-              //       Text('Order already taken.',
-              //         style: TextStyle(
-              //             fontSize: 20,
-              //             fontWeight: FontWeight.w500,
-              //             color: Colors.red
-              //         ),),
-              //       Text('Order #${notificationResponse.id.toString()}',
-              //         style: TextStyle(
-              //             fontSize: 20,
-              //             fontWeight: FontWeight.w500,
-              //             color: Colors.red
-              //         ),),
-              //       Text('Click fast next time',
-              //         style: TextStyle(
-              //             fontSize: 16,
-              //             fontWeight: FontWeight.w500,
-              //             color: Colors.black
-              //         ),),
-              //       LottieScreen()
-              //     ],
-              //   ),
-              // ),
-            );
-          },
-        ),
-      ),
+            ),
+          ),
     ) : null;
   }
 
-  Future<void> showRideDetailsFakeSheet(Data notificationResponse) async{
-    return  showModalBottomSheet(
+  Future<void> showRideDetailsFakeSheet(Data notificationResponse) async {
+    return showModalBottomSheet(
       context: context,
       isDismissible: false,
-      isScrollControlled: true, // Allows the sheet to take up more space
-      backgroundColor: Colors.transparent, // Makes the rounded corners visible
-      builder: (context) => Container(
-        padding: const EdgeInsets.only(top: 20), // Space for the drag handle
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: DraggableScrollableSheet(
-          expand: false,
-          shouldCloseOnMinExtent: false,
-          initialChildSize: 0.5, // Initial height (40% of screen)
-          minChildSize: 0.3, // Minimum height when dragged down
-          maxChildSize: 0.7, // Maximum height when dragged up
-          builder: (context, scrollController) {
-            return  WillPopScope(
-              onWillPop: () async {
-                // ❌ back button से बंद नहीं होने देना
-                return false;
-              },
-              child:   SingleChildScrollView(
-                controller: scrollController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Align(
-                      alignment: Alignment.topRight,
-                      child:   InkWell(
-                        onTap: () {
-                          stopRingtone();
-                          saveFakeId(notificationResponse.orderId.toString(),notificationResponse.isFake);
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20),
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: TColor.red,
-                            shape: BoxShape.circle,
-
-                          ),
-                          child: Icon(Icons.close,color: Colors.white,),
-                        ),
-                      ),
-                    ).paddingSymmetric(horizontal: 20),
-                    Text('Order already taken.'.tr,
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.red
-                      ),),
-                    Text('Click fast next time'.tr,
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black
-                      ),),
-                    LottieScreen()
-                  ],
-                ),
+      isScrollControlled: true,
+      // Allows the sheet to take up more space
+      backgroundColor: Colors.transparent,
+      // Makes the rounded corners visible
+      builder: (context) =>
+          Container(
+            padding: const EdgeInsets.only(top: 20),
+            // Space for the drag handle
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
-            );
-          },
-        ),
-      ),
+            ),
+            child: DraggableScrollableSheet(
+              expand: false,
+              shouldCloseOnMinExtent: false,
+              initialChildSize: 0.5,
+              // Initial height (40% of screen)
+              minChildSize: 0.3,
+              // Minimum height when dragged down
+              maxChildSize: 0.7,
+              // Maximum height when dragged up
+              builder: (context, scrollController) {
+                return WillPopScope(
+                  onWillPop: () async {
+                    // ❌ back button से बंद नहीं होने देना
+                    return false;
+                  },
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: InkWell(
+                            onTap: () {
+                              stopRingtone();
+                              saveFakeId(
+                                  notificationResponse.orderId.toString(),
+                                  notificationResponse.isFake);
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 20),
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: TColor.red,
+                                shape: BoxShape.circle,
+
+                              ),
+                              child: Icon(Icons.close, color: Colors.white,),
+                            ),
+                          ),
+                        ).paddingSymmetric(horizontal: 20),
+                        Text('Order already taken.'.tr,
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.red
+                          ),),
+                        Text('Click fast next time'.tr,
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black
+                          ),),
+                        LottieScreen()
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
     );
   }
 
 
   String referralCode = "12345678";
   double? roadDistance;
+
   _shareReferral() async {
     // Play Store link with referral parameter
     const String packageName = 'service.triptoll.in'; // Apna package name daalein
@@ -1378,6 +1582,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     // Share using device's share dialog
     await Share.share(shareText);
   }
+
   String formatScheduleDate(String? date) {
     if (date == null || date.isEmpty) return '';
     DateTime parsedDate = DateTime.parse(date);
@@ -1410,26 +1615,26 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
           child: Column(
             children: [
-             bookingResponse.orderStatus == 'scheduled' ?
-             Row(
-               crossAxisAlignment: CrossAxisAlignment.center,
-               mainAxisAlignment: MainAxisAlignment.center,
-               children: [
-                 Text(
-                   "Schedule Order",
-                   textAlign: TextAlign.center,
-                   style: TextStyle(
-                     color: Colors.black,
-                     fontSize: 22,
-                     fontWeight: FontWeight.w500
-                   ),
-                 ),
-               ],
-             ) : SizedBox.shrink(),
               bookingResponse.orderStatus == 'scheduled' ?
-                  SizedBox(
-                    height: 15,
-                  ) : SizedBox.shrink(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Schedule Order",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500
+                    ),
+                  ),
+                ],
+              ) : SizedBox.shrink(),
+              bookingResponse.orderStatus == 'scheduled' ?
+              SizedBox(
+                height: 15,
+              ) : SizedBox.shrink(),
               bookingResponse.orderStatus == 'scheduled' ?
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -1495,7 +1700,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 children: [
                   Expanded(
                     child: Text(
-                      "${AppContants.rupessSystem} ${bookingResponse.amount ?? ""}",
+                      "${AppContants.rupessSystem} ${bookingResponse.amount ??
+                          ""}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.black,
@@ -1507,14 +1713,17 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                     child: FutureBuilder<Map<String, dynamic>>(
                       future: calculateDropDistancesForBooking(bookingResponse),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Text("Calculating...",
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                              style: TextStyle(
+                                  color: TColor.secondaryText, fontSize: 18));
                         } else if (snapshot.hasError) {
                           return Text("Error: ${snapshot.error}",
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                              style: TextStyle(
+                                  color: TColor.secondaryText, fontSize: 18));
                         } else {
                           final data = snapshot.data!;
                           final km = data['total_distance_km'];
@@ -1533,7 +1742,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               ),
               const SizedBox(height: 15),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 10),
                 child: Row(
                   children: [
                     Container(
@@ -1559,7 +1769,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 10),
                 itemCount: bookingResponse.dropoffs?.length ?? 0,
                 itemBuilder: (context, index) {
                   final drop = bookingResponse.dropoffs![index];
@@ -1594,13 +1805,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                     onTap: () {
                       stopRingtone();
                       Navigator.pop(context);
-                     // Get.find<AuthController>().bookingStatusChange(
-                     //      status: "cancel",
-                     //      amount: bookingResponse.amount,
-                     //      orderID: bookingResponse.orderId,
-                     //      cus_id:bookingResponse.cusId,
-                     //      value: 0
-                     //  );
+                      // Get.find<AuthController>().bookingStatusChange(
+                      //      status: "cancel",
+                      //      amount: bookingResponse.amount,
+                      //      orderID: bookingResponse.orderId,
+                      //      cus_id:bookingResponse.cusId,
+                      //      value: 0
+                      //  );
                     },
                     child: Container(
 
@@ -1611,28 +1822,33 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                         shape: BoxShape.circle,
 
                       ),
-                      child: Icon(Icons.close,color: Colors.white,),
+                      child: Icon(Icons.close, color: Colors.white,),
                     ),
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: bookingResponse.isFake == false || bookingResponse.isFake == false ?
+                      onTap: bookingResponse.isFake == false ||
+                          bookingResponse.isFake == false ?
                           () async {
                         final prefs = await SharedPreferences.getInstance();
-                        authController.isLoadingTime = prefs.getBool(AppContants.isLoadingTime)!;
-                        print('dsdskdsds${authController.isLoadingTime.toString()}');
-                        authController.maxTime = prefs.getString(AppContants.maxTimeVar)!;
-                        authController.loadingCharges = prefs.getString(AppContants.loadingCharges)!;
-                        authController.checkDriverBooking(context);
+                        authController.isLoadingTime =
+                        prefs.getBool(AppContants.isLoadingTime)!;
+                        print('dsdskdsds${authController.isLoadingTime
+                            .toString()}');
+                        authController.maxTime =
+                        prefs.getString(AppContants.maxTimeVar)!;
+                        authController.loadingCharges =
+                        prefs.getString(AppContants.loadingCharges)!;
                         Navigator.pop(context);
                         Get.find<AuthController>().accpetBooking(
                             orderID: bookingResponse.bookingId,
-                            cus_id:bookingResponse.cusId,
+                            cus_id: bookingResponse.cusId,
                             value: 0
                         );
-                      } : (){
+                      } : () {
                         Get.back();
-                        saveFakeId(bookingResponse.bookingId.toString(),bookingResponse.isFake);
+                        saveFakeId(bookingResponse.bookingId.toString(),
+                            bookingResponse.isFake);
                         showRideDetailsFakeSheet(bookingResponse);
                       },
                       child: Container(
@@ -1713,10 +1929,12 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   //   return distance;
   // }
 
-  Future<Map<String, dynamic>> calculateDropDistancesForBooking(dynamic booking) async {
+  Future<Map<String, dynamic>> calculateDropDistancesForBooking(
+      dynamic booking) async {
     const apiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk";
 
-    final url = Uri.parse("https://routes.googleapis.com/directions/v2:computeRoutes");
+    final url = Uri.parse(
+        "https://routes.googleapis.com/directions/v2:computeRoutes");
 
     final headers = {
       "Content-Type": "application/json",
@@ -1747,7 +1965,9 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
       final body = jsonEncode({
         "origin": {
-          "location": {"latLng": {"latitude": currentLat, "longitude": currentLng}}
+          "location": {
+            "latLng": {"latitude": currentLat, "longitude": currentLng}
+          }
         },
         "destination": {
           "location": {
@@ -1776,7 +1996,9 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
           int hours = seconds ~/ 3600;
           int minutes = (seconds % 3600) ~/ 60;
-          String durationText = hours > 0 ? "${hours}h ${minutes}m" : "${minutes}m";
+          String durationText = hours > 0
+              ? "${hours}h ${minutes}m"
+              : "${minutes}m";
 
           drops.add({
             "drop_address": drop.address,
@@ -1804,47 +2026,54 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
   }
 
 
-
   double _toRadians(double degree) {
     return degree * (pi / 180);
   }
+
   // In your parent widget where you want to show the bottom sheet
 
-  void showRunningDetailsSheet(Orders notificationResponse,AuthController authController) {
+  void showRunningDetailsSheet(Orders notificationResponse,
+      AuthController authController) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allows the sheet to take up more space
       backgroundColor: Colors.transparent, // Makes the rounded corners visible
-      builder: (context) => Container(
-        padding: const EdgeInsets.only(top: 20), // Space for the drag handle
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+      builder: (context) =>
+          Container(
+            padding: const EdgeInsets.only(top: 20),
+            // Space for the drag handle
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.3,
+              // Initial height (40% of screen)
+              minChildSize: 0.3,
+              // Minimum height when dragged down
+              maxChildSize: 0.7,
+              // Maximum height when dragged up
+              builder: (context, scrollController) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: _buildRunningDetailsContent(
+                      notificationResponse, authController),
+                );
+              },
+            ),
           ),
-        ),
-        child: DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.3, // Initial height (40% of screen)
-          minChildSize: 0.3, // Minimum height when dragged down
-          maxChildSize: 0.7, // Maximum height when dragged up
-          builder: (context, scrollController) {
-            return SingleChildScrollView(
-              controller: scrollController,
-              child: _buildRunningDetailsContent(notificationResponse,authController),
-            );
-          },
-        ),
-      ),
     );
   }
 
 
-
 // The content of your bottom sheet (your original Column widget with slight modifications)
 
-  Widget _buildRunningDetailsContent(Orders bookingResponse,AuthController authController) {
+  Widget _buildRunningDetailsContent(Orders bookingResponse,
+      AuthController authController) {
     return Column(
       children: [
         // Drag handle indicator
@@ -1868,7 +2097,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                 children: [
                   Expanded(
                     child: Text(
-                      "${AppContants.rupessSystem} ${bookingResponse.amount ?? ""}",
+                      "${AppContants.rupessSystem} ${bookingResponse.amount ??
+                          ""}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: TColor.secondaryText,
@@ -1890,14 +2120,17 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                     child: FutureBuilder<Map<String, dynamic>>(
                       future: calculateDropDistancesForBooking(bookingResponse),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Text("Calculating...",
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                              style: TextStyle(
+                                  color: TColor.secondaryText, fontSize: 18));
                         } else if (snapshot.hasError) {
                           return Text("Error: ${snapshot.error}",
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: TColor.secondaryText, fontSize: 18));
+                              style: TextStyle(
+                                  color: TColor.secondaryText, fontSize: 18));
                         } else {
                           final data = snapshot.data!;
                           final km = data['total_distance_km'];
@@ -1906,7 +2139,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                           return Text(
                             "${km.toStringAsFixed(2)} KM • $duration",
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: TColor.secondaryText, fontSize: 18),
+                            style: TextStyle(
+                                color: TColor.secondaryText, fontSize: 18),
                           );
                         }
                       },
@@ -1914,7 +2148,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 25, vertical: 8),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -1939,31 +2174,33 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
               ),
               const SizedBox(height: 15),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 10),
                 child: Row(
                   children: [
-                  Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: TColor.secondary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Text(
-                      "${bookingResponse.pickup!.address ?? ""}",
-                      style: TextStyle(
-                        color: TColor.primaryText,
-                        fontSize: 15,
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: TColor.secondary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Text(
+                        "${bookingResponse.pickup!.address ?? ""}",
+                        style: TextStyle(
+                          color: TColor.primaryText,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
-                  ),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 10),
                 child: Row(
                   children: [
                     Container(
@@ -1994,7 +2231,7 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                         status: "cancel",
                         amount: bookingResponse.amount,
                         orderID: bookingResponse.orderId,
-                        cus_id:bookingResponse.cusId,
+                        cus_id: bookingResponse.cusId,
                       );
                     },
                     child: Container(
@@ -2006,7 +2243,8 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                         shape: BoxShape.circle,
 
                       ),
-                      child: Icon(Icons.directions_outlined,color: Colors.white,),
+                      child: Icon(
+                        Icons.directions_outlined, color: Colors.white,),
                     ),
                   ),
                   Expanded(
@@ -2014,14 +2252,15 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                       onTap: () {
                         Navigator.pop(context); // Close the bottom sheet
 
-                        if(bookingResponse.startTrip.toString().toLowerCase() == "yes" ){
+                        if (bookingResponse.startTrip.toString()
+                            .toLowerCase() == "yes") {
 
                         }
                         authController.bookingStatusChange(
                           status: "accept",
                           amount: bookingResponse.amount,
                           orderID: bookingResponse.orderId,
-                          cus_id:bookingResponse.cusId,
+                          cus_id: bookingResponse.cusId,
                         );
                       },
                       child: Container(
@@ -2040,7 +2279,10 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  bookingResponse.startTrip.toString().toLowerCase() == "yes"  ? "Delivered":"Pick Up",
+                                  bookingResponse.startTrip.toString()
+                                      .toLowerCase() == "yes"
+                                      ? "Delivered"
+                                      : "Pick Up",
                                   style: TextStyle(
                                     color: TColor.primaryTextW,
                                     fontSize: 14,
@@ -2078,13 +2320,13 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content:
-                Text(responseObj[KKey.message] as String? ?? MSG.success)));
+            Text(responseObj[KKey.message] as String? ?? MSG.success)));
 
         if (mounted) {
           setState(() {});
         }
       } else {
-         isDriverOnline = !isDriverOnline;
+        isDriverOnline = !isDriverOnline;
         mdShowAlert(
             "Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
       }
@@ -2094,41 +2336,44 @@ class _HomeViewState extends State<HomeView>with TickerProviderStateMixin {
     });
   }
 
-  // void apiHome() {
-  //   Globs.showHUD();
-  //   ServiceCall.post(
-  //       {}, SVKey.svHome,
-  //       isTokenApi: true, withSuccess: (responseObj) async {
-  //     Globs.hideHUD();
-  //
-  //     if (responseObj[KKey.status] == "1") {
-  //         var rObj = (responseObj[KKey.payload] as Map? ?? {})["running"] as Map? ?? {};
-  //
-  //         if(rObj.keys.isNotEmpty) {
-  //           context.push(RunRideView(rObj: rObj));
-  //         }
-  //
-  //
-  //     } else {
-  //       mdShowAlert(
-  //           "Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
-  //     }
-  //   }, failure: (error) async {
-  //     Globs.hideHUD();
-  //     mdShowAlert(Globs.appName, error.toString(), () {});
-  //   });
-  // }
+// void apiHome() {
+//   Globs.showHUD();
+//   ServiceCall.post(
+//       {}, SVKey.svHome,
+//       isTokenApi: true, withSuccess: (responseObj) async {
+//     Globs.hideHUD();
+//
+//     if (responseObj[KKey.status] == "1") {
+//         var rObj = (responseObj[KKey.payload] as Map? ?? {})["running"] as Map? ?? {};
+//
+//         if(rObj.keys.isNotEmpty) {
+//           context.push(RunRideView(rObj: rObj));
+//         }
+//
+//
+//     } else {
+//       mdShowAlert(
+//           "Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
+//     }
+//   }, failure: (error) async {
+//     Globs.hideHUD();
+//     mdShowAlert(Globs.appName, error.toString(), () {});
+//   });
+// }
 }
+
 class FullWidthDriverStatusSwitch extends StatefulWidget {
   final AuthController authController;
 
   const FullWidthDriverStatusSwitch({super.key, required this.authController});
 
   @override
-  State<FullWidthDriverStatusSwitch> createState() => _FullWidthDriverStatusSwitchState();
+  State<FullWidthDriverStatusSwitch> createState() =>
+      _FullWidthDriverStatusSwitchState();
 }
 
-class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitch>
+class _FullWidthDriverStatusSwitchState
+    extends State<FullWidthDriverStatusSwitch>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   bool _isOnline = false;
@@ -2140,9 +2385,13 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
 
   void _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    Get.find<AuthController>().isLoadingTime =
+    Get
+        .find<AuthController>()
+        .isLoadingTime =
         prefs.getBool(AppContants.isLoadingTime) ?? false;
-    print('dsdskdsds ${Get.find<AuthController>().isLoadingTime}');
+    print('dsdskdsds ${Get
+        .find<AuthController>()
+        .isLoadingTime}');
   }
 
   @override
@@ -2156,7 +2405,9 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
       });
     });
     Get.find<AuthController>().getMyScheduledOrderFun();
-    _isOnline = widget.authController.driverInResponse?.driverDetails?.loginStatus.toString() == "online";
+    _isOnline =
+        widget.authController.driverInResponse?.driverDetails?.loginStatus
+            .toString() == "online";
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -2176,13 +2427,15 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
         });
       }
     });
-    _bookingStream = Stream.periodic(const Duration(seconds: 30)).listen((_) {
-      if (!mounted) return;
-      widget.authController.checkDriverBooking(context);
-    });
+    // _bookingStream = Stream.periodic(const Duration(seconds: 30)).listen((_) {
+    //   if (!mounted) return;
+    //   widget.authController.checkDriverBooking(context);
+    // });
   }
+
   late StreamSubscription _bookingStream;
   Timer? _timer;
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -2197,7 +2450,11 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
     final startMillis = prefs.getInt('online_startTime');
     final lastSavedDate = prefs.getString('last_saved_date');
 
-    final today = DateTime.now().toIso8601String().split("T").first;
+    final today = DateTime
+        .now()
+        .toIso8601String()
+        .split("T")
+        .first;
 
     if (lastSavedDate != today) {
       // ✅ नया दिन → reset
@@ -2234,7 +2491,11 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
       await prefs.remove('online_startTime');
     }
     await prefs.setString(
-        'last_saved_date', DateTime.now().toIso8601String().split("T").first);
+        'last_saved_date', DateTime
+        .now()
+        .toIso8601String()
+        .split("T")
+        .first);
   }
 
   // 🔥 CHANGED: simplified toggle logic
@@ -2270,7 +2531,8 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
     Duration total = widget.authController.totalOnlineDuration;
 
     if (_isOnline && widget.authController.onlineStartTime != null) {
-      total += DateTime.now().difference(widget.authController.onlineStartTime!);
+      total +=
+          DateTime.now().difference(widget.authController.onlineStartTime!);
     }
 
     final hours = total.inHours;
@@ -2290,7 +2552,8 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
             _toggleStatus(!_isOnline);
           },
           onHorizontalDragEnd: (details) {
-            if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+            if (details.primaryVelocity != null &&
+                details.primaryVelocity! > 0) {
               _toggleStatus(true);
             } else if (details.primaryVelocity != null &&
                 details.primaryVelocity! < 0) {
@@ -2317,7 +2580,8 @@ class _FullWidthDriverStatusSwitchState extends State<FullWidthDriverStatusSwitc
               children: [
                 Center(
                   child: Text(
-                    "${"Swipe To".tr} ${_isOnline ? "Offline".tr : "Online".tr}",
+                    "${"Swipe To".tr} ${_isOnline ? "Offline".tr : "Online"
+                        .tr}",
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

@@ -1,10 +1,12 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi_driver/common/custom_snackbar.dart';
 import '../../common/appContants.dart';
 import '../../common/color_extension.dart';
 import '../../controller/authController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../socket/socket_connect_file.dart';
 import '../home/show_timer.dart';
 import '../home/support/faq.dart';
 import '../home/unloading_timer.dart';
@@ -60,9 +62,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   }
 
   Future<void> _prepareMapData() async {
-    final order = Get.find<AuthController>()
-        .runningOrderResponse!
-        .orders![0];
+    final order = Get.find<AuthController>().bookingDetailsResponse!;
 
     LatLng pickup = LatLng(
       double.parse(order.pickup!.lat!),
@@ -192,8 +192,8 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
               child: GoogleMap(
                 initialCameraPosition: CameraPosition(
                   target: LatLng(
-                    double.parse(controller.runningOrderResponse!.orders![0].pickup!.lat!),
-                    double.parse(controller.runningOrderResponse!.orders![0].pickup!.lng!),
+                    double.parse(controller.bookingDetailsResponse!.pickup!.lat!),
+                    double.parse(controller.bookingDetailsResponse!.pickup!.lng!),
                   ),
                   zoom: 14,
                 ),
@@ -240,14 +240,14 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          controller.runningOrderResponse!.orders![0].pickup!.name.toString(),
+                                          controller.bookingDetailsResponse!.pickup!.name.toString(),
                                           style: TextStyle(
                                               fontSize: 18, fontWeight: FontWeight.bold),
                                         ),
                                         InkWell(
                                           onTap: () {
                                             AppContants.makePhoneCall(
-                                                controller.runningOrderResponse!.orders![0].pickup!.contactNumber.toString());
+                                                controller.bookingDetailsResponse!.pickup!.contactNumber.toString());
                                           },
                                           child: Row(
                                             children: [
@@ -255,7 +255,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                                   size: 16),
                                               const SizedBox(width: 5),
                                               Text(
-                                                  '${controller.runningOrderResponse!.orders![0].pickup!.contactNumber.toString()}'),
+                                                  '${controller.bookingDetailsResponse!.pickup!.contactNumber.toString()}'),
                                             ],
                                           ),
                                         ),
@@ -285,7 +285,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    "${AppContants.rupessSystem} ${controller.runningOrderResponse!.orders![0].totalAmount ?? ""}",
+                                    "${AppContants.rupessSystem} ${controller.bookingDetailsResponse!.totalAmount ?? ""}",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: TColor.secondaryText,
@@ -295,7 +295,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                 ),
                                 Expanded(
                                   child: FutureBuilder<Map<String, dynamic>>(
-                                    future: controller.calculateDropDistancesForBooking(controller.runningOrderResponse!.orders![0]),
+                                    future: controller.calculateDropDistancesForBooking(controller.bookingDetailsResponse!),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState == ConnectionState.waiting) {
                                         return Text("Calculating...",
@@ -340,7 +340,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              controller.runningOrderResponse!.orders![0].pickup!.address ?? "",
+                                              controller.bookingDetailsResponse!.pickup!.address ?? "",
                                               style: TextStyle(
                                                 color: TColor.primaryText,
                                                 fontSize: 15,
@@ -351,7 +351,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                             width: 10,
                                           ),
                                           Text(
-                                            controller.runningOrderResponse!.orders![0].pickup!.status ?? "",
+                                            controller.bookingDetailsResponse!.pickup!.status ?? "",
                                             style: TextStyle(
                                                 color: TColor.primaryText,
                                                 fontSize: 15,
@@ -363,14 +363,14 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                       InkWell(
                                         onTap: () {
                                           AppContants.makePhoneCall(
-                                              controller.runningOrderResponse!.orders![0].senderContactNumber.toString());
+                                              controller.bookingDetailsResponse!.senderContactNumber.toString());
                                         },
                                         child: Row(
                                           children: [
                                             Icon(Icons.call_outlined, color: Colors.blue,
                                                 size: 16),
                                             const SizedBox(width: 5),
-                                            Text('${controller.runningOrderResponse!.orders![0].senderContactNumber.toString()} , ${controller.runningOrderResponse!.orders![0].senderName.toString()}'),
+                                            Text('${controller.bookingDetailsResponse!.senderContactNumber.toString()} , ${controller.bookingDetailsResponse!.senderName.toString()}'),
                                           ],
                                         ),
                                       ),
@@ -387,9 +387,9 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                               shrinkWrap: true,
                               padding: EdgeInsets.zero,
                               physics: NeverScrollableScrollPhysics(),
-                              itemCount: controller.runningOrderResponse!.orders![0].dropoffs?.length ?? 0,
+                              itemCount: controller.bookingDetailsResponse!.dropoffs?.length ?? 0,
                               itemBuilder: (context, index) {
-                                final dropoff = controller.runningOrderResponse!.orders![0].dropoffs![index];
+                                final dropoff = controller.bookingDetailsResponse!.dropoffs![index];
 
                                 // bool isCompleted = index < currentDropIndex.value ||
                                 //    (isLastDropCompleted.value && index == currentDropIndex.value);
@@ -456,21 +456,21 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                           // const SizedBox(height: 25),
 
                           const SizedBox(height: 35),
-                          controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() ==
+                          controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() ==
                               "loading"
                               ? LoadingTimer(
                             loadingChargePerMin: controller.loadingCharges.toString(),
                             maxLoadingTime: controller.maxTime.toString(),
                           )
                               : SizedBox.shrink(),
-                          controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() ==
+                          controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() ==
                               "unloading"
                               ? UnLoadingTimer(
                             loadingChargePerMin: controller.loadingCharges.toString(),
                             maxLoadingTime: controller.maxTime.toString(),
                           )
                               : SizedBox.shrink(),
-                          controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted" ?
+                          controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted" ?
                            Padding(
                              padding: const EdgeInsets.only(bottom: 8.0),
                              child: Align(
@@ -484,7 +484,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                ),
                              ),
                            ) : SizedBox.shrink(),
-                          controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted" ?
+                          controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted" ?
                           PinCodeTextField(
                             appContext: context,
                             length: 4,
@@ -514,11 +514,10 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                               disabledColor: Colors.black,
                             ),
 
-                            onCompleted: (enteredOtp) {
+                            onCompleted: (enteredOtp) async {
 
                               String apiOtp = controller
-                                  .runningOrderResponse!
-                                  .orders![0]
+                                  .bookingDetailsResponse!
                                   .pickupOtp
                                   .toString();
 
@@ -528,11 +527,27 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                 controller.startLoadingApi(
                                   controller.getUserID().toString(),
                                   context,
-                                  controller.runningOrderResponse!.orders![0].bookingId.toString(),
-                                  controller.runningOrderResponse!.orders![0].pickup!.locationId.toString(),
+                                  controller.bookingDetailsResponse!.id.toString(),
+                                  controller.bookingDetailsResponse!.pickup!.locationId.toString(),
                                 );
-
-                              } else {
+                                    Set<int> shownBookingIds = {};
+                                    if (!shownBookingIds.contains(int.parse(
+                                        controller.bookingDetailsResponse!
+                                            .id
+                                            .toString()))) {
+                                      shownBookingIds.add(int.parse(controller
+                                          .bookingDetailsResponse!
+                                          .id
+                                          .toString()));
+                                      final prefs =
+                                          await SharedPreferences.getInstance();
+                                      await prefs.setString(
+                                          AppContants.bookingID,
+                                          controller.bookingDetailsResponse!
+                                              .id
+                                              .toString());
+                                    }
+                                  } else {
 
                                 showCustomSnackBar("Wrong Pickup Pin",isError: true,getXSnackBar: true);
                                 otpController.clear();
@@ -558,9 +573,9 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   Widget bottomButtons(BuildContext context, AuthController controller) {
     return Container(
       padding: EdgeInsets.only(bottom: 50,top: 20),
-      child:   controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() ==
+      child:   controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() ==
           "delivered" &&
-          controller.runningOrderResponse!.orders![0].paymentStatus.toString().toLowerCase() ==
+          controller.bookingDetailsResponse!.paymentStatus.toString().toLowerCase() ==
               "pending" ?
 
       Column(
@@ -580,7 +595,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                     fontWeight: FontWeight.bold),),
                 Flexible(
                   child: Text(
-                    "${AppContants.rupessSystem} ${controller.runningOrderResponse!.orders![0].totalAmount ?? ""}",
+                    "${AppContants.rupessSystem} ${controller.bookingDetailsResponse!.totalAmount ?? ""}",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: TColor.secondaryText,
@@ -594,15 +609,25 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
           SizedBox(height: 20,),
 
           InkWell(
-            onTap: () {
+            onTap: () async {
               //   Navigator.pop(context);
               controller.currentDropIndex.value = 0;
               controller.loadingStart.value = false;
               controller.unloadingStart.value = false;
               controller.showCompletePayment.value = false;
-              controller.orderPayment(controller.runningOrderResponse!.orders![0].bookingId.toString(),
-                  controller.runningOrderResponse!.orders![0].driverId.toString(),
+              controller.orderPayment(controller.bookingDetailsResponse!.id.toString(),
+                  controller.bookingDetailsResponse!.driverId.toString(),
                   controller.generate8DigitKey().toString());
+              final chatController = Get.find<ChatController>();
+              chatController.socket?.emitWithAck("endTrip", {
+                "driver_id": controller.getUserID().toString(),
+               },
+                  ack: (response) {
+                    print("endTripSocket: $response");
+                  }
+              );
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove(AppContants.bookingID);
             },
             child: Container(
               height: 40,
@@ -637,13 +662,13 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
       ) :
       Row(
         children: [
-          controller.runningOrderResponse!.orders![0].orderStatus.toString() == "unloading" ?
+          controller.bookingDetailsResponse!.orderStatus.toString() == "unloading" ?
           SizedBox() :
           Expanded(
             child: InkWell(
               onTap: () async {
-                if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked") {
-                  final drops = controller.runningOrderResponse!.orders![0].dropoffs ?? [];
+                if (controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "picked") {
+                  final drops = controller.bookingDetailsResponse!.dropoffs ?? [];
                   if (drops.isEmpty) return;
                   final sortedDrops = List.from(drops)
                     ..sort((a, b) => int.parse(a.sequence.toString())
@@ -663,8 +688,8 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                 }
                 else {
                   controller.openGoogleMap(double.parse(
-                      controller.runningOrderResponse!.orders![0].pickup!.lat.toString()), double
-                      .parse(controller.runningOrderResponse!.orders![0].pickup!.lng.toString()));
+                      controller.bookingDetailsResponse!.pickup!.lat.toString()), double
+                      .parse(controller.bookingDetailsResponse!.pickup!.lng.toString()));
                 }
               },
               child: Container(
@@ -682,9 +707,9 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                       Icons.directions_outlined, color: Colors.white,),
                     SizedBox(width: 10,),
                     Text(
-                      controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked"
+                      controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "picked"
                           ? "Drop Location".tr :
-                      controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted" ?
+                      controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted" ?
                       "Pickup Direction".tr :
                       "Direction".tr,
                       style: TextStyle(
@@ -705,13 +730,12 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
           Expanded(
               child:  InkWell(
                 onTap: () async {
-                  if ( controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted") {
+                  if ( controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted") {
 
                     String enteredOtp = otpController.text.trim();
                     String apiOtp = controller
-                        .runningOrderResponse!
-                        .orders![0]
-                        .pickupOtp
+                        .bookingDetailsResponse!.
+                        pickupOtp
                         .toString();
 
                     if (enteredOtp.length != 4) {
@@ -725,20 +749,35 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                       controller.startLoadingApi(
                         controller.getUserID().toString(),
                         context,
-                        controller.runningOrderResponse!.orders![0].bookingId.toString(),
-                        controller.runningOrderResponse!.orders![0].pickup!.locationId.toString(),
+                        controller.bookingDetailsResponse!.id.toString(),
+                        controller.bookingDetailsResponse!.pickup!.locationId.toString(),
                       );
+                      Set<int> shownBookingIds = {};
+                      if (!shownBookingIds.contains(int.parse(controller.bookingDetailsResponse!.id.toString()))) {
+                        shownBookingIds.add(int.parse(controller.bookingDetailsResponse!.id.toString()));
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString(AppContants.bookingID, controller.bookingDetailsResponse!.id.toString());
 
+                      }
                     } else {
                       showCustomSnackBar("Wrong OTP",isError: true,getXSnackBar: true);
 
                     }
                     }
-                  else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "loading") {
-                    controller.orderPicked(orderID: controller.runningOrderResponse!.orders![0].bookingId.toString(),locationID: controller.runningOrderResponse!.orders![0].pickup!.locationId.toString(),context: context);
-                    // checkDriverBooking(context);
+                  else if (controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "loading") {
+                    controller.orderPicked(orderID: controller.bookingDetailsResponse!.id.toString(),locationID: controller.bookingDetailsResponse!.pickup!.locationId.toString(),context: context);
+
+                    final chatController = Get.find<ChatController>();
+                    chatController.socket?.emitWithAck("startTrip", {
+                      "driver_id": controller.getUserID().toString(),
+                      "booking_id":  controller.bookingDetailsResponse!.id.toString()
+                    },
+                        ack: (response) {
+                          print("startTripSocket: $response");
+                        }
+                    );
                   }
-                  else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "unloading") {
+                  else if (controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "unloading") {
 
                     showDialog(
                       context: context,
@@ -762,7 +801,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                               onPressed: () {
                                 Navigator.of(context).pop();
                                 controller.orderDelivered(
-                                  orderID: controller.runningOrderResponse!.orders![0].bookingId.toString(),
+                                  orderID: controller.bookingDetailsResponse!.id.toString(),
                                   context: context,
                                 );
 
@@ -776,13 +815,13 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                       },
                     );
                   }
-                  else if (controller.runningOrderResponse!.orders![0].orderStatus
+                  else if (controller.bookingDetailsResponse!.orderStatus
                       .toString()
                       .toLowerCase() ==
                       "picked") {
 
                     final drops =
-                        controller.runningOrderResponse!.orders![0].dropoffs ?? [];
+                        controller.bookingDetailsResponse!.dropoffs ?? [];
 
                     if (drops.isEmpty) return;
 
@@ -806,7 +845,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                     final isSuccess = await controller.startUnLoadingApi(
                       controller.getUserID().toString(),
                       context,
-                      controller.runningOrderResponse!.orders![0].bookingId.toString(),
+                      controller.bookingDetailsResponse!.id.toString(),
                       nextPendingDrop.locationId.toString(),
                     );
 
@@ -831,13 +870,13 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "accpeted" ?
+                              controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted" ?
                               "Start Loading".tr
-                                  :  controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "loading" ?
+                                  :  controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "loading" ?
                               "Start Trip".tr :
-                              controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked"
+                              controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "picked"
                                   ? "Unloading".tr :
-                              controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "unloading" ?
+                              controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "unloading" ?
                               "Completed".tr
                                   : "Unknown error",
                               style: TextStyle(

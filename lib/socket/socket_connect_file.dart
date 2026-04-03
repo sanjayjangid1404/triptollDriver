@@ -44,11 +44,20 @@ class ChatController extends GetxController {
 
     socket!.onConnect((_) async {
       log('✅ Connected with server');
-      socket!.off("new_booking");
+      showCustomSnackBar('✅ Connected with server',isError: false,getXSnackBar: true);
+      socket!.off("newBooking");
       socket!.off("forceLogout");
       socket!.off("deviceStatus");
+      socket!.off("bookingAccepted");
+      socket!.off("bookingTaken");
+      socket!.off("scheduledReminder");
+      socket!.off("tripStarted");
+      socket!.off("activeBooking");
+      socket!.off("tripEnded");
       socket!.on("forceLogout", (data) {
-        print("📡 forceLogout status: $data");
+        if (kDebugMode) {
+          print("📡 forceLogout status: $data");
+        }
 
         if (data != null && data["message"] == "Logged in from another device"){
           showCustomSnackBar(
@@ -62,20 +71,27 @@ class ChatController extends GetxController {
           socket?.dispose();
           socket = null;
         }else{
-          print("logout socket else part");
+          if (kDebugMode) {
+            print("logout socket else part");
+          }
         }
       });
       socket!.on("deviceStatus", (data) {
-        print("📡 Device status: $data");
+        if (kDebugMode) {
+          print("📡 Device status: $data");
+        }
 
         if (data != null && data["status"] == true) {
-          print("🚨 दूसरे device से login हुआ → logout");
         }else{
-          print("logout socket else part");
+          if (kDebugMode) {
+            print("logout socket else part");
+          }
         }
       });
-      socket!.on("new_booking", (data) async {
-        print("📡 new_booking status: $data");
+      socket!.on("newBooking", (data) async {
+        if (kDebugMode) {
+          print("📡 newBooking status: $data");
+        }
 
         if (data != null && data["status"] == true && data["data"] != null) {
           var booking = data["data"][0];
@@ -83,13 +99,13 @@ class ChatController extends GetxController {
           try {
             var bookingData = Data.fromJson(booking);
             int bookingId = int.tryParse(bookingData.bookingId.toString()) ?? 0;
-
-            if (!shownBookingIds.contains(bookingId)) {
-              shownBookingIds.add(bookingId);
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setString(AppContants.bookingID, bookingId.toString());
-              newBookingSocket.value = bookingData;
-            }
+            newBookingSocket.value = bookingData;
+            // if (!shownBookingIds.contains(bookingId)) {
+            //   shownBookingIds.add(bookingId);
+            //   final prefs = await SharedPreferences.getInstance();
+            //   await prefs.setString(AppContants.bookingID, bookingId.toString());
+            //   newBookingSocket.value = bookingData;
+            // }
 
           } catch (e) {
             print("❌ parsing error: $e");
@@ -99,13 +115,88 @@ class ChatController extends GetxController {
           print("❌ new_booking else part");
         }
       });
+      socket!.on("bookingAccepted", (data) async {
+        if (kDebugMode) {
+          print("📡 bookingAccepted status: $data");
+        }
+
+      });
+      socket!.on("bookingTaken", (data) async {
+        if (kDebugMode) {
+          print("📡 bookingTaken status: $data");
+        }
+
+      });
+      Set<int> shownBookingIds = {};
+      socket!.on("scheduledReminder", (data) async {
+        if (kDebugMode) {
+          print("📡 scheduledReminder status: $data");
+        }
+        if (data != null && data['status'] == true) {
+          var bookings = data['data'];
+
+          if (bookings != null && bookings.isNotEmpty) {
+
+            for (var booking in bookings) {
+              int bookingId =
+                  int.tryParse(booking['booking_id'].toString()) ?? 0;
+
+
+              if (!shownBookingIds.contains(bookingId)) {
+                shownBookingIds.add(bookingId);
+                Get.find<AuthController>().setBookingId(bookingId);
+
+                if (kDebugMode) {
+                  print("✅ New Booking Saved: $bookingId");
+                }
+
+                // 👉 yaha tu popup / notification bhi trigger kar sakta hai
+              } else {
+                if (kDebugMode) {
+                  print("⚠️ Duplicate Booking Ignored: $bookingId");
+                }
+              }
+            }
+          }
+        }
+      });
+      socket!.on("updateStatus", (data) async {
+        if (kDebugMode) {
+          print("📡 updateStatus status: $data");
+        }
+
+      });
+      socket!.on("nextDrop", (data) async {
+        if (kDebugMode) {
+          print("📡 nextDrop status: $data");
+        }
+
+      });
+      socket!.on("tripStarted", (data) {
+        if (kDebugMode) {
+          print("📡 tripStarted status: $data");
+        }
+      });
+
+      socket!.on("activeBooking", (data) {
+        if (kDebugMode) {
+          print("📡 activeBooking status: $data");
+        }
+
+      });
+
+      socket!.on("tripEnded", (data) {
+        if (kDebugMode) {
+          print("📡 tripEnded status: $data");
+        }
+      });
       await sendDeviceData();
     });
     socket!.onReconnectFailed((_) {
       log("❌ Reconnection Failed after 10 attempts");
 
       showCustomSnackBar(
-        "Connection failed. Please login again.",
+        "Network issue. Please login again.",
         getXSnackBar: true,
         isError: true,
       );
@@ -131,6 +222,7 @@ class ChatController extends GetxController {
 
     socket!.onReconnect((_) async {
       log("🔁 Reconnected");
+
       await sendDeviceData();
     });
 
@@ -154,6 +246,13 @@ class ChatController extends GetxController {
     socket?.emitWithAck("startDeviceMonitor", payload, ack: (res) {
       print("startDeviceMonitor: $res");
     });
+    socket?.emitWithAck("restoreTrip", {
+      "driver_id": userID.toString()
+    },
+      ack: (res) {
+        print("restoreTrip: $res");
+      }
+    );
   }
   Future<void> reconnectWithNewToken() async {
     print("🔄 Reconnecting with new token...");

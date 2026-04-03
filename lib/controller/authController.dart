@@ -33,6 +33,7 @@ import '../common/custom_snackbar.dart';
 import '../common/driver_notification_service.dart';
 import '../common/globs.dart';
 import '../common/route_helper.dart';
+import '../model/booking_deatils_model.dart';
 import '../model/category_type_response.dart' hide Data;
 import '../model/check_ticket_limit_model.dart';
 import '../model/city_response.dart';
@@ -61,7 +62,9 @@ import '../view/home/support/faq.dart';
 import '../view/home/unloading_timer.dart';
 import '../view/login/document_upload_view.dart';
 import 'package:http/http.dart' as http;
+
 import '../view/running/runnig_order_screen.dart';
+// import '../view/running/runnig_order_screen.dart';
 
 
 
@@ -78,6 +81,18 @@ class AuthController extends GetxController implements GetxService {
   Timer? loadingTimer;
   RxInt elapsedSeconds = 0.obs;
 
+  RxInt bookingIdForSocket = 0.obs;
+  void setBookingId(int id) async {
+    bookingIdForSocket.value = id;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt("booking_id", id);
+  }
+
+  void loadBookingId() async {
+    final prefs = await SharedPreferences.getInstance();
+    bookingIdForSocket.value = prefs.getInt("booking_id") ?? 0;
+  }
   void startLoadingTimer() {
     if (loadingTimer != null) return;
 
@@ -198,6 +213,7 @@ class AuthController extends GetxController implements GetxService {
       //   checkDriverDevice(deviceId);
       // });
     //}
+    loadBookingId();
     _checkLocationPermission();
   }
 
@@ -329,6 +345,7 @@ class AuthController extends GetxController implements GetxService {
               "lat": position.latitude,
               "lng": position.longitude,
               "booking_id" : bookingID ?? "0",
+              "login_status" :  driverStatus ?? "online",
             },
             ack: (response) {
               if (kDebugMode) {
@@ -344,7 +361,19 @@ class AuthController extends GetxController implements GetxService {
 
               if (response["status"] == "success") {
                 if (kDebugMode) {
+                  // showCustomSnackBar('${response["message"]}',isError: false,getXSnackBar: true);
                   print("✅ Success: ${response["message"]}");
+                }
+                final payload = {
+                  "lat": position.latitude,
+                  "lng": position.longitude,
+                  "driver_id": getUserID(),
+                  "booking_id": bookingID ?? "0",
+                  "login_status": driverStatus ?? "online",
+                  // "location_time": DateTime.now().toIso8601String(),
+                };
+                if (kDebugMode) {
+                  print("DRIVER LOCATION PAYLOAD: $payload");
                 }
               } else {
                 if (kDebugMode) {
@@ -354,7 +383,7 @@ class AuthController extends GetxController implements GetxService {
             },
           );
         } else {
-          print("❌ Socket not connected authController");
+          print("❌ Socket not connected authController 1");
         }
 
         _locationUpdateTimer = Timer(const Duration(seconds: 10), () async {
@@ -371,6 +400,7 @@ class AuthController extends GetxController implements GetxService {
                 "lat": position.latitude,
                 "lng": position.longitude,
                 "booking_id" :bookingID ?? "0",
+                "login_status" :  driverStatus ?? "online",
               },
               ack: (response) {
                 print("Server response: $response");
@@ -382,6 +412,17 @@ class AuthController extends GetxController implements GetxService {
 
                 if (response["status"] == "success") {
                   print("✅ Success: ${response["message"]}");
+                  // showCustomSnackBar('${response["message"]}',isError: false,getXSnackBar: true);
+                  final payload = {
+                    "lat": position.latitude,
+                    "lng": position.longitude,
+                    "driver_id": getUserID(),
+                    "booking_id": bookingID ?? "0",
+                    "login_status" : driverStatus,
+                  };
+                  if (kDebugMode) {
+                    print("DRIVER LOCATION PAYLOAD: $payload");
+                  }
                 } else {
                   print("❌ Error: ${response["message"]}");
                 }
@@ -389,7 +430,7 @@ class AuthController extends GetxController implements GetxService {
             );
 
           } else {
-            print("❌ Socket not connected authController");
+            print("❌ Socket not connected authController 2");
           }
         });
       }
@@ -598,7 +639,7 @@ class AuthController extends GetxController implements GetxService {
           print("🔥 Second emit fired");
         }
         else {
-          print("❌ Socket not connected authController");
+          print("❌ Socket not connected authController 3");
         }
         if (response.body['is_loading_time'].toString() == "true") {
           authRepo.saveIsLoadingTime(true);
@@ -911,6 +952,7 @@ class AuthController extends GetxController implements GetxService {
 
       else {
         await DriverNotificationService.showOfflineNotification();
+        driverInfo(context!);
       }
 
     }
@@ -1134,8 +1176,11 @@ class AuthController extends GetxController implements GetxService {
 
     if (response.statusCode == 200 || response.statusCode == 400) {
       stopRingtone();
-
-
+      final chatController = Get.find<ChatController>();
+      chatController.socket?.emitWithAck("acceptBooking", {
+        "driver_id": getUserID(),
+        "booking_id" : orderID ?? "0",
+      });
       hasShownSheet = false;
 
       Get.offAll(HomeView());
@@ -1743,7 +1788,7 @@ class AuthController extends GetxController implements GetxService {
       stopRingtone();
       authRepo.saveUserBooking(orderID.toString());
       hasShownSheet = false;
-      checkDriverBooking(context);
+      getBookingDetails(context: context,bookingID: orderID.toString());
       // Get.offAll(HomeView());
     }
     else {
@@ -1776,7 +1821,8 @@ class AuthController extends GetxController implements GetxService {
     if (response.statusCode == 200 || response.statusCode == 400) {
       hasShownSheet = false;
       authRepo.saveUserBooking("0");
-      checkDriverBooking(context);
+      getBookingDetails(context: context,bookingID: orderID.toString());
+
       startJourneyToNext(cus_id: getUserID(), orderID: orderID);
       update();
     }
@@ -1823,43 +1869,43 @@ class AuthController extends GetxController implements GetxService {
 
   RunningOrderResponse? runningOrderResponse = RunningOrderResponse();
   RxString runningOrderStatus = "".obs;
-  Future<void> checkDriverBooking(BuildContext context) async {
-    update();
-    print(getUserDeviceID());
-
-    if (isKyc() && isPayment()) {
-      isLoading = true;
-      Response response = await authRepo.checkDriverBooking(userID: getUserID());
-      if (response.statusCode == 200 || response.statusCode == 400) {
-        runningOrderResponse = null;
-        runningOrderResponse = RunningOrderResponse.fromJson(response.body);
-        checkAndStartBookingNotification(context);
-        getScheduledOrderFun();
-        if (response.body["status"] == false) {
-          checkAndStartBookingNotification(context);
-        }
-        else {
-          checkAndShowPage(context);
-        }
-
-        update();
-        if (runningOrderResponse != null &&
-            runningOrderResponse!.orders != null &&
-            runningOrderResponse!.orders!.isNotEmpty) {
-
-          runningOrderStatus.value =
-              runningOrderResponse!.orders![0].orderStatus?.toString() ?? '';
-        }
-        update();
-      }
-      else {
-        ApiChecker.checkApi(response);
-      }
-
-      isLoading = false;
-      update();
-    }
-  }
+  // Future<void> checkDriverBooking(BuildContext context) async {
+  //   update();
+  //   print(getUserDeviceID());
+  //
+  //   if (isKyc() && isPayment()) {
+  //     isLoading = true;
+  //     Response response = await authRepo.checkDriverBooking(userID: getUserID());
+  //     if (response.statusCode == 200 || response.statusCode == 400) {
+  //       runningOrderResponse = null;
+  //       runningOrderResponse = RunningOrderResponse.fromJson(response.body);
+  //       checkAndStartBookingNotification(context);
+  //       getScheduledOrderFun();
+  //       if (response.body["status"] == false) {
+  //         checkAndStartBookingNotification(context);
+  //       }
+  //       else {
+  //         // checkAndShowPage(context);
+  //       }
+  //
+  //       update();
+  //       if (runningOrderResponse != null &&
+  //           runningOrderResponse!.orders != null &&
+  //           runningOrderResponse!.orders!.isNotEmpty) {
+  //
+  //         runningOrderStatus.value =
+  //             runningOrderResponse!.orders![0].orderStatus?.toString() ?? '';
+  //       }
+  //       update();
+  //     }
+  //     else {
+  //       ApiChecker.checkApi(response);
+  //     }
+  //
+  //     isLoading = false;
+  //     update();
+  //   }
+  // }
 
   Future<void> startTrip(String id, String status, BuildContext context,
       String cusId, String orderID, String amount) async
@@ -1919,7 +1965,7 @@ class AuthController extends GetxController implements GetxService {
 
     if (response.statusCode == 200 || response.statusCode == 400) {
       hasShownSheet = false;
-      checkDriverBooking(context);
+      getBookingDetails(context: context,bookingID: orderID.toString());
       // Get.offAll(HomeView());
       update();
     }
@@ -1952,7 +1998,7 @@ class AuthController extends GetxController implements GetxService {
       /// ✅ SUCCESS CASE
       if (response.statusCode == 200) {
         hasShownSheet = false;
-        checkDriverBooking(context);
+        getBookingDetails(context: context,bookingID: orderID.toString());
         return true;
       }
 
@@ -2021,13 +2067,8 @@ class AuthController extends GetxController implements GetxService {
             notificationResponse.add(BookingNotificationResponse.fromJson(
                 response.body["bookings"][i]));
           }
-
-          // checkAndShowBottomSheet(context);
-          checkAndShowPage(context);
-          checkDriverBooking(context);
+          // getBookingDetails(context: context,bookingID: orderID.toString());
           stopBookingNotificationPolling();
-
-          //  await  context.push( TipRequestView(bObj: BookingNotificationResponse.fromJson(response.body[0])) );
         }
       }
       else {
@@ -2147,7 +2188,7 @@ class AuthController extends GetxController implements GetxService {
         await authRepo.saveDriverStatus(status);
       }
 
-      checkDriverBooking(context);
+      // getBookingDetails(context: context,bookingID: orderID.toString());
 
 
       update();
@@ -2219,11 +2260,11 @@ class AuthController extends GetxController implements GetxService {
   }
 
   bool isBookingDetails = false;
-  BookingDetailsResponse? bookingDetailsResponse = BookingDetailsResponse();
+  GetBookingDetailModel? bookingDetailsResponse = GetBookingDetailModel();
   PaymentHistoryModel? paymentHistoryModel = PaymentHistoryModel();
 
   Future<void> getBookingDetails(
-      {String? bookingID, String? driverLat, String? driverLng}) async
+      {String? bookingID,required BuildContext context}) async
   {
     isBookingDetails = true;
 
@@ -2234,25 +2275,22 @@ class AuthController extends GetxController implements GetxService {
 
     // vehicleData = null;
     Response response = await authRepo.getBookingDetails(
-        bookingID: bookingID, userID: getUserID());
+        bookingID: bookingID);
 
 
     if (response.statusCode == 200 || response.statusCode == 400) {
-      bookingDetailsResponse = BookingDetailsResponse.fromJson(response.body);
+      bookingDetailsResponse = GetBookingDetailModel.fromJson(response.body[0]);
 
-      if (driverLat != null && driverLat!.isNotEmpty && driverLng != null &&
-          driverLng!.isNotEmpty && bookingDetailsResponse != null) {
-        print("driverLat!=>$driverLat!");
-        print("driverLng!=>$driverLng!");
+      update();
+      checkAndShowOrderPage(context);
+      update();
+      if (bookingDetailsResponse != null) {
+        runningOrderStatus.value =
+            bookingDetailsResponse!.orderStatus.toString() ?? '';
       }
-
-
-      // getAllBookingLoading = false;
       update();
     }
     else {
-      // dynamic data = jsonDecode(response.body);
-
       ApiChecker.checkApi(response);
     }
 
@@ -2709,10 +2747,25 @@ class AuthController extends GetxController implements GetxService {
     }
   }
 
-  void checkAndShowPage(BuildContext context) {
-    if (runningOrderResponse != null &&
-        runningOrderResponse!.orders != null &&
-        runningOrderResponse!.orders!.isNotEmpty) {
+  // void checkAndShowPage(BuildContext context) {
+  //   if (runningOrderResponse != null &&
+  //       runningOrderResponse!.orders != null &&
+  //       runningOrderResponse!.orders!.isNotEmpty) {
+  //
+  //     WidgetsBinding.instance.addPostFrameCallback((_) {
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => RunningOrderScreen(
+  //             // order: runningOrderResponse!.orders![0],
+  //           ),
+  //         ),
+  //       );
+  //     });
+  //   }
+  // }
+  void checkAndShowOrderPage(BuildContext context) {
+    if (bookingDetailsResponse != null) {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.push(

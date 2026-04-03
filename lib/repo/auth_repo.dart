@@ -450,9 +450,10 @@ class AuthRepo{
         "${AppContants.getAllBookingURL}?payment_status=$status&limit=$limit&user_id=$userID&user_type=driver");
   }
 
-  Future<Response> getBookingDetails({String? bookingID,String? userID}) async {
-    return await apiClient.getData(
-        "${AppContants.getBookingDetails}/$bookingID?user_type=customer&user_id=$userID");
+  Future<Response> getBookingDetails({String? bookingID}) async {
+    return await apiClient.getDataWithBody(
+        AppContants.getBookingDetails,
+    {"booking_id":bookingID});
   }
 
   Future<Response> getBookingDriver({String? bookingID}) async {
@@ -586,6 +587,7 @@ class AuthRepo{
   Future<void> saveDriverStatus(String status) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('driver_status', status);
+    await prefs.reload();
   }
 
   Future<String?> getDriverStatus() async {

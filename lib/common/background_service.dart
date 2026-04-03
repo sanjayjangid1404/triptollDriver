@@ -155,7 +155,7 @@ void onStart(ServiceInstance service) async {
         locationSettings: LocationSettings(accuracy: LocationAccuracy.bestForNavigation),
 
       );
-
+      await prefs.reload();
       debugPrint("callingLocation");
       print("callingLocation");
       String? userId = prefs.getString(AppContants.userID);
@@ -164,6 +164,7 @@ void onStart(ServiceInstance service) async {
       if (userId != null && userId.isNotEmpty) {
         // await _sendLocationToServer(userId,position.latitude, position.longitude,bookingID);
         String? driverStatus = await getDriverStatus();
+        print("🔥 BG DRIVER STATUS: $driverStatus");
         if (socket?.connected == true &&
             userId.toString().trim().isNotEmpty) {
           socket?.emitWithAck(
@@ -172,7 +173,8 @@ void onStart(ServiceInstance service) async {
               "driver_id": userId,
               "lat": position.latitude,
               "lng": position.longitude,
-              "booking_id" : bookingID ?? "0"
+              "booking_id" : bookingID ?? "0",
+              "login_status" :  driverStatus ?? "online",
             },
             ack: (response) {
               if (kDebugMode) {
@@ -202,7 +204,7 @@ void onStart(ServiceInstance service) async {
             "lng": position.longitude,
             "driver_id": userId,
             "booking_id": bookingID ?? "0",
-            // "driver_status": driverStatus ?? "online",
+            "login_status": driverStatus ?? "online",
             // "location_time": DateTime.now().toIso8601String(),
           };
           if (kDebugMode) {
@@ -256,7 +258,7 @@ void onStart(ServiceInstance service) async {
       //   // );
       // }
 
-      debugPrint('Location Update: ${position.latitude}, ${position.longitude} at ${DateTime.now()}');
+      // debugPrint('Location Update: ${position.latitude}, ${position.longitude} at ${DateTime.now()}');
 
     } catch (e) {
       debugPrint('Location Error: $e');
@@ -265,6 +267,7 @@ void onStart(ServiceInstance service) async {
 }
 Future<String?> getDriverStatus() async {
   final prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
   return prefs.getString('driver_status');
 }
 
