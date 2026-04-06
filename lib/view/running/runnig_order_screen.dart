@@ -667,20 +667,22 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
           Expanded(
             child: InkWell(
               onTap: () async {
-                if (controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "picked") {
-                  final drops = controller.bookingDetailsResponse!.dropoffs ?? [];
+                if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked") {
+                  final drops = controller.runningOrderResponse!.orders![0].dropoffs ?? [];
                   if (drops.isEmpty) return;
                   final sortedDrops = List.from(drops)
                     ..sort((a, b) => int.parse(a.sequence.toString())
                         .compareTo(int.parse(b.sequence.toString())));
 
-                  final dropIndex = controller.currentDropIndex.value;
-                  if (dropIndex < sortedDrops.length) {
-                    final drop = sortedDrops[dropIndex];
+                  final nextPendingDrop = sortedDrops.firstWhere(
+                        (d) => d.status.toString().toLowerCase() == "pending",
+                    orElse: () => null,
+                  );
 
+                  if (nextPendingDrop != null) {
                     controller.openGoogleMap(
-                      double.parse(drop.lat.toString()),
-                      double.parse(drop.lng.toString()),
+                      double.parse(nextPendingDrop.lat.toString()),
+                      double.parse(nextPendingDrop.lng.toString()),
                     );
                   } else {
                     print("✅ All drops completed");
@@ -688,8 +690,8 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                 }
                 else {
                   controller.openGoogleMap(double.parse(
-                      controller.bookingDetailsResponse!.pickup!.lat.toString()), double
-                      .parse(controller.bookingDetailsResponse!.pickup!.lng.toString()));
+                      controller.runningOrderResponse!.orders![0].pickup!.lat.toString()), double
+                      .parse(controller.runningOrderResponse!.orders![0].pickup!.lng.toString()));
                 }
               },
               child: Container(
