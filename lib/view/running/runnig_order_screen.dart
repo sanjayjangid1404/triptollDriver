@@ -556,7 +556,8 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   }
 
   Widget bottomButtons(BuildContext context, AuthController controller) {
-    return Container(
+    return  controller.runningOrderResponse!.orders != null ?
+      Container(
       padding: EdgeInsets.only(bottom: 50,top: 20),
       child:   controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() ==
           "delivered" &&
@@ -769,6 +770,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
 
                                 controller.resetLoadingTimer();
                                 controller.resetUnLoadingTimer();
+                                controller.checkDriverBooking(context);
                               },
                               child:  Text("Yes".tr),
                             ),
@@ -856,6 +858,6 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
           )
         ],
       ),
-    );
+    ) : SizedBox();
   }
 }

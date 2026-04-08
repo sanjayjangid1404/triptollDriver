@@ -2574,6 +2574,7 @@ class AuthController extends GetxController implements GetxService {
         runningOrderResponse!.orders!.isNotEmpty) {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
