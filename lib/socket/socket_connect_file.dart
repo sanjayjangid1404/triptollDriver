@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -7,6 +8,7 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:taxi_driver/common/custom_snackbar.dart';
 import '../common/appContants.dart';
 import '../controller/authController.dart';
+import '../model/booking_deatils_model.dart';
 import '../model/booking_notification_response.dart';
 
 
@@ -15,6 +17,22 @@ class ChatController extends GetxController {
   Rxn<Data> newBookingSocket = Rxn<Data>();
   io.Socket? socket;
   Set<int> shownBookingIds = {};
+  Future<void> emitDriverOnline() async {
+    try {
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      String userID = pref.getString(AppContants.userID) ?? '';
+
+      if (userID.isEmpty) {
+        print("❌ UserID not found");
+        return;
+      }
+      socket?.emit("driver_online", {
+        "driver_id": userID,
+      });
+    } catch (e) {
+      print("❌ Error emitting driver_online: $e");
+    }
+  }
   Future<void> connectToServer() async {
     if (socket?.connected == true) {
       log("Already connected");
@@ -54,6 +72,7 @@ class ChatController extends GetxController {
       socket!.off("tripStarted");
       socket!.off("activeBooking");
       socket!.off("tripEnded");
+      await emitDriverOnline();
       socket!.on("forceLogout", (data) {
         if (kDebugMode) {
           print("📡 forceLogout status: $data");
@@ -181,8 +200,25 @@ class ChatController extends GetxController {
       socket!.on("activeBooking", (data) {
         if (kDebugMode) {
           print("📡 activeBooking status: $data");
+          print("📡 activeBooking status: ${jsonEncode(data)}");
         }
 
+        try {
+          if (data != null && data is Map<String, dynamic>) {
+            final bookingList = data['data'];
+
+            if (bookingList is List && bookingList.isNotEmpty) {
+              Get.find<AuthController>().bookingDetailsResponse =
+                  GetBookingDetailModel.fromJson(bookingList[0]);
+
+              Get.find<AuthController>().checkAndShowOrderPageSokect();
+            }
+
+            update();
+          }
+        } catch (e) {
+          print("❌ Parsing error: $e");
+        }
       });
 
       socket!.on("tripEnded", (data) {
@@ -219,10 +255,13 @@ class ChatController extends GetxController {
     socket!.onError((data) {
       log("❌ Error: $data");
     });
-
+    socket!.onAny((event, data) {
+      log("📡 EVENT: $event");
+      log("📦 DATA: $data");
+    });
     socket!.onReconnect((_) async {
       log("🔁 Reconnected");
-
+      await emitDriverOnline();
       await sendDeviceData();
     });
 

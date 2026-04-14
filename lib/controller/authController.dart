@@ -2766,20 +2766,27 @@ class AuthController extends GetxController implements GetxService {
   // }
   void checkAndShowOrderPage(BuildContext context) {
     if (bookingDetailsResponse != null) {
-
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return; // 🔥 fix
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => RunningOrderScreen(
-              // order: runningOrderResponse!.orders![0],
-            ),
+            builder: (_) => RunningOrderScreen(),
           ),
         );
       });
     }
   }
-
+  void checkAndShowOrderPageSokect() {
+    if (bookingDetailsResponse != null) {
+      if (Get.currentRoute != "/RunningOrderScreen") {
+        Future.microtask(() {
+          Get.to(() => RunningOrderScreen());
+        });
+      }
+    }
+  }
   Widget buildRunningDetailsContent(Orders bookingResponse,
       BuildContext context) {
     return Column(

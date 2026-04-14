@@ -192,8 +192,8 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
               child: GoogleMap(
                 initialCameraPosition: CameraPosition(
                   target: LatLng(
-                    double.parse(controller.bookingDetailsResponse!.pickup!.lat!),
-                    double.parse(controller.bookingDetailsResponse!.pickup!.lng!),
+                    double.parse(controller.bookingDetailsResponse!.pickup?.lat),
+                    double.parse(controller.bookingDetailsResponse!.pickup?.lng),
                   ),
                   zoom: 14,
                 ),
@@ -521,6 +521,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                   .pickupOtp
                                   .toString();
 
+
                               if (enteredOtp == apiOtp) {
 
                                 // ✅ Correct OTP → Auto API Call
@@ -550,6 +551,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                   } else {
 
                                 showCustomSnackBar("Wrong Pickup Pin",isError: true,getXSnackBar: true);
+                                showCustomSnackBar(apiOtp,isError: true,getXSnackBar: true);
                                 otpController.clear();
                               }
                             },
@@ -831,7 +833,6 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                       ..sort((a, b) => int.parse(a.sequence.toString())
                           .compareTo(int.parse(b.sequence.toString())));
 
-                    // 🔥 Always find FIRST pending drop
                     final nextPendingDrop = sortedDrops.firstWhere(
                           (d) => d.status.toString().toLowerCase() == "pending",
                       orElse: () => null,

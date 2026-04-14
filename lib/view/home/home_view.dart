@@ -2439,7 +2439,7 @@ class _FullWidthDriverStatusSwitchState
   @override
   void dispose() {
     _timer?.cancel();
-    _bookingStream.cancel();
+    // _bookingStream.cancel();
     _animationController.dispose();
     super.dispose();
   }
