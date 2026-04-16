@@ -98,6 +98,7 @@ class AuthRepo{
     });
   }
 
+
   Future<Response> driverBasicInfo(body,List<MultipartBody> multipartBody) async {
 
     return await apiClient.postMultipartData(
