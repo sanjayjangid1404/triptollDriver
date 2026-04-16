@@ -31,13 +31,13 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
     print('function call $s');
 
     if (s == "loading") {
-      controller.startLoadingTimer();
+      controller.restoreLoading();
       controller.stopUnLoadingTimer();
       return;
     }
 
     if (s == "unloading") {
-      controller.startUnLoadingTimer();
+      controller.restoreUnLoading();
       controller.stopLoadingTimer();
       return;
     }
@@ -738,7 +738,6 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                     }
                   else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "loading") {
                     controller.orderPicked(orderID: controller.runningOrderResponse!.orders![0].bookingId.toString(),locationID: controller.runningOrderResponse!.orders![0].pickup!.locationId.toString(),context: context);
-                    // checkDriverBooking(context);
                   }
                   else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "unloading") {
 
@@ -767,7 +766,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                                   orderID: controller.runningOrderResponse!.orders![0].bookingId.toString(),
                                   context: context,
                                 );
-
+                                controller.clearAllTimers();
                                 controller.resetLoadingTimer();
                                 controller.resetUnLoadingTimer();
                                 controller.checkDriverBooking(context);
@@ -778,11 +777,9 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                         );
                       },
                     );
+
                   }
-                  else if (controller.runningOrderResponse!.orders![0].orderStatus
-                      .toString()
-                      .toLowerCase() ==
-                      "picked") {
+                  else if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked") {
 
                     final drops =
                         controller.runningOrderResponse!.orders![0].dropoffs ?? [];
@@ -812,6 +809,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                       controller.runningOrderResponse!.orders![0].bookingId.toString(),
                       nextPendingDrop.locationId.toString(),
                     );
+                    Get.find<AuthController>().startUnLoading();
 
                     if (!isSuccess) {
                       print("⛔ Failed — retry same drop");

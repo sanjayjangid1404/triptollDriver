@@ -65,6 +65,109 @@ import '../view/running/runnig_order_screen.dart';
 
 class AuthController extends GetxController implements GetxService {
 
+
+  RxInt elapsedSeconds = 0.obs;
+  RxInt elapsedSecondsUnload = 0.obs;
+
+  Timer? _loadingTimer;
+  Timer? _unloadingTimer;
+
+  double chargesLoading = 0.0;
+  double chargesUnLoading = 0.0;
+
+  String realLoadingTime = "0";
+  String realUnLoadingTime = "0";
+
+  /// ================= LOADING =================
+
+  Future<void> startLoading() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+      "loadingStartTime",
+      DateTime.now().millisecondsSinceEpoch,
+    );
+
+    _startLoadingTimer();
+    print('call tiemererer::::::');
+  }
+
+  Future<int> _getLoadingSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? start = prefs.getInt("loadingStartTime");
+
+    if (start == null) return 0;
+
+    int now = DateTime.now().millisecondsSinceEpoch;
+    return ((now - start) / 1000).floor();
+  }
+
+  void _startLoadingTimer() {
+    _loadingTimer?.cancel();
+
+    _loadingTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      elapsedSeconds.value = await _getLoadingSeconds();
+    });
+  }
+
+  Future<void> restoreLoading() async {
+    elapsedSeconds.value = await _getLoadingSeconds();
+    _startLoadingTimer();
+  }
+
+  /// ================= UNLOADING =================
+
+  Future<void> startUnLoading() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+      "unloadingStartTime",
+      DateTime.now().millisecondsSinceEpoch,
+    );
+
+    _startUnLoadingTimer();
+  }
+
+  Future<int> _getUnLoadingSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? start = prefs.getInt("unloadingStartTime");
+
+    if (start == null) return 0;
+
+    int now = DateTime.now().millisecondsSinceEpoch;
+    return ((now - start) / 1000).floor();
+  }
+
+  void _startUnLoadingTimer() {
+    _unloadingTimer?.cancel();
+
+    _unloadingTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      elapsedSecondsUnload.value = await _getUnLoadingSeconds();
+    });
+  }
+
+  Future<void> restoreUnLoading() async {
+    elapsedSecondsUnload.value = await _getUnLoadingSeconds();
+    _startUnLoadingTimer();
+  }
+
+  /// ================= CLEAR =================
+
+  Future<void> clearAllTimers() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove("loadingStartTime");
+    await prefs.remove("unloadingStartTime");
+
+    elapsedSeconds.value = 0;
+    elapsedSecondsUnload.value = 0;
+
+    _loadingTimer?.cancel();
+    _unloadingTimer?.cancel();
+  }
+
+
+
+
+
   DateTime? onlineStartTime;
   Duration totalOnlineDuration = Duration.zero;
   String time = '0 h 0 m';
@@ -74,7 +177,6 @@ class AuthController extends GetxController implements GetxService {
   bool isLoadingTime = false;
   RxBool loadingStart = false.obs;
   Timer? loadingTimer;
-  RxInt elapsedSeconds = 0.obs;
 
   void startLoadingTimer() {
     if (loadingTimer != null) return; // already running
@@ -96,7 +198,6 @@ class AuthController extends GetxController implements GetxService {
     elapsedSeconds.value = 0;
   }
   Timer? unloadingTimer;
-  RxInt elapsedSecondsUnload = 0.obs;
 
   void startUnLoadingTimer() {
     if (unloadingTimer != null) return;
@@ -120,15 +221,11 @@ class AuthController extends GetxController implements GetxService {
   var currentDropIndex = 0.obs;
   RxBool isLastDropCompleted = false.obs;
   String bookingId = '';
-  double chargesLoading = 0.0;
-  double chargesUnLoading = 0.0;
   RxBool unloadingStart = false.obs;
   RxBool showCompletePayment = false.obs;
   RxBool showUnLoading = false.obs;
   String maxTime = '0';
   String loadingCharges = '0';
-  String realLoadingTime = '0';
-  String realUnLoadingTime = '0';
   bool isBookingProcess = false;
   bool isShowDriver = false;
   bool hasShownSheet = false;
@@ -1779,7 +1876,7 @@ class AuthController extends GetxController implements GetxService {
     if (response.statusCode == 200 || response.statusCode == 400) {
       hasShownSheet = false;
       checkDriverBooking(context);
-      // Get.offAll(HomeView());
+      startLoading();
       update();
     }
     else {

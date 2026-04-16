@@ -18,7 +18,7 @@ class LoadingTimer extends StatelessWidget {
 
   double _calculateCharge(int seconds) {
     int elapsedMinutes = seconds ~/ 60;
-    int freeMinutes = int.parse(maxLoadingTime);
+    int freeMinutes = int.tryParse(maxLoadingTime) ?? 0;
 
     if (elapsedMinutes <= freeMinutes) return 0.0;
     return (elapsedMinutes - freeMinutes) *
@@ -32,14 +32,14 @@ class LoadingTimer extends StatelessWidget {
   }
 
   Color _getTimerColor(int seconds) {
-    int freeSeconds = int.parse(maxLoadingTime) * 60;
+    int freeSeconds = (int.tryParse(maxLoadingTime) ?? 0) * 60;
     if (seconds <= freeSeconds) return Colors.green;
 
     double t = ((seconds - freeSeconds) / 60).clamp(0.0, 1.0);
     return Color.lerp(Colors.green, Colors.red, t)!;
   }
   double _progressValue(int seconds) {
-    int freeSeconds = int.parse(maxLoadingTime) * 60;
+    int freeSeconds = (int.tryParse(maxLoadingTime) ?? 0) * 60;
 
     if (seconds <= 0) return 0.0;
     if (seconds >= freeSeconds) return 1.0;
