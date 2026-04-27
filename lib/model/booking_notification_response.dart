@@ -61,7 +61,8 @@ BookingNotificationResponse copyWith({  dynamic status,
 class Data {
   Data({
       dynamic bookingId, 
-      dynamic orderId, 
+      dynamic id,
+      dynamic orderId,
       dynamic amount, 
       dynamic vehicleId, 
       dynamic orderStatus,
@@ -73,6 +74,7 @@ class Data {
       List<Dropoffs>? dropoffs, 
       dynamic distance,}){
     _bookingId = bookingId;
+    _id = id;
     _orderId = orderId;
     _amount = amount;
     _vehicleId = vehicleId;
@@ -87,7 +89,8 @@ class Data {
 }
 
   Data.fromJson(dynamic json) {
-    _bookingId = json['booking_id'];
+    _bookingId = json['id'];
+    _id = json['id'];
     _orderId = json['order_id'];
     _amount = json['amount'];
     _vehicleId = json['vehicle_id'];
@@ -106,6 +109,7 @@ class Data {
     _distance = json['distance'];
   }
   dynamic _bookingId;
+  dynamic _id;
   dynamic _orderId;
   dynamic _amount;
   dynamic _vehicleId;
@@ -118,6 +122,7 @@ class Data {
   List<Dropoffs>? _dropoffs;
   dynamic _distance;
 Data copyWith({  dynamic bookingId,
+  dynamic id,
   dynamic orderId,
   dynamic amount,
   dynamic vehicleId,
@@ -129,7 +134,9 @@ Data copyWith({  dynamic bookingId,
   Pickup? pickup,
   List<Dropoffs>? dropoffs,
   dynamic distance,
-}) => Data(  bookingId: bookingId ?? _bookingId,
+}) => Data(
+  bookingId: bookingId ?? _bookingId,
+  id: id ?? _id,
   orderId: orderId ?? _orderId,
   amount: amount ?? _amount,
   vehicleId: vehicleId ?? _vehicleId,
@@ -143,6 +150,7 @@ Data copyWith({  dynamic bookingId,
   distance: distance ?? _distance,
 );
   dynamic get bookingId => _bookingId;
+  dynamic get id => _id;
   dynamic get orderId => _orderId;
   dynamic get amount => _amount;
   dynamic get vehicleId => _vehicleId;
@@ -157,7 +165,7 @@ Data copyWith({  dynamic bookingId,
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    map['booking_id'] = _bookingId;
+    map['id'] = _bookingId;
     map['order_id'] = _orderId;
     map['amount'] = _amount;
     map['vehicle_id'] = _vehicleId;

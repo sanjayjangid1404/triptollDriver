@@ -62,7 +62,7 @@ class ChatController extends GetxController {
 
     socket!.onConnect((_) async {
       log('✅ Connected with server');
-      showCustomSnackBar('✅ Connected with server',isError: false,getXSnackBar: true);
+      // showCustomSnackBar('✅ Connected with server',isError: false,getXSnackBar: true);
       socket!.off("newBooking");
       socket!.off("forceLogout");
       socket!.off("deviceStatus");
@@ -74,25 +74,26 @@ class ChatController extends GetxController {
       socket!.off("tripEnded");
       await emitDriverOnline();
       socket!.on("forceLogout", (data) {
-        if (kDebugMode) {
-          print("📡 forceLogout status: $data");
-        }
+        print("📡 forceLogout status: $data");
+        print("CHECK: ${data["message"] == "Logged in from another device"}");
+        final message = data?["message"]?.toString() ?? "";
 
-        if (data != null && data["message"] == "Logged in from another device"){
+        if (message.contains("Logged in from another device")) {
+
+          print("🚨 FORCE LOGOUT TRIGGERED");
+
           showCustomSnackBar(
-            data["message"],
+            message,
             getXSnackBar: true,
             isError: true,
           );
+
           Get.find<AuthController>().logoutUser();
+
           socket?.clearListeners();
           socket?.disconnect();
           socket?.dispose();
           socket = null;
-        }else{
-          if (kDebugMode) {
-            print("logout socket else part");
-          }
         }
       });
       socket!.on("deviceStatus", (data) {
@@ -119,13 +120,7 @@ class ChatController extends GetxController {
             var bookingData = Data.fromJson(booking);
             int bookingId = int.tryParse(bookingData.bookingId.toString()) ?? 0;
             newBookingSocket.value = bookingData;
-            // if (!shownBookingIds.contains(bookingId)) {
-            //   shownBookingIds.add(bookingId);
-            //   final prefs = await SharedPreferences.getInstance();
-            //   await prefs.setString(AppContants.bookingID, bookingId.toString());
-            //   newBookingSocket.value = bookingData;
-            // }
-
+            newBookingSocket.refresh();
           } catch (e) {
             print("❌ parsing error: $e");
           }
@@ -151,32 +146,34 @@ class ChatController extends GetxController {
         if (kDebugMode) {
           print("📡 scheduledReminder status: $data");
         }
-        if (data != null && data['status'] == true) {
-          var bookings = data['data'];
 
-          if (bookings != null && bookings.isNotEmpty) {
+        try {
+          if (data == null) return;
 
-            for (var booking in bookings) {
-              int bookingId =
-                  int.tryParse(booking['booking_id'].toString()) ?? 0;
+          List bookings = [];
+          if (data['booking'] != null) {
+            bookings = [data['booking']];
+          }
+          else if (data['data'] != null && data['data'] is List) {
+            bookings = data['data'];
+          }
 
+          for (var booking in bookings) {
+            int bookingId =
+                int.tryParse(booking['id'].toString()) ?? 0;
 
-              if (!shownBookingIds.contains(bookingId)) {
-                shownBookingIds.add(bookingId);
-                Get.find<AuthController>().setBookingId(bookingId);
+            if (!shownBookingIds.contains(bookingId)) {
+              shownBookingIds.add(bookingId);
 
-                if (kDebugMode) {
-                  print("✅ New Booking Saved: $bookingId");
-                }
+              Get.find<AuthController>().setBookingId(bookingId);
 
-                // 👉 yaha tu popup / notification bhi trigger kar sakta hai
-              } else {
-                if (kDebugMode) {
-                  print("⚠️ Duplicate Booking Ignored: $bookingId");
-                }
-              }
+              print("✅ New Booking Saved: $bookingId");
+            } else {
+              print("⚠️ Duplicate Booking Ignored: $bookingId");
             }
           }
+        } catch (e) {
+          print("❌ Error in scheduledReminder: $e");
         }
       });
       socket!.on("updateStatus", (data) async {
@@ -196,31 +193,64 @@ class ChatController extends GetxController {
           print("📡 tripStarted status: $data");
         }
       });
-
+      // socket!.on("activeBooking", (data) {
+      //   if (kDebugMode) {
+      //     print("📡 activeBooking status: $data");
+      //     print("📡 activeBooking status: ${jsonEncode(data)}");
+      //   }
+      //
+      //   try {
+      //     if (data != null && data is Map<String, dynamic>) {
+      //       final bookingList = data['data'];
+      //
+      //       if (bookingList is List && bookingList.isNotEmpty) {
+      //         Get.find<AuthController>().bookingDetailsResponse =
+      //             GetBookingDetailModel.fromJson(bookingList[0]);
+      //         if (Get.find<AuthController>().bookingDetailsResponse != null){
+      //           Get.find<AuthController>().runningOrderStatus.value =
+      //               Get.find<AuthController>().bookingDetailsResponse!.orderStatus.toString() ?? '';
+      //         }
+      //            Get.find<AuthController>().checkAndShowOrderPageSokect();
+      //       }
+      //
+      //       update();
+      //     }
+      //   } catch (e) {
+      //     print("❌ Parsing error: $e");
+      //   }
+      // });
       socket!.on("activeBooking", (data) {
         if (kDebugMode) {
           print("📡 activeBooking status: $data");
-          print("📡 activeBooking status: ${jsonEncode(data)}");
         }
 
         try {
-          if (data != null && data is Map<String, dynamic>) {
-            final bookingList = data['data'];
+          Map<String, dynamic> parsedData;
 
-            if (bookingList is List && bookingList.isNotEmpty) {
-              Get.find<AuthController>().bookingDetailsResponse =
-                  GetBookingDetailModel.fromJson(bookingList[0]);
-
-              Get.find<AuthController>().checkAndShowOrderPageSokect();
-            }
-
-            update();
+          if (data is String) {
+            parsedData = jsonDecode(data);
+          } else {
+            parsedData = Map<String, dynamic>.from(data);
           }
+
+          final bookingList = parsedData['data'];
+
+          if (bookingList is List && bookingList.isNotEmpty) {
+            final controller = Get.find<AuthController>();
+
+            controller.bookingDetailsResponse =
+                GetBookingDetailModel.fromJson(bookingList[0]);
+
+            controller.runningOrderStatus.value = controller.bookingDetailsResponse?.orderStatus ?? '';
+            controller.checkAndShowOrderPageSokect();
+            print("📍 Pickup Full: ${controller.bookingDetailsResponse?.pickup?.toJson()}");
+          }
+
+          update();
         } catch (e) {
           print("❌ Parsing error: $e");
         }
       });
-
       socket!.on("tripEnded", (data) {
         if (kDebugMode) {
           print("📡 tripEnded status: $data");

@@ -26,6 +26,7 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   Set<Polyline> _polylines = {};
   List<LatLng> _allPoints = [];
   final String googleApiKey = "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk";
+
   void _handleStatus(String status) {
     final s = status.trim().toLowerCase();
     final controller = Get.find<AuthController>();
@@ -33,13 +34,13 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
     print('function call $s');
 
     if (s == "loading") {
-      controller.startLoadingTimer();
+      controller.restoreLoading();
       controller.stopUnLoadingTimer();
       return;
     }
 
     if (s == "unloading") {
-      controller.startUnLoadingTimer();
+      controller.restoreUnLoading();
       controller.stopLoadingTimer();
       return;
     }
@@ -62,7 +63,9 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   }
 
   Future<void> _prepareMapData() async {
-    final order = Get.find<AuthController>().bookingDetailsResponse!;
+    final order = Get
+        .find<AuthController>()
+        .bookingDetailsResponse!;
 
     LatLng pickup = LatLng(
       double.parse(order.pickup!.lat!),
@@ -109,10 +112,8 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
     );
   }
 
-  Future<void> _drawRouteUsingDirections(
-      LatLng start,
-      LatLng end,
-      ) async {
+  Future<void> _drawRouteUsingDirections(LatLng start,
+      LatLng end,) async {
     PolylinePoints polylinePoints = PolylinePoints(
       apiKey: "AIzaSyAddnEWMk05vtngwZAc13ub52nY2OIRmWk",
     );
@@ -142,14 +143,13 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
           points: route,
         ),
       );
-
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     } else {
       debugPrint("❌ No route found : ${result.errorMessage}");
     }
   }
-
-
 
 
   void _moveCameraToBounds() {
@@ -189,11 +189,16 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
           children: [
             SizedBox(
               height: 260,
-              child: GoogleMap(
+              child: controller.bookingDetailsResponse?.pickup?.lat == null ||
+                  controller.bookingDetailsResponse?.pickup?.lng == null ?
+            Center(child: CircularProgressIndicator()) :
+              GoogleMap(
                 initialCameraPosition: CameraPosition(
                   target: LatLng(
-                    double.parse(controller.bookingDetailsResponse!.pickup?.lat),
-                    double.parse(controller.bookingDetailsResponse!.pickup?.lng),
+                    double.parse(
+                        controller.bookingDetailsResponse?.pickup?.lat),
+                    double.parse(
+                        controller.bookingDetailsResponse?.pickup?.lng),
                   ),
                   zoom: 14,
                 ),
@@ -213,357 +218,424 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
 
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 15),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    const CircleAvatar(
-                                      radius: 30,
-                                      backgroundImage: NetworkImage(
-                                          'https://randomuser.me/api/portraits/men/1.jpg'),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 15),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 15),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment
+                                    .spaceBetween,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment
+                                        .center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      const CircleAvatar(
+                                        radius: 30,
+                                        backgroundImage: NetworkImage(
+                                            'https://randomuser.me/api/portraits/men/1.jpg'),
+                                      ),
+                                      const SizedBox(width: 15),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .start,
+                                        children: [
+                                          Text(
+                                            controller.bookingDetailsResponse!
+                                                .pickup!.name.toString(),
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              AppContants.makePhoneCall(
+                                                  controller
+                                                      .bookingDetailsResponse!
+                                                      .pickup!.contactNumber
+                                                      .toString());
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.call_outlined,
+                                                    color: Colors.blue,
+                                                    size: 16),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                    '${controller
+                                                        .bookingDetailsResponse!
+                                                        .pickup!.contactNumber
+                                                        .toString()}'),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) => FaqScreen(),));
+                                    },
+                                    child: Image.asset('assets/img/help.png',
+                                      height: 40,
                                     ),
-                                    const SizedBox(width: 15),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                  )
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(height: 10,),
+
+                            InkWell(
+                              onTap: () {},
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "${AppContants.rupessSystem} ${controller
+                                          .bookingDetailsResponse!
+                                          .totalAmount ?? ""}",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: TColor.secondaryText,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: FutureBuilder<Map<String, dynamic>>(
+                                      future: controller
+                                          .calculateDropDistancesForBooking(
+                                          controller.bookingDetailsResponse!),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return Text("Calculating...",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  color: TColor.secondaryText,
+                                                  fontSize: 18));
+                                        } else if (snapshot.hasError) {
+                                          return Text(
+                                              "Error: ${snapshot.error}",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  color: TColor.secondaryText,
+                                                  fontSize: 18));
+                                        } else {
+                                          final data = snapshot.data!;
+                                          final km = data['total_distance_km'];
+                                          final duration = data['total_duration'];
+
+                                          return Text(
+                                            "${km.toStringAsFixed(
+                                                2)} KM • $duration",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: TColor.secondaryText,
+                                                fontSize: 18),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.location_on_outlined,
+                                    color: Colors.green,),
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start,
                                       children: [
-                                        Text(
-                                          controller.bookingDetailsResponse!.pickup!.name.toString(),
-                                          style: TextStyle(
-                                              fontSize: 18, fontWeight: FontWeight.bold),
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment
+                                              .start,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                controller
+                                                    .bookingDetailsResponse!
+                                                    .pickup!.address ?? "",
+                                                style: TextStyle(
+                                                  color: TColor.primaryText,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Text(
+                                              controller.bookingDetailsResponse!
+                                                  .pickup!.status ?? "",
+                                              style: TextStyle(
+                                                  color: TColor.primaryText,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w600
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         InkWell(
                                           onTap: () {
                                             AppContants.makePhoneCall(
-                                                controller.bookingDetailsResponse!.pickup!.contactNumber.toString());
+                                                controller
+                                                    .bookingDetailsResponse!
+                                                    .senderContactNumber
+                                                    .toString());
                                           },
                                           child: Row(
                                             children: [
-                                              Icon(Icons.call_outlined, color: Colors.blue,
+                                              Icon(Icons.call_outlined,
+                                                  color: Colors.blue,
                                                   size: 16),
                                               const SizedBox(width: 5),
-                                              Text(
-                                                  '${controller.bookingDetailsResponse!.pickup!.contactNumber.toString()}'),
+                                              Text('${controller
+                                                  .bookingDetailsResponse!
+                                                  .senderContactNumber
+                                                  .toString()} , ${controller
+                                                  .bookingDetailsResponse!
+                                                  .senderName.toString()}'),
                                             ],
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (
-                                        context) => FaqScreen(),));
-                                  },
-                                  child: Image.asset('assets/img/help.png',
-                                    height: 40,
                                   ),
-                                )
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: controller.bookingDetailsResponse!
+                                    .dropoffs?.length ?? 0,
+                                itemBuilder: (context, index) {
+                                  final dropoff = controller
+                                      .bookingDetailsResponse!.dropoffs![index];
 
-                          SizedBox(height: 10,),
+                                  // bool isCompleted = index < currentDropIndex.value ||
+                                  //    (isLastDropCompleted.value && index == currentDropIndex.value);
 
-                          InkWell(
-                            onTap: () {
-                            },
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    "${AppContants.rupessSystem} ${controller.bookingDetailsResponse!.totalAmount ?? ""}",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: TColor.secondaryText,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: FutureBuilder<Map<String, dynamic>>(
-                                    future: controller.calculateDropDistancesForBooking(controller.bookingDetailsResponse!),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState == ConnectionState.waiting) {
-                                        return Text("Calculating...",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(color: TColor.secondaryText, fontSize: 18));
-                                      } else if (snapshot.hasError) {
-                                        return Text("Error: ${snapshot.error}",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(color: TColor.secondaryText, fontSize: 18));
-                                      } else {
-                                        final data = snapshot.data!;
-                                        final km = data['total_distance_km'];
-                                        final duration = data['total_duration'];
-
-                                        return Text(
-                                          "${km.toStringAsFixed(2)} KM • $duration",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(color: TColor.secondaryText, fontSize: 18),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Icons.location_on_outlined, color: Colors.green,),
-                                const SizedBox(width: 15),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              controller.bookingDetailsResponse!.pickup!.address ?? "",
-                                              style: TextStyle(
-                                                color: TColor.primaryText,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                            controller.bookingDetailsResponse!.pickup!.status ?? "",
-                                            style: TextStyle(
-                                                color: TColor.primaryText,
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      InkWell(
-                                        onTap: () {
-                                          AppContants.makePhoneCall(
-                                              controller.bookingDetailsResponse!.senderContactNumber.toString());
-                                        },
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.call_outlined, color: Colors.blue,
-                                                size: 16),
-                                            const SizedBox(width: 5),
-                                            Text('${controller.bookingDetailsResponse!.senderContactNumber.toString()} , ${controller.bookingDetailsResponse!.senderName.toString()}'),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.zero,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: controller.bookingDetailsResponse!.dropoffs?.length ?? 0,
-                              itemBuilder: (context, index) {
-                                final dropoff = controller.bookingDetailsResponse!.dropoffs![index];
-
-                                // bool isCompleted = index < currentDropIndex.value ||
-                                //    (isLastDropCompleted.value && index == currentDropIndex.value);
-
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Icon(Icons.location_on_outlined, color: Colors.red,),
-                                      const SizedBox(width: 15),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    dropoff.address ?? "",
-                                                    style: TextStyle(
-                                                      color: TColor.primaryText,
-                                                      fontSize: 15,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Text(
-                                                  dropoff.status ?? "",
-                                                  style: TextStyle(
-                                                    color: TColor.primaryText,
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w600
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            InkWell(
-                                              onTap: () {
-                                                AppContants.makePhoneCall(dropoff.contactNumber.toString());
-                                              },
-                                              child: Row(
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start,
+                                      children: [
+                                        Icon(Icons.location_on_outlined,
+                                          color: Colors.red,),
+                                        const SizedBox(width: 15),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment
+                                                .start,
+                                            children: [
+                                              Row(
+                                                crossAxisAlignment: CrossAxisAlignment
+                                                    .start,
                                                 children: [
-                                                  Icon(Icons.call_outlined, color: Colors.blue, size: 16),
-                                                  const SizedBox(width: 5),
-                                                  Text('${dropoff.contactNumber} , ${dropoff.name}'),
+                                                  Expanded(
+                                                    child: Text(
+                                                      dropoff.address ?? "",
+                                                      style: TextStyle(
+                                                        color: TColor
+                                                            .primaryText,
+                                                        fontSize: 15,
+                                                      ),
+                                                      maxLines: 2,
+                                                      overflow: TextOverflow
+                                                          .ellipsis,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Text(
+                                                    dropoff.status ?? "",
+                                                    style: TextStyle(
+                                                        color: TColor
+                                                            .primaryText,
+                                                        fontSize: 15,
+                                                        fontWeight: FontWeight
+                                                            .w600
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
-                                            ),
-                                          ],
+                                              InkWell(
+                                                onTap: () {
+                                                  AppContants.makePhoneCall(
+                                                      dropoff.contactNumber
+                                                          .toString());
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.call_outlined,
+                                                        color: Colors.blue,
+                                                        size: 16),
+                                                    const SizedBox(width: 5),
+                                                    Text('${dropoff
+                                                        .contactNumber} , ${dropoff
+                                                        .name}'),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            // const SizedBox(height: 25),
+
+                            const SizedBox(height: 35),
+                            controller.bookingDetailsResponse!.orderStatus
+                                .toString().toLowerCase() ==
+                                "loading"
+                                ? LoadingTimer(
+                              loadingChargePerMin: controller.loadingCharges
+                                  .toString(),
+                              maxLoadingTime: controller.maxTime.toString(),
+                            )
+                                : SizedBox.shrink(),
+
+                            Obx(() {
+                                  if(controller.refreshIntUpdate.value > 0) {}
+                              return (controller.bookingDetailsResponse!.orderStatus
+                                  .toString()
+                                  .toLowerCase() == "unloading") ?
+                                UnLoadingTimer(
+                                loadingChargePerMin: controller.loadingCharges
+                                    .toString(),
+                                maxLoadingTime: controller.maxTime.toString(),
+                              )   : SizedBox.shrink();
+                            }),
+                            controller.bookingDetailsResponse!.orderStatus
+                                .toString().toLowerCase() == "accpeted" ?
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text('Enter Pickup Pin Here',
+                                  style: TextStyle(
+                                      color: TColor.primaryText,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600
                                   ),
-                                );
-                              },
-                            ),
-                          ),
-                          // const SizedBox(height: 25),
+                                ),
+                              ),
+                            ) : SizedBox.shrink(),
+                            controller.bookingDetailsResponse!.orderStatus
+                                .toString().toLowerCase() == "accpeted" ?
+                            PinCodeTextField(
+                              appContext: context,
+                              length: 4,
+                              controller: otpController,
+                              keyboardType: TextInputType.number,
+                              autoDisposeControllers: false,
+                              animationType: AnimationType.fade,
+                              enableActiveFill: true,
+                              cursorColor: Colors.black,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              pinTheme: PinTheme(
+                                shape: PinCodeFieldShape.box,
+                                borderRadius: BorderRadius.circular(8),
+                                fieldHeight: 55,
+                                fieldWidth: 50,
 
-                          const SizedBox(height: 35),
-                          controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() ==
-                              "loading"
-                              ? LoadingTimer(
-                            loadingChargePerMin: controller.loadingCharges.toString(),
-                            maxLoadingTime: controller.maxTime.toString(),
-                          )
-                              : SizedBox.shrink(),
-                          controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() ==
-                              "unloading"
-                              ? UnLoadingTimer(
-                            loadingChargePerMin: controller.loadingCharges.toString(),
-                            maxLoadingTime: controller.maxTime.toString(),
-                          )
-                              : SizedBox.shrink(),
-                          controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted" ?
-                           Padding(
-                             padding: const EdgeInsets.only(bottom: 8.0),
-                             child: Align(
-                               alignment: Alignment.centerLeft,
-                               child: Text('Enter Pickup Pin Here',
-                               style: TextStyle(
-                                   color: TColor.primaryText,
-                                   fontSize: 18,
-                                   fontWeight: FontWeight.w600
-                               ),
-                               ),
-                             ),
-                           ) : SizedBox.shrink(),
-                          controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted" ?
-                          PinCodeTextField(
-                            appContext: context,
-                            length: 4,
-                            controller: otpController,
-                            keyboardType: TextInputType.number,
-                            autoDisposeControllers: false,
-                            animationType: AnimationType.fade,
-                            enableActiveFill: true,
-                            cursorColor: Colors.black,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            pinTheme: PinTheme(
-                              shape: PinCodeFieldShape.box,
-                              borderRadius: BorderRadius.circular(8),
-                              fieldHeight: 55,
-                              fieldWidth: 50,
+                                // 👇 Border colors
+                                inactiveColor: Colors.black,
+                                activeColor: Colors.black,
+                                selectedColor: Colors.black,
 
-                              // 👇 Border colors
-                              inactiveColor: Colors.black,
-                              activeColor: Colors.black,
-                              selectedColor: Colors.black,
+                                // 👇 Background colors
+                                activeFillColor: Colors.white,
+                                selectedFillColor: Colors.white,
+                                inactiveFillColor: Colors.grey.shade50,
 
-                              // 👇 Background colors
-                              activeFillColor: Colors.white,
-                              selectedFillColor: Colors.white,
-                              inactiveFillColor: Colors.grey.shade50,
+                                disabledColor: Colors.black,
+                              ),
 
-                              disabledColor: Colors.black,
-                            ),
-
-                            onCompleted: (enteredOtp) async {
-
-                              String apiOtp = controller
-                                  .bookingDetailsResponse!
-                                  .pickupOtp
-                                  .toString();
+                              onCompleted: (enteredOtp) async {
+                                String apiOtp = controller
+                                    .bookingDetailsResponse!
+                                    .pickupOtp
+                                    .toString();
 
 
-                              if (enteredOtp == apiOtp) {
-
-                                // ✅ Correct OTP → Auto API Call
-                                controller.startLoadingApi(
-                                  controller.getUserID().toString(),
-                                  context,
-                                  controller.bookingDetailsResponse!.id.toString(),
-                                  controller.bookingDetailsResponse!.pickup!.locationId.toString(),
-                                );
-                                    Set<int> shownBookingIds = {};
-                                    if (!shownBookingIds.contains(int.parse(
+                                if (enteredOtp == apiOtp) {
+                                  // ✅ Correct OTP → Auto API Call
+                                  controller.startLoadingApi(
+                                    controller.getUserID().toString(),
+                                    context,
+                                    controller.bookingDetailsResponse!.id
+                                        .toString(),
+                                    controller.bookingDetailsResponse!.pickup!
+                                        .locationId.toString(),
+                                  );
+                                  Set<int> shownBookingIds = {};
+                                  if (!shownBookingIds.contains(int.parse(
+                                      controller.bookingDetailsResponse!
+                                          .id
+                                          .toString()))) {
+                                    shownBookingIds.add(int.parse(controller
+                                        .bookingDetailsResponse!
+                                        .id
+                                        .toString()));
+                                    final prefs =
+                                    await SharedPreferences.getInstance();
+                                    await prefs.setString(
+                                        AppContants.bookingID,
                                         controller.bookingDetailsResponse!
                                             .id
-                                            .toString()))) {
-                                      shownBookingIds.add(int.parse(controller
-                                          .bookingDetailsResponse!
-                                          .id
-                                          .toString()));
-                                      final prefs =
-                                          await SharedPreferences.getInstance();
-                                      await prefs.setString(
-                                          AppContants.bookingID,
-                                          controller.bookingDetailsResponse!
-                                              .id
-                                              .toString());
-                                    }
-                                  } else {
+                                            .toString());
+                                  }
+                                } else {
+                                  showCustomSnackBar(
+                                      "Wrong Pickup Pin", isError: true,
+                                      getXSnackBar: true);
+                                  otpController.clear();
+                                }
+                              },
 
-                                showCustomSnackBar("Wrong Pickup Pin",isError: true,getXSnackBar: true);
-                                showCustomSnackBar(apiOtp,isError: true,getXSnackBar: true);
-                                otpController.clear();
-                              }
-                            },
-
-                            onChanged: (value) {},
-                          ) : SizedBox.shrink(),
-                          const SizedBox(height: 25),
-                        ],
+                              onChanged: (value) {},
+                            ) : SizedBox.shrink(),
+                            const SizedBox(height: 25),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                )
+                    ],
+                  )
               ),
             ),
           ],
@@ -573,131 +645,81 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
   }
 
   Widget bottomButtons(BuildContext context, AuthController controller) {
-    return Container(
-      padding: EdgeInsets.only(bottom: 50,top: 20),
-      child:   controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() ==
-          "delivered" &&
-          controller.bookingDetailsResponse!.paymentStatus.toString().toLowerCase() ==
-              "pending" ?
+    return Obx(() {
+      if (controller.refreshIntUpdate.value > 0) {}
+      return Container(
+        padding: EdgeInsets.only(bottom: 50, top: 20),
+        child: controller.bookingDetailsResponse!.orderStatus.toString()
+            .toLowerCase() ==
+            "delivered" &&
+            controller.bookingDetailsResponse!.paymentStatus.toString()
+                .toLowerCase() ==
+                "pending" ?
 
-      Column(
+        Column(
 
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
 
-        children: [
-          Padding(
-            padding:const EdgeInsets.symmetric(horizontal: 15),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Collect Payment".tr, style: TextStyle(fontSize: 16,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),),
-                Flexible(
-                  child: Text(
-                    "${AppContants.rupessSystem} ${controller.bookingDetailsResponse!.totalAmount ?? ""}",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: TColor.secondaryText,
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20,),
-
-          InkWell(
-            onTap: () async {
-              //   Navigator.pop(context);
-              controller.currentDropIndex.value = 0;
-              controller.loadingStart.value = false;
-              controller.unloadingStart.value = false;
-              controller.showCompletePayment.value = false;
-              controller.orderPayment(controller.bookingDetailsResponse!.id.toString(),
-                  controller.bookingDetailsResponse!.driverId.toString(),
-                  controller.generate8DigitKey().toString());
-              final chatController = Get.find<ChatController>();
-              chatController.socket?.emitWithAck("endTrip", {
-                "driver_id": controller.getUserID().toString(),
-               },
-                  ack: (response) {
-                    print("endTripSocket: $response");
-                  }
-              );
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.remove(AppContants.bookingID);
-            },
-            child: Container(
-              height: 40,
-
-
-              margin: const EdgeInsets.symmetric(horizontal: 15),
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                  color: TColor.red,
-                  borderRadius: BorderRadius.circular(30)
-
-              ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-
-                  Text(
-                    "Cash Collect".tr,
-                    style: TextStyle(
-                      color: TColor.primaryTextW,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                  Text("Collect Payment".tr, style: TextStyle(fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),),
+                  Flexible(
+                    child: Text(
+                      "${AppContants.rupessSystem} ${controller
+                          .bookingDetailsResponse!.totalAmount ?? ""}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: TColor.secondaryText,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
+            SizedBox(height: 20,),
 
-
-        ],
-      ) :
-      Row(
-        children: [
-          controller.bookingDetailsResponse!.orderStatus.toString() == "unloading" ?
-          SizedBox() :
-          Expanded(
-            child: InkWell(
+            InkWell(
               onTap: () async {
-                if (controller.runningOrderResponse!.orders![0].orderStatus.toString().toLowerCase() == "picked") {
-                  final drops = controller.runningOrderResponse!.orders![0].dropoffs ?? [];
-                  if (drops.isEmpty) return;
-                  final sortedDrops = List.from(drops)
-                    ..sort((a, b) => int.parse(a.sequence.toString())
-                        .compareTo(int.parse(b.sequence.toString())));
+                //   Navigator.pop(context);
+                controller.currentDropIndex.value = 0;
+                controller.loadingStart.value = false;
+                controller.unloadingStart.value = false;
+                controller.showCompletePayment.value = false;
+                controller.orderPayment(
+                    controller.bookingDetailsResponse!.id.toString(),
+                    controller.bookingDetailsResponse!.driverId.toString(),
+                    controller.generate8DigitKey().toString());
+                final chatController = Get.find<ChatController>();
+                chatController.socket?.emitWithAck("updateStatus", {
+                  "booking_id":   controller.bookingDetailsResponse!.id ?? "0",
+                  "status": "paid"
+                },
+                    ack: (response) {
+                      print("ACK Responseend: $response");
 
-                  final nextPendingDrop = sortedDrops.firstWhere(
-                        (d) => d.status.toString().toLowerCase() == "pending",
-                    orElse: () => null,
-                  );
-
-                  if (nextPendingDrop != null) {
-                    controller.openGoogleMap(
-                      double.parse(nextPendingDrop.lat.toString()),
-                      double.parse(nextPendingDrop.lng.toString()),
-                    );
-                  } else {
-                    print("✅ All drops completed");
-                  }
-                }
-                else {
-                  controller.openGoogleMap(double.parse(
-                      controller.runningOrderResponse!.orders![0].pickup!.lat.toString()), double
-                      .parse(controller.runningOrderResponse!.orders![0].pickup!.lng.toString()));
-                }
+                      if (response != null && response["status"] == true) {
+                        print("✅ Status updated successfully");
+                      } else {
+                        print("❌ Failed to update status");
+                      }
+                    });
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove(AppContants.bookingID);
               },
               child: Container(
-                margin: const EdgeInsets.only(left: 20),
+                height: 40,
+
+
+                margin: const EdgeInsets.symmetric(horizontal: 15),
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                     color: TColor.red,
@@ -707,15 +729,9 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.directions_outlined, color: Colors.white,),
-                    SizedBox(width: 10,),
+
                     Text(
-                      controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "picked"
-                          ? "Drop Location".tr :
-                      controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted" ?
-                      "Pickup Direction".tr :
-                      "Direction".tr,
+                      "Cash Collect".tr,
                       style: TextStyle(
                         color: TColor.primaryTextW,
                         fontSize: 14,
@@ -726,177 +742,277 @@ class _RunningOrderScreenState extends State<RunningOrderScreen> {
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          // isLoadingTime == false ?
-          Expanded(
-              child:  InkWell(
+
+
+          ],
+        ) :
+        Row(
+          children: [
+            controller.bookingDetailsResponse!.orderStatus.toString() ==
+                "unloading" ?
+            SizedBox() :
+            Expanded(
+              child: InkWell(
                 onTap: () async {
-                  if ( controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted") {
-
-                    String enteredOtp = otpController.text.trim();
-                    String apiOtp = controller
-                        .bookingDetailsResponse!.
-                        pickupOtp
-                        .toString();
-
-                    if (enteredOtp.length != 4) {
-                      showCustomSnackBar("Please enter 4 digit Pin for continue ride",getXSnackBar: true,isError: true);
-                      return;
-                    }
-
-                    if (enteredOtp == apiOtp) {
-
-                      // ✅ Correct OTP → Call API
-                      controller.startLoadingApi(
-                        controller.getUserID().toString(),
-                        context,
-                        controller.bookingDetailsResponse!.id.toString(),
-                        controller.bookingDetailsResponse!.pickup!.locationId.toString(),
-                      );
-                      Set<int> shownBookingIds = {};
-                      if (!shownBookingIds.contains(int.parse(controller.bookingDetailsResponse!.id.toString()))) {
-                        shownBookingIds.add(int.parse(controller.bookingDetailsResponse!.id.toString()));
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setString(AppContants.bookingID, controller.bookingDetailsResponse!.id.toString());
-
-                      }
-                    } else {
-                      showCustomSnackBar("Wrong OTP",isError: true,getXSnackBar: true);
-
-                    }
-                    }
-                  else if (controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "loading") {
-                    controller.orderPicked(orderID: controller.bookingDetailsResponse!.id.toString(),locationID: controller.bookingDetailsResponse!.pickup!.locationId.toString(),context: context);
-
-                    final chatController = Get.find<ChatController>();
-                    chatController.socket?.emitWithAck("startTrip", {
-                      "driver_id": controller.getUserID().toString(),
-                      "booking_id":  controller.bookingDetailsResponse!.id.toString()
-                    },
-                        ack: (response) {
-                          print("startTripSocket: $response");
-                        }
-                    );
-                  }
-                  else if (controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "unloading") {
-
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          content:  Text("Are you sure you want to complete this ride?".tr,
-                          style: TextStyle(
-                            fontFamily: "NunitoSans",
-                            fontWeight: FontWeight.w500,
-                            fontSize: 19
-                          ),),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child:  Text("No".tr),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                controller.orderDelivered(
-                                  orderID: controller.bookingDetailsResponse!.id.toString(),
-                                  context: context,
-                                );
-
-                                controller.resetLoadingTimer();
-                                controller.resetUnLoadingTimer();
-                              },
-                              child:  Text("Yes".tr),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  }
-                  else if (controller.bookingDetailsResponse!.orderStatus
-                      .toString()
-                      .toLowerCase() ==
-                      "picked") {
-
-                    final drops =
-                        controller.bookingDetailsResponse!.dropoffs ?? [];
-
+                  if (controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "picked") {
+                    final drops = controller.bookingDetailsResponse!.dropoffs ?? [];
                     if (drops.isEmpty) return;
-
                     final sortedDrops = List.from(drops)
-                      ..sort((a, b) => int.parse(a.sequence.toString())
-                          .compareTo(int.parse(b.sequence.toString())));
+                      ..sort((a, b) =>
+                          int.parse(a.sequence.toString())
+                              .compareTo(int.parse(b.sequence.toString())));
 
                     final nextPendingDrop = sortedDrops.firstWhere(
                           (d) => d.status.toString().toLowerCase() == "pending",
                       orElse: () => null,
                     );
 
-                    if (nextPendingDrop == null) {
-                      print("🎉 All drops completed");
-                      return;
-                    }
-
-                    print("👉 Working on Drop ID: ${nextPendingDrop.locationId}");
-
-                    final isSuccess = await controller.startUnLoadingApi(
-                      controller.getUserID().toString(),
-                      context,
-                      controller.bookingDetailsResponse!.id.toString(),
-                      nextPendingDrop.locationId.toString(),
-                    );
-
-                    if (!isSuccess) {
-                      print("⛔ Failed — retry same drop");
+                    if (nextPendingDrop != null) {
+                      controller.openGoogleMap(
+                        double.parse(nextPendingDrop.lat.toString()),
+                        double.parse(nextPendingDrop.lng.toString()),
+                      );
+                    } else {
+                      print("✅ All drops completed");
                     }
                   }
-                  },
+                  else {
+                    controller.openGoogleMap(double.parse(
+                        controller.bookingDetailsResponse!.pickup!.lat
+                            .toString()), double
+                        .parse(controller.bookingDetailsResponse!.pickup!.lng.toString()));
+                  }
+                },
                 child: Container(
-                    height: 40,
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: TColor.primary,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child:
-                    Stack(
-                      alignment: Alignment.centerRight,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "accpeted" ?
-                              "Start Loading".tr
-                                  :  controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "loading" ?
-                              "Start Trip".tr :
-                              controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "picked"
-                                  ? "Unloading".tr :
-                              controller.bookingDetailsResponse!.orderStatus.toString().toLowerCase() == "unloading" ?
-                              "Completed".tr
-                                  : "Unknown error",
-                              style: TextStyle(
-                                color: TColor.primaryTextW,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    )
+                  margin: const EdgeInsets.only(left: 20),
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                      color: TColor.red,
+                      borderRadius: BorderRadius.circular(30)
+
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.directions_outlined, color: Colors.white,),
+                      SizedBox(width: 10,),
+                      Text(
+                        controller.bookingDetailsResponse!.orderStatus
+                            .toString().toLowerCase() == "picked"
+                            ? "Drop Location".tr :
+                        controller.bookingDetailsResponse!.orderStatus
+                            .toString().toLowerCase() == "accpeted" ?
+                        "Pickup Direction".tr :
+                        "Direction".tr,
+                        style: TextStyle(
+                          color: TColor.primaryTextW,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              )
-          )
-        ],
-      ),
-    );
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            // isLoadingTime == false ?
+            Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    if (controller.bookingDetailsResponse?.orderStatus
+                        .toString().toLowerCase() == "accpeted") {
+                      String enteredOtp = otpController.text.trim();
+                      String apiOtp = controller
+                          .bookingDetailsResponse!.
+                      pickupOtp
+                          .toString();
+
+                      if (enteredOtp.length != 4) {
+                        showCustomSnackBar(
+                            "Please enter 4 digit Pin for continue ride",
+                            getXSnackBar: true, isError: true);
+                        return;
+                      }
+
+                      if (enteredOtp == apiOtp) {
+                        // ✅ Correct OTP → Call API
+                        controller.startLoadingApi(
+                          controller.getUserID().toString(),
+                          context,
+                          controller.bookingDetailsResponse!.id.toString(),
+                          controller.bookingDetailsResponse!.pickup!.locationId
+                              .toString(),
+                        );
+                        Set<int> shownBookingIds = {};
+                        if (!shownBookingIds.contains(int.parse(
+                            controller.bookingDetailsResponse!.id
+                                .toString()))) {
+                          shownBookingIds.add(int.parse(
+                              controller.bookingDetailsResponse!.id
+                                  .toString()));
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString(AppContants.bookingID,
+                              controller.bookingDetailsResponse!.id.toString());
+                        }
+                      } else {
+                        showCustomSnackBar(
+                            "Wrong OTP", isError: true, getXSnackBar: true);
+                      }
+                    }
+                    else if (controller.bookingDetailsResponse!.orderStatus
+                        .toString().toLowerCase() == "loading") {
+                      controller.orderPicked(orderID: controller
+                          .bookingDetailsResponse!.id.toString(),
+                          locationID: controller.bookingDetailsResponse!.pickup!
+                              .locationId.toString(),
+                          context: context);
+
+                      final chatController = Get.find<ChatController>();
+                      chatController.socket?.emitWithAck("startTrip", {
+                        "driver_id": controller.getUserID().toString(),
+                        "booking_id": controller.bookingDetailsResponse!.id
+                            .toString()
+                      },
+                          ack: (response) {
+                            print("startTripSocket: $response");
+                          }
+                      );
+                    }
+                    else if (controller.bookingDetailsResponse!.orderStatus
+                        .toString().toLowerCase() == "unloading") {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            content: Text(
+                              "Are you sure you want to complete this ride?".tr,
+                              style: TextStyle(
+                                  fontFamily: "NunitoSans",
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 19
+                              ),),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text("No".tr),
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  Navigator.of(context).pop();
+                                  controller.orderDelivered(
+                                    orderID: controller.bookingDetailsResponse!
+                                        .id.toString(),
+                                    context: context,
+                                  );
+                                  await controller.getBookingDetails(
+                                    context: context,
+                                    bookingID: controller
+                                        .bookingDetailsResponse!.id
+                                        .toString(),);
+                                  controller.clearAllTimers();
+                                  controller.resetLoadingTimer();
+                                  controller.resetUnLoadingTimer();
+                                },
+                                child: Text("Yes".tr),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                    else if (controller.bookingDetailsResponse!.orderStatus
+                        .toString()
+                        .toLowerCase() ==
+                        "picked") {
+                      final drops =
+                          controller.bookingDetailsResponse!.dropoffs ?? [];
+
+                      if (drops.isEmpty) return;
+
+                      final sortedDrops = List.from(drops)
+                        ..sort((a, b) =>
+                            int.parse(a.sequence.toString())
+                                .compareTo(int.parse(b.sequence.toString())));
+
+                      final nextPendingDrop = sortedDrops.firstWhere(
+                            (d) =>
+                        d.status.toString().toLowerCase() == "pending",
+                        orElse: () => null,
+                      );
+
+                      if (nextPendingDrop == null) {
+                        print("🎉 All drops completed");
+                        return;
+                      }
+
+                      print("👉 Working on Drop ID: ${nextPendingDrop
+                          .locationId}");
+
+                      final isSuccess = await controller.startUnLoadingApi(
+                        controller.getUserID().toString(),
+                        context,
+                        controller.bookingDetailsResponse!.id.toString(),
+                        nextPendingDrop.locationId.toString(),
+                      );
+                      Get.find<AuthController>().startUnLoading();
+                      if (!isSuccess) {
+                        print("⛔ Failed — retry same drop");
+                      }
+                    }
+                  },
+                  child: Container(
+                      height: 40,
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: TColor.primary,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child:
+                      Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                controller.bookingDetailsResponse!.orderStatus
+                                    .toString().toLowerCase() == "accpeted" ?
+                                "Start Loading".tr
+                                    : controller.bookingDetailsResponse!
+                                    .orderStatus.toString().toLowerCase() ==
+                                    "loading" ?
+                                "Start Trip".tr :
+                                controller.bookingDetailsResponse!.orderStatus
+                                    .toString().toLowerCase() == "picked"
+                                    ? "Unloading".tr :
+                                controller.bookingDetailsResponse!.orderStatus
+                                    .toString().toLowerCase() == "unloading" ?
+                                "Completed".tr
+                                    : "Unknown error",
+                                style: TextStyle(
+                                  color: TColor.primaryTextW,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      )
+                  ),
+                )
+            )
+          ],
+        ),
+      );
+    });
   }
 }

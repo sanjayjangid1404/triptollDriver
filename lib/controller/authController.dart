@@ -70,6 +70,124 @@ import '../view/running/runnig_order_screen.dart';
 
 class AuthController extends GetxController implements GetxService {
 
+  RxInt elapsedSeconds = 0.obs;
+  RxInt elapsedSecondsUnload = 0.obs;
+
+  Timer? _loadingTimer;
+  Timer? _unloadingTimer;
+
+  double chargesLoading = 0.0;
+  double chargesUnLoading = 0.0;
+
+  String realLoadingTime = "0";
+  String realUnLoadingTime = "0";
+
+  /// ================= LOADING =================
+
+  Future<void> startLoading() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+      "loadingStartTime",
+      DateTime.now().millisecondsSinceEpoch,
+    );
+    maxTime =
+    prefs.getString(AppContants.maxTimeVar)!;
+    loadingCharges =
+    prefs.getString(AppContants.loadingCharges)!;
+    _startLoadingTimer();
+    print('call tiemererer::::::');
+  }
+
+  Future<int> _getLoadingSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? start = prefs.getInt("loadingStartTime");
+
+    if (start == null) return 0;
+
+    int now = DateTime.now().millisecondsSinceEpoch;
+    return ((now - start) / 1000).floor();
+  }
+
+  void _startLoadingTimer() {
+    _loadingTimer?.cancel();
+
+    _loadingTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      elapsedSeconds.value = await _getLoadingSeconds();
+    });
+  }
+
+  Future<void> restoreLoading() async {
+    final prefs = await SharedPreferences.getInstance();
+    maxTime =
+    prefs.getString(AppContants.maxTimeVar)!;
+    loadingCharges =
+    prefs.getString(AppContants.loadingCharges)!;
+    elapsedSeconds.value = await _getLoadingSeconds();
+    _startLoadingTimer();
+  }
+
+  /// ================= UNLOADING =================
+
+  Future<void> startUnLoading() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+      "unloadingStartTime",
+      DateTime.now().millisecondsSinceEpoch,
+    );
+
+    _startUnLoadingTimer();
+  }
+
+  Future<int> _getUnLoadingSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? start = prefs.getInt("unloadingStartTime");
+
+    if (start == null) return 0;
+
+    int now = DateTime.now().millisecondsSinceEpoch;
+    return ((now - start) / 1000).floor();
+  }
+
+  void _startUnLoadingTimer() {
+    _unloadingTimer?.cancel();
+
+    _unloadingTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      elapsedSecondsUnload.value = await _getUnLoadingSeconds();
+    });
+  }
+
+  Future<void> restoreUnLoading() async {
+    final prefs = await SharedPreferences.getInstance();
+    maxTime =
+    prefs.getString(AppContants.maxTimeVar)!;
+    loadingCharges =
+    prefs.getString(AppContants.loadingCharges)!;
+    elapsedSecondsUnload.value = await _getUnLoadingSeconds();
+    _startUnLoadingTimer();
+  }
+
+  /// ================= CLEAR =================
+
+  Future<void> clearAllTimers() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove("loadingStartTime");
+    await prefs.remove("unloadingStartTime");
+
+    elapsedSeconds.value = 0;
+    elapsedSecondsUnload.value = 0;
+
+    _loadingTimer?.cancel();
+    _unloadingTimer?.cancel();
+  }
+
+
+
+
+
+
+
+
   DateTime? onlineStartTime;
   Duration totalOnlineDuration = Duration.zero;
   String time = '0 h 0 m';
@@ -79,7 +197,6 @@ class AuthController extends GetxController implements GetxService {
   bool isLoadingTime = false;
   RxBool loadingStart = false.obs;
   Timer? loadingTimer;
-  RxInt elapsedSeconds = 0.obs;
 
   RxInt bookingIdForSocket = 0.obs;
   void setBookingId(int id) async {
@@ -113,7 +230,6 @@ class AuthController extends GetxController implements GetxService {
     elapsedSeconds.value = 0;
   }
   Timer? unloadingTimer;
-  RxInt elapsedSecondsUnload = 0.obs;
 
   void startUnLoadingTimer() {
     if (unloadingTimer != null) return;
@@ -137,15 +253,11 @@ class AuthController extends GetxController implements GetxService {
   var currentDropIndex = 0.obs;
   RxBool isLastDropCompleted = false.obs;
   String bookingId = '';
-  double chargesLoading = 0.0;
-  double chargesUnLoading = 0.0;
   RxBool unloadingStart = false.obs;
   RxBool showCompletePayment = false.obs;
   RxBool showUnLoading = false.obs;
   String maxTime = '0';
   String loadingCharges = '0';
-  String realLoadingTime = '0';
-  String realUnLoadingTime = '0';
   bool isBookingProcess = false;
   bool isShowDriver = false;
   bool hasShownSheet = false;
@@ -316,6 +428,7 @@ class AuthController extends GetxController implements GetxService {
   }
   Future<String?> getDriverStatus() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
     return prefs.getString('driver_status');
   }
   void _startLocationUpdates() {
@@ -373,7 +486,7 @@ class AuthController extends GetxController implements GetxService {
                   // "location_time": DateTime.now().toIso8601String(),
                 };
                 if (kDebugMode) {
-                  print("DRIVER LOCATION PAYLOAD: $payload");
+                  print("DRIVER LOCATION PAYLOAD1: $payload");
                 }
               } else {
                 if (kDebugMode) {
@@ -421,7 +534,7 @@ class AuthController extends GetxController implements GetxService {
                     "login_status" : driverStatus,
                   };
                   if (kDebugMode) {
-                    print("DRIVER LOCATION PAYLOAD: $payload");
+                    print("DRIVER LOCATION PAYLOAD2: $payload");
                   }
                 } else {
                   print("❌ Error: ${response["message"]}");
@@ -575,36 +688,36 @@ class AuthController extends GetxController implements GetxService {
         authRepo.setPricePerMinute(response.body['loading_charge_per_min'].toString());
 
         if (chatController.socket?.connected == true) {
-          chatController.socket?.emitWithAck(
-            "registerDriverDevice",
-            {
-              "driver_id": response.body['id'].toString(),
-              "device_token" : deviceId
-            },
-            ack: (response) {
-              if (kDebugMode) {
-                print("Server response driver device: $response");
-              }
-
-              if (response == null) {
-                if (kDebugMode) {
-                  print("❌ No response from server");
-                }
-                return;
-              }
-
-              if (response["status"] == "success") {
-                if (kDebugMode) {
-                  print("✅ Success: ${response["message"]}");
-                }
-              } else {
-                if (kDebugMode) {
-                  print("❌ Error: ${response["message"]}");
-                }
-              }
-            },
-          );
-          print("🔥 first emit fired");
+          // chatController.socket?.emitWithAck(
+          //   "registerDriverDevice",
+          //   {
+          //     "driver_id": response.body['id'].toString(),
+          //     "device_token" : deviceId
+          //   },
+          //   ack: (response) {
+          //     if (kDebugMode) {
+          //       print("Server response driver device: $response");
+          //     }
+          //
+          //     if (response == null) {
+          //       if (kDebugMode) {
+          //         print("❌ No response from server");
+          //       }
+          //       return;
+          //     }
+          //
+          //     if (response["status"] == "success") {
+          //       if (kDebugMode) {
+          //         print("✅ Success: ${response["message"]}");
+          //       }
+          //     } else {
+          //       if (kDebugMode) {
+          //         print("❌ Error: ${response["message"]}");
+          //       }
+          //     }
+          //   },
+          // );
+          // print("🔥 first emit fired");
           chatController.socket?.emitWithAck(
               "startDeviceMonitor",
               {
@@ -945,11 +1058,19 @@ class AuthController extends GetxController implements GetxService {
     //  LoginResponse? loginResponse;
 
     if (response.statusCode == 200 || response.statusCode == 400) {
+      final chatController = Get.find<ChatController>();
       if (status == "online") {
+        chatController.socket?.emit("driverOnline", {
+          'driver_id': getUserID()
+        });
+        final payload = {
+          'driver_id': getUserID()
+        };
+
+        print("📤 Sending Payload driverOnline: $payload");
         await DriverNotificationService.showOnlineNotification();
         driverInfo(context!);
       }
-
       else {
         await DriverNotificationService.showOfflineNotification();
         driverInfo(context!);
@@ -977,6 +1098,7 @@ class AuthController extends GetxController implements GetxService {
       ApiChecker.checkApi(response);
     }
   }
+  RxInt refreshIntT = 0.obs;
   Future<void> getMyScheduledOrderFun() async {
     Response response = await authRepo.getMyScheduledBookings(
         userId: getUserID());
@@ -1180,6 +1302,25 @@ class AuthController extends GetxController implements GetxService {
       chatController.socket?.emitWithAck("acceptBooking", {
         "driver_id": getUserID(),
         "booking_id" : orderID ?? "0",
+      });
+      final payload = {
+        "booking_id": orderID ?? "0",
+        "status": "accpeted"
+      };
+
+      print("📤 Sending Payload: $payload");
+      chatController.socket?.emitWithAck("updateStatus", {
+        "booking_id": orderID ?? "0",
+        "status": "accpeted"
+      },
+          ack: (response) {
+        print("ACK Response: $response");
+
+        if (response != null && response["status"] == true) {
+          print("✅ Status updated successfully");
+        } else {
+          print("❌ Failed to update status");
+        }
       });
       hasShownSheet = false;
 
@@ -1789,6 +1930,26 @@ class AuthController extends GetxController implements GetxService {
       authRepo.saveUserBooking(orderID.toString());
       hasShownSheet = false;
       getBookingDetails(context: context,bookingID: orderID.toString());
+      final payload = {
+        "booking_id": orderID ?? "0",
+        "status": "picked"
+      };
+
+      print("📤 Sending Payload: $payload");
+      final chatController = Get.find<ChatController>();
+      chatController.socket?.emitWithAck("updateStatus", {
+        "booking_id": orderID ?? "0",
+        "status": "picked"
+      },
+          ack: (response) {
+            print("ACK Response: $response");
+
+            if (response != null && response["status"] == true) {
+              print("✅ Status updated successfully");
+            } else {
+              print("❌ Failed to update status");
+            }
+          });
       // Get.offAll(HomeView());
     }
     else {
@@ -1799,6 +1960,7 @@ class AuthController extends GetxController implements GetxService {
     Globs.hideHUD();
     update();
   }
+  RxInt refreshIntUpdate = 0.obs;
 
   Future<void> orderDelivered(
       {String? cus_id, String? orderID, String? amount, int? value,context}) async
@@ -1819,11 +1981,30 @@ class AuthController extends GetxController implements GetxService {
     //  LoginResponse? loginResponse;
 
     if (response.statusCode == 200 || response.statusCode == 400) {
+      await getBookingDetails(context: context, bookingID: orderID.toString(),);
+      refreshIntUpdate.value = DateTime.now().microsecondsSinceEpoch;
+      final chatController = Get.find<ChatController>();
+      final payload = {
+        "booking_id": orderID ?? "0",
+        "status": "delivered"
+      };
+
+      print("📤 Sending Payload: $payload");
+      chatController.socket?.emitWithAck("updateStatus", {
+        "booking_id": orderID ?? "0",
+        "status": "delivered"
+      }, ack: (response) {
+        print("ACK Response: $response");
+
+        if (response != null && response["status"] == true) {
+          print("✅ Status updated successfully");
+        } else {
+          print("❌ Failed to update status");
+        }
+      });
       hasShownSheet = false;
       authRepo.saveUserBooking("0");
-      getBookingDetails(context: context,bookingID: orderID.toString());
-
-      startJourneyToNext(cus_id: getUserID(), orderID: orderID);
+      await startJourneyToNext(cus_id: getUserID(), orderID: orderID,);
       update();
     }
     else {
@@ -1965,8 +2146,27 @@ class AuthController extends GetxController implements GetxService {
 
     if (response.statusCode == 200 || response.statusCode == 400) {
       hasShownSheet = false;
+      final chatController = Get.find<ChatController>();
+      chatController.socket?.emitWithAck("updateStatus", {
+        "booking_id": orderID ?? "0",
+        "status": "loading"
+      }, ack: (response) {
+        print("ACK Response: $response");
+
+        if (response != null && response["status"] == true) {
+          print("✅ Status updated successfully");
+        } else {
+          print("❌ Failed to update status");
+        }
+      });
+      final payload = {
+        "booking_id": orderID ?? "0",
+        "status": "loading"
+      };
+
+      print("📤 Sending Payload: $payload");
+      startLoading();
       getBookingDetails(context: context,bookingID: orderID.toString());
-      // Get.offAll(HomeView());
       update();
     }
     else {
@@ -1998,17 +2198,41 @@ class AuthController extends GetxController implements GetxService {
       /// ✅ SUCCESS CASE
       if (response.statusCode == 200) {
         hasShownSheet = false;
+        final chatController = Get.find<ChatController>();
+        final payload = {
+          "booking_id": orderID ?? "0",
+          "status": "unloading"
+        };
+
+        print("📤 Sending Payload: $payload");
+        chatController.socket?.emitWithAck("updateStatus", {
+          "booking_id": orderID ?? "0",
+          "status": "unloading"
+        }, ack: (response) {
+          print("ACK Response: $response");
+
+          if (response != null && response["status"] == true) {
+            print("✅ Status updated successfully");
+          } else {
+            print("❌ Failed to update status");
+          }
+        });
         getBookingDetails(context: context,bookingID: orderID.toString());
+        update();
         return true;
       }
 
       /// ❌ API returned error (400, etc.)
       if (response.statusCode == 400) {
+        getBookingDetails(context: context,bookingID: orderID.toString());
+        update();
         ApiChecker.checkApi(response);
         return false;
       }
 
       /// ❌ Other errors
+      getBookingDetails(context: context,bookingID: orderID.toString());
+      update();
       ApiChecker.checkApi(response);
       return false;
 
@@ -2378,6 +2602,10 @@ class AuthController extends GetxController implements GetxService {
   }
 
   Future<void> logoutUser() async {
+    final chatController = Get.find<ChatController>();
+    chatController.socket?.disconnect();
+    chatController.socket?.dispose();
+    chatController.socket = null;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     Get.offAll(() =>MobileNumberView());
@@ -2778,14 +3006,25 @@ class AuthController extends GetxController implements GetxService {
       });
     }
   }
+  bool isNavigatingToRunning = false;
+
   void checkAndShowOrderPageSokect() {
-    if (bookingDetailsResponse != null) {
+    if (bookingDetailsResponse == null) return;
+    if (isNavigatingToRunning) return;
+
+    isNavigatingToRunning = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 300));
+
       if (Get.currentRoute != "/RunningOrderScreen") {
-        Future.microtask(() {
-          Get.to(() => RunningOrderScreen());
-        });
+        await Get.to(() => RunningOrderScreen(),
+          routeName: "/RunningOrderScreen",
+        );
       }
-    }
+
+      isNavigatingToRunning = false;
+    });
   }
   Widget buildRunningDetailsContent(Orders bookingResponse,
       BuildContext context) {
@@ -3382,6 +3621,21 @@ class AuthController extends GetxController implements GetxService {
     //  LoginResponse? loginResponse;
 
     if (response.statusCode == 200 || response.statusCode == 400) {
+      final chatController = Get.find<ChatController>();
+      chatController.socket?.emitWithAck("completeTrip", {
+        "booking_id":  bookingDetailsResponse!.id.toString(),
+        "driver_id": getUserID().toString(),
+      },
+          ack: (response) {
+            print("endTripSocket: $response");
+          }
+      );
+      final payload = {
+        "booking_id":bookingDetailsResponse!.id.toString(),
+        "status": "paid"
+      };
+
+      print("📤 Sending Payloadend: $payload");
       Get.offAll(HomeView());
 
       // subCategoryVehicle = SubCategoryVehicle.fromJson(response.body);

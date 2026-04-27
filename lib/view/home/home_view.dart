@@ -115,58 +115,31 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     }
   }
 
-  // Stream<Data?> bookingStream() {
-  //   return Stream.periodic(const Duration(seconds: 5)).asyncMap((_) async {
-  //     try {
-  //       print({
-  //         "driver_id":Get.find<AuthController>().getUserID()
-  //       });
-  //       final response = await http.post(
-  //         Uri.parse("https://triptoll.in/app-admin/api/Booking/findNewBookings"),
-  //         body: jsonEncode({
-  //           "driver_id":Get.find<AuthController>().getUserID()
-  //         })
-  //       );
-  //
-  //       print("respnse=>findNewBookings${response.body}");
-  //
-  //
-  //       if (response.statusCode == 200) {
-  //         final json = jsonDecode(response.body);
-  //         if (json["status"] == true && json["data"] != null) {
-  //           return Data.fromJson(json["data"][0]);
-  //         }
-  //       }
-  //     } catch (e) {
-  //       print("Error: $e");
-  //     }
-  //     return null;
-  //   });
-  // }
   Worker? bookingWorker;
-
+  List<Data> bookingQueue = [];
+  String? lastClosedBookingId;
   @override
   void initState() {
     super.initState();
     print("calling");
     checkForUpdate();
+
     if (!Get.isRegistered<ChatController>()) {
       Get.put(ChatController(), permanent: true);
     }
     final chatController = Get.find<ChatController>();
     chatController.socket!.on("bookingTaken", (data) async {
-      if (kDebugMode) {
-        print("📡 bookingTaken status: $data");
-      }
+      final bookingId = data["booking_id"];
 
-      if (data != null && data["booking_id"] != null) {
+      print("Booking bookingTaken: $bookingId");
+      if (data["booking_id"] != null) {
         if (isSheetOpen) {
           if (Get.isBottomSheetOpen ?? false) {
-            Get.back(); // bottom sheet close
+            Get.back();
           } else if (Get.isDialogOpen ?? false) {
-            Get.back(); // dialog close
+            Get.back();
           } else {
-            Navigator.of(Get.context!).pop(); // fallback
+            Navigator.of(Get.context!).pop();
           }
 
           isSheetOpen = false;
@@ -177,37 +150,38 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       final bookingId = data["booking_id"];
 
       print("Booking cancelled: $bookingId");
-      if (data != null && data["booking_id"] != null) {
+      if (data["booking_id"] != null) {
         if (isSheetOpen) {
           if (Get.isBottomSheetOpen ?? false) {
-            Get.back(); // bottom sheet close
+            Get.back();
           } else if (Get.isDialogOpen ?? false) {
-            Get.back(); // dialog close
+            Get.back();
           } else {
-            Navigator.of(Get.context!).pop(); // fallback
+            Navigator.of(Get.context!).pop();
           }
 
           isSheetOpen = false;
         }
       }
     });
+    final controller11 = Get.find<AuthController>();
+
+    ever(controller11.runningOrderStatus, (status) {
+      if (controller11.bookingDetailsResponse != null) {
+        controller11.checkAndShowOrderPageSokect();
+      }
+    });
     bookingWorker = ever(chatController.newBookingSocket, (Data? booking) {
       if (booking != null) {
-        if (!isSheetOpen &&
-            authController.isPayment() &&
-            authController.isKyc() &&
-            (int.tryParse(authController.walletAmount.toString()) ?? 0) >=
-                -99) {
-          isSheetOpen = true;
+        String id = booking.bookingId.toString();
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-
-            showRideDetailsSheet(booking).then((_) {
-              isSheetOpen = false;
-            });
-          });
+        if (lastClosedBookingId == id) {
+          print("🚫 Ignored because already taken: $id");
+          return;
         }
+
+        bookingQueue.add(booking);
+        _processQueue();
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -262,8 +236,25 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       }
     });
   }
+  Set<String> shownBookings = {};
+  void _processQueue() async {
+    if (isSheetOpen || bookingQueue.isEmpty) return;
 
+    final booking = bookingQueue.removeAt(0);
+    isSheetOpen = true;
 
+    print("🚀 Showing booking: ${booking.bookingId}");
+
+    try {
+      await showRideDetailsSheet(booking);
+    } catch (e) {
+      print("❌ Sheet error: $e");
+    }
+
+    // 👇 IMPORTANT: finally hatao aur yahan likho
+    isSheetOpen = false;
+    print("🔁 Sheet closed");
+  }
   Timer? _timer;
 
   @override
@@ -963,8 +954,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                           ),
                         );
                       }),
-                      Get
-                          .find<AuthController>()
+                      Get.find<AuthController>()
                           .getMyScheduleOrderModel
                           .value
                           .data != null ?
@@ -1383,8 +1373,8 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     List<String> savedIds = prefs.getStringList('fake_ids') ?? [];
     final currentId = notificationResponse.bookingId.toString();
     return !savedIds.contains(currentId) ?
-    showModalBottomSheet(
-      context: context,
+    await showModalBottomSheet(
+      context: Get.context!,
       isDismissible: false,
       isScrollControlled: true,
       // Allows the sheet to take up more space
@@ -1828,7 +1818,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                   Expanded(
                     child: InkWell(
                       onTap: bookingResponse.isFake == false ||
-                          bookingResponse.isFake == false ?
+                          bookingResponse.isFake == false || bookingResponse.isFake == 0 || bookingResponse.isFake == "0" ?
                           () async {
                         final prefs = await SharedPreferences.getInstance();
                         authController.isLoadingTime =
@@ -1839,13 +1829,17 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         prefs.getString(AppContants.maxTimeVar)!;
                         authController.loadingCharges =
                         prefs.getString(AppContants.loadingCharges)!;
-                        Navigator.pop(context);
+
+                        if (Get.isBottomSheetOpen ?? false) {
+                          Get.back();
+                        }
                         Get.find<AuthController>().accpetBooking(
                             orderID: bookingResponse.bookingId,
                             cus_id: bookingResponse.cusId,
                             value: 0
                         );
                       } : () {
+                        print('dgsffg${bookingResponse.isFake}' );
                         Get.back();
                         saveFakeId(bookingResponse.bookingId.toString(),
                             bookingResponse.isFake);

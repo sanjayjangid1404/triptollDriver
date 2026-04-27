@@ -18,7 +18,7 @@ class UnLoadingTimer extends StatelessWidget {
   final AuthController controller = Get.find<AuthController>();
 
   double _progressValue(int seconds) {
-    final freeSeconds = int.parse(maxLoadingTime) * 60;
+    int freeSeconds = (int.tryParse(maxLoadingTime) ?? 0) * 60;
     if (seconds <= 0) return 0.0;
     if (seconds >= freeSeconds) return 1.0;
     return seconds / freeSeconds;
@@ -26,14 +26,13 @@ class UnLoadingTimer extends StatelessWidget {
 
   double _calculateCharge(int seconds) {
     int elapsedMinutes = seconds ~/ 60;
-    int freeMinutes = int.parse(maxLoadingTime);
+    int freeMinutes = int.tryParse(maxLoadingTime) ?? 0;
     if (elapsedMinutes <= freeMinutes) return 0.0;
-    return (elapsedMinutes - freeMinutes) *
-        double.parse(loadingChargePerMin);
+    return (elapsedMinutes - freeMinutes) * double.parse(loadingChargePerMin);
   }
 
   Color _getTimerColor(int seconds) {
-    int freeSeconds = int.parse(maxLoadingTime) * 60;
+    int freeSeconds = (int.tryParse(maxLoadingTime) ?? 0) * 60;
     if (seconds <= freeSeconds) return Colors.green;
 
     double t = ((seconds - freeSeconds) / 60).clamp(0.0, 1.0);
