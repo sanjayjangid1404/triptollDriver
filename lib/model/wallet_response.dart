@@ -13,18 +13,18 @@
 
 class WalletResponse {
   WalletResponse({
-      String? id, 
-      String? userId, 
-      String? type, 
-      String? walletAmount, 
-      String? trnType, 
+      dynamic id, 
+      dynamic userId, 
+      dynamic type, 
+      dynamic walletAmount, 
+      dynamic trnType, 
       dynamic trnId, 
       dynamic paymentType, 
-      String? remark, 
-      String? status, 
+      dynamic remark, 
+      dynamic status, 
       dynamic paymentDate, 
-      String? addDate, 
-      String? updateDate,}){
+      dynamic addDate, 
+      dynamic updateDate,}){
     _id = id;
     _userId = userId;
     _type = type;
@@ -40,43 +40,44 @@ class WalletResponse {
 }
 
   WalletResponse.fromJson(dynamic json) {
-    _id = json['id'];
-    _userId = json['user_id'];
-    _type = json['type'];
-    _walletAmount = json['wallet_amount'];
-    _trnType = json['trn_type'];
+    if (json == null) return;
+    _id = json['id']?.toString();
+    _userId = json['user_id']?.toString();
+    _type = json['type']?.toString();
+    _walletAmount = json['wallet_amount']?.toString();
+    _trnType = json['trn_type']?.toString();
     _trnId = json['trn_id'];
     _paymentType = json['payment_type'];
-    _remark = json['remark'];
-    _status = json['status'];
+    _remark = json['remark']?.toString();
+    _status = json['status']?.toString();
     _paymentDate = json['payment_date'];
-    _addDate = json['add_date'];
-    _updateDate = json['update_date'];
+    _addDate = json['add_date']?.toString();
+    _updateDate = json['update_date']?.toString();
   }
-  String? _id;
-  String? _userId;
-  String? _type;
-  String? _walletAmount;
-  String? _trnType;
+  dynamic _id;
+  dynamic _userId;
+  dynamic _type;
+  dynamic _walletAmount;
+  dynamic _trnType;
   dynamic _trnId;
   dynamic _paymentType;
-  String? _remark;
-  String? _status;
+  dynamic _remark;
+  dynamic _status;
   dynamic _paymentDate;
-  String? _addDate;
-  String? _updateDate;
-WalletResponse copyWith({  String? id,
-  String? userId,
-  String? type,
-  String? walletAmount,
-  String? trnType,
+  dynamic _addDate;
+  dynamic _updateDate;
+WalletResponse copyWith({  dynamic id,
+  dynamic userId,
+  dynamic type,
+  dynamic walletAmount,
+  dynamic trnType,
   dynamic trnId,
   dynamic paymentType,
-  String? remark,
-  String? status,
+  dynamic remark,
+  dynamic status,
   dynamic paymentDate,
-  String? addDate,
-  String? updateDate,
+  dynamic addDate,
+  dynamic updateDate,
 }) => WalletResponse(  id: id ?? _id,
   userId: userId ?? _userId,
   type: type ?? _type,
@@ -90,18 +91,18 @@ WalletResponse copyWith({  String? id,
   addDate: addDate ?? _addDate,
   updateDate: updateDate ?? _updateDate,
 );
-  String? get id => _id;
-  String? get userId => _userId;
-  String? get type => _type;
-  String? get walletAmount => _walletAmount;
-  String? get trnType => _trnType;
+  dynamic get id => _id;
+  dynamic get userId => _userId;
+  dynamic get type => _type;
+  dynamic get walletAmount => _walletAmount;
+  dynamic get trnType => _trnType;
   dynamic get trnId => _trnId;
   dynamic get paymentType => _paymentType;
-  String? get remark => _remark;
-  String? get status => _status;
+  dynamic get remark => _remark;
+  dynamic get status => _status;
   dynamic get paymentDate => _paymentDate;
-  String? get addDate => _addDate;
-  String? get updateDate => _updateDate;
+  dynamic get addDate => _addDate;
+  dynamic get updateDate => _updateDate;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

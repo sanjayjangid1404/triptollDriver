@@ -1179,29 +1179,64 @@ class AuthController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> getWalletHistory() async {
+  Future<List<WalletResponse>> getWalletHistory({int page = 1,
+    String? fromDate,
+    String? toDate,}) async {
+    if (page == 1) {
+      walletResponseList.clear();
+    }
+
     isLoading = true;
-
     update();
-    print(getUserDeviceID());
 
-    walletResponseList = [];
+    Response response = await authRepo.getWalletHistory(
+      userID: getUserID(),
+      page: page,
+      fromDate: fromDate,
+      toDate: toDate,
+    );
 
-    Response response = await authRepo.getWalletHistory(userID: getUserID());
-
-    //  LoginResponse? loginResponse;
+    List<WalletResponse> newData = [];
 
     if (response.statusCode == 200 || response.statusCode == 400) {
-      for (int i = 0; i < response.body.length; i++) {
-        walletResponseList.add(WalletResponse.fromJson(response.body[i]));
+
+      print("RESPONSE => ${response.body}");
+
+      if (response.body != null) {
+        List dataList = [];
+
+        if (response.body is List) {
+          dataList = response.body;
+        } else if (response.body is Map && response.body['data'] != null) {
+          dataList = response.body['data'];
+        }
+
+        print("DATA LIST LENGTH => ${dataList.length}");
+
+        for (var item in dataList) {
+          if (item != null && item is Map<String, dynamic>) {
+            newData.add(WalletResponse.fromJson(item));
+          }
+        }
       }
-    }
-    else {
+
+      for (var item in newData) {
+        bool alreadyExists = walletResponseList.any((e) => e.id == item.id);
+
+        if (!alreadyExists) {
+          walletResponseList.add(item);
+        }
+      }
+    } else {
       ApiChecker.checkApi(response);
     }
 
     isLoading = false;
     update();
+
+    print("FINAL LIST LENGTH => ${walletResponseList.length}");
+
+    return newData;
   }
   Future<void> getWalletInactiveHistory() async {
     isLoading = true;
@@ -3018,6 +3053,10 @@ class AuthController extends GetxController implements GetxService {
       await Future.delayed(const Duration(milliseconds: 300));
 
       if (Get.currentRoute != "/RunningOrderScreen") {
+        await Get.to(() => RunningOrderScreen(),
+          routeName: "/RunningOrderScreen",
+        );
+      }else{
         await Get.to(() => RunningOrderScreen(),
           routeName: "/RunningOrderScreen",
         );

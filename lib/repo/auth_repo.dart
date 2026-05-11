@@ -278,15 +278,25 @@ class AuthRepo{
     },[]);
   }
 
-  Future<Response> getWalletHistory({String? userID}) async {
-    print("call");
+  Future<Response> getWalletHistory({
+    String? userID,
+    int page = 1,
+    String? fromDate,
+    String? toDate,
+  }) async {
     return await apiClient.postMultipartData(
-        "${AppContants.getWalletHistoryURL}",{
-      "user_id":userID.toString(),
-      "user_type":"driver",
-    },[]);
+      "${AppContants.getWalletHistoryURL}",
+      {
+        "user_id": userID.toString(),
+        "user_type": "driver",
+        "page": page.toString(),
+        "limit": "20",
+        "from_date": fromDate ?? "",
+        "to_date": toDate ?? "",
+      },
+      [],
+    );
   }
-
   Future<Response> saveFirebaseToken({String? userID}) async {
     print("call");
     return await apiClient.postData(

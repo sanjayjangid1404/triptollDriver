@@ -171,15 +171,51 @@ class _WalletViewState extends State<WalletView> {
       "price": "\$40"
     },
   ];
+  int _page = 1;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  ScrollController _scrollController = ScrollController();
+  void _loadData() async {
+    _page = 1;
+    _hasMore = true;
 
+    await Get.find<AuthController>().getWalletHistory(page: _page);
+
+    setState(() {});
+  }
+
+  void _loadMore() async {
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    _page++;
+
+    var newData = await Get.find<AuthController>().getWalletHistory(page: _page);
+
+    if (newData.isEmpty) {
+      _hasMore = false;
+    }
+
+    setState(() {
+      _isLoadingMore = false;
+    });
+  }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
-
+      _loadData();
+      _scrollController.addListener(() {
+        if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+            !_isLoadingMore &&
+            _hasMore) {
+          _loadMore();
+        }
+      });
 
       Get.find<AuthController>().getWalletHistory();
       Get.find<AuthController>().getWalletInactiveHistory();
@@ -237,6 +273,7 @@ class _WalletViewState extends State<WalletView> {
           ),
         ),
         body: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -398,28 +435,107 @@ class _WalletViewState extends State<WalletView> {
                 color: TColor.lightWhite,
                 width: double.maxFinite,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                color: TColor.lightWhite,
-                width: double.maxFinite,
-                child: Text(
-                  "History".tr,
-                  style: TextStyle(
-                    color: TColor.primaryText,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "History".tr,
+                    style: TextStyle(
+                      color: TColor.primaryText,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
-              ),
 
-              ListView.separated(
-                physics: const NeverScrollableScrollPhysics(),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: GestureDetector(
+                      onTap: () async {
+                        DateTime now = DateTime.now();
+
+                        DateTimeRange? picked = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(2020),
+                          lastDate: now,
+                          initialDateRange: DateTimeRange(
+                            start: now.subtract(Duration(days: 7)),
+                            end: now,
+                          ),
+                        );
+
+                        if (picked != null) {
+                          String fromDate =
+                              "${picked.start.year}-${picked.start.month.toString().padLeft(2, '0')}-${picked.start.day.toString().padLeft(2, '0')}";
+
+                          String toDate =
+                              "${picked.end.year}-${picked.end.month.toString().padLeft(2, '0')}-${picked.end.day.toString().padLeft(2, '0')}";
+
+                          print("FROM: $fromDate");
+                          print("TO: $toDate");
+                          Get.find<AuthController>().getWalletHistory(
+                            page: 1,
+                            fromDate: fromDate,
+                            toDate: toDate,
+                          );
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.calendar_today, size: 16, color: Colors.black),
+                            SizedBox(width: 5),
+                            Text(
+                              "Filter".tr,
+                              style: TextStyle(
+                                color: TColor.primaryText,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ).paddingSymmetric(horizontal: 20),
+              authController.walletResponseList.isEmpty
+                  ?
+              Column(
+                children: [
+                  Icon(Icons.history, size: 40, color: Colors.grey),
+                  SizedBox(height: 10),
+                  Text(
+                    "Transaction history not found".tr,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ).paddingOnly(top: 130)
+              : ListView.separated(
+                physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                itemBuilder:(context, index) {
+                itemCount: authController.walletResponseList.length + (_isLoadingMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == authController.walletResponseList.length) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
                   var wObj = authController.walletResponseList[index];
-                return WalletRow(wObj: wObj);
-              } , separatorBuilder: (context, index) => const Divider(indent: 50,) , itemCount: authController.walletResponseList.length)
+                  return WalletRow(wObj: wObj);
+                },
+                separatorBuilder: (context, index) => const Divider(indent: 50),
+              ),
             ],
           ),
         ),

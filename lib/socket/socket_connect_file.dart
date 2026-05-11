@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:taxi_driver/common/custom_snackbar.dart';
 import '../common/appContants.dart';
+import '../common/route_helper.dart';
 import '../controller/authController.dart';
 import '../model/booking_deatils_model.dart';
 import '../model/booking_notification_response.dart';
+import '../view/running/runnig_order_screen.dart';
 
 
 class ChatController extends GetxController {
@@ -219,6 +222,7 @@ class ChatController extends GetxController {
       //     print("❌ Parsing error: $e");
       //   }
       // });
+      bool isNavigatingToRunning = false;
       socket!.on("activeBooking", (data) {
         if (kDebugMode) {
           print("📡 activeBooking status: $data");
@@ -242,8 +246,24 @@ class ChatController extends GetxController {
                 GetBookingDetailModel.fromJson(bookingList[0]);
 
             controller.runningOrderStatus.value = controller.bookingDetailsResponse?.orderStatus ?? '';
-            controller.checkAndShowOrderPageSokect();
-            print("📍 Pickup Full: ${controller.bookingDetailsResponse?.pickup?.toJson()}");
+            // controller.checkAndShowOrderPageSokect();
+            if (isNavigatingToRunning) return;
+
+            if (Get.currentRoute == RouteHelper.runningOrder) return;
+
+            isNavigatingToRunning = true;
+
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              try {
+                await Future.delayed(const Duration(milliseconds: 300));
+
+                Get.offAllNamed(RouteHelper.runningOrder);
+
+              } finally {
+                isNavigatingToRunning = false;
+              }
+            });
+              print("📍 Pickup Full: ${controller.bookingDetailsResponse?.pickup?.toJson()}");
           }
 
           update();
@@ -285,10 +305,10 @@ class ChatController extends GetxController {
     socket!.onError((data) {
       log("❌ Error: $data");
     });
-    socket!.onAny((event, data) {
-      log("📡 EVENT: $event");
-      log("📦 DATA: $data");
-    });
+    // socket!.onAny((event, data) {
+    //   log("📡 EVENT: $event");
+    //   log("📦 DATA: $data");
+    // });
     socket!.onReconnect((_) async {
       log("🔁 Reconnected");
       await emitDriverOnline();

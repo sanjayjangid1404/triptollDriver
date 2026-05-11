@@ -7,6 +7,8 @@ import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:taxi_driver/view/home/home_view.dart';
 import 'package:taxi_driver/view/login/mobile_number_view.dart';
 
+import '../view/running/runnig_order_screen.dart';
+
 
 
 
@@ -37,6 +39,7 @@ class RouteHelper  {
   static String changePasswordView = '/changePasswordView';
   static String qrCodeScreen = '/qrCodeScreen';
   static String faceVerification = '/faceVerification';
+  static String runningOrder = '/runningOrder';
 
 
 
@@ -79,6 +82,10 @@ class RouteHelper  {
 
     GetPage(name: login, page: () => const MobileNumberView()),
     GetPage(name: homeView, page: () => const HomeView()),
+    GetPage(
+      name: runningOrder,
+      page: () => RunningOrderScreen(),
+    ),
   ];
 
 
